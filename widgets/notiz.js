@@ -38,6 +38,11 @@ const NotizWidget = {
                 <div style="flex-grow: 1;"></div>
                 
                 <button @mousedown.prevent="format('removeFormat')" title="Formatierung löschen" style="padding: 4px 10px; min-width: unset; background: rgba(239, 68, 68, 0.2); color: #fca5a5;">🧹</button>
+
+                <div class="drag-handle" title="Notiz hier anfassen zum Verschieben" 
+                     style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; cursor: grab; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; height: 28px;">
+                     ✥
+                </div>
             </div>
 
             <div ref="editor" 
@@ -48,6 +53,7 @@ const NotizWidget = {
             </div>
         </div>
     `,
+    // ... restlicher Code (mounted, methods) bleibt gleich
     mounted() {
         if (!this.widgetData.data || this.widgetData.data === 'Hier tippen...') {
             this.$refs.editor.innerHTML = '';
@@ -57,11 +63,9 @@ const NotizWidget = {
     },
     methods: {
         format(command, value = null) {
-            // Manche Browser nennen den Textmarker 'backColor' statt 'hiliteColor'. Das fangen wir hier sicherheitshalber ab.
             if (command === 'hiliteColor' && !document.queryCommandSupported('hiliteColor')) {
                 command = 'backColor';
             }
-            
             document.execCommand(command, false, value);
             this.$refs.editor.focus();
             this.onInput();
