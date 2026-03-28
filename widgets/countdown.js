@@ -9,23 +9,28 @@ const CountdownWidget = {
                 <button @click="startTimer" style="background: #10b981; border: none; padding: 8px 16px; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1.1rem;">Start</button>
             </div>
 
-            <div v-else style="position: relative; width: 65cqmin; height: 65cqmin; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 100 100" style="position: absolute; width: 100%; height: 100%; transform: rotate(-90deg);">
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" />
-                    <circle cx="50" cy="50" r="42" fill="none" :stroke="ringColor" stroke-width="6" stroke-linecap="round"
-                            :stroke-dasharray="264" :stroke-dashoffset="dashOffset" 
-                            style="transition: stroke-dashoffset 1s linear, stroke 0.5s;" />
-                </svg>
-                <div style="font-size: clamp(1.5rem, 12cqw, 3.5rem); font-weight: bold; font-variant-numeric: tabular-nums; z-index: 10; position: absolute;">
+            <div v-else style="width: 85%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
+                
+                <div style="font-size: clamp(2rem, 18cqw, 5rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">
                     {{ formatTime(timeLeft) }}
+                </div>
+                
+                <div style="width: 100%; height: 24px; background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
+                    <div :style="{ 
+                        width: barWidth + '%', 
+                        backgroundColor: barColor, 
+                        height: '100%', 
+                        transition: 'width 1s linear, background-color 0.5s ease',
+                        boxShadow: '0 0 10px ' + barColor
+                    }"></div>
                 </div>
             </div>
 
-            <div v-if="timeLeft > 0" style="margin-top: 15px; display: flex; gap: 10px; z-index: 10;">
-                <button @click="togglePause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 12px; color: white; cursor: pointer;">
+            <div v-if="timeLeft > 0" style="margin-top: 20px; display: flex; gap: 10px; z-index: 10;">
+                <button @click="togglePause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 16px; color: white; cursor: pointer; font-size: 1.1rem;">
                     {{ isRunning ? '⏸ Pause' : '▶ Weiter' }}
                 </button>
-                <button @click="resetTimer" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 4px 12px; color: #fca5a5; cursor: pointer;">
+                <button @click="resetTimer" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 6px 16px; color: #fca5a5; cursor: pointer; font-size: 1.1rem;">
                     ⏹ Stopp
                 </button>
             </div>
@@ -41,16 +46,17 @@ const CountdownWidget = {
         }
     },
     computed: {
-        dashOffset() {
+        // Berechnet die Breite des Balkens in Prozent
+        barWidth() {
             if (this.totalTime === 0) return 0;
-            // 264 ist der neue Umfang für Radius 42
-            return 264 - ((this.timeLeft / this.totalTime) * 264);
+            return (this.timeLeft / this.totalTime) * 100;
         },
-        ringColor() {
+        // Bestimmt die Farbe des Balkens je nach verbleibender Zeit
+        barColor() {
             const fraction = this.timeLeft / this.totalTime;
-            if (fraction > 0.5) return '#34d399';
-            if (fraction > 0.2) return '#fbbf24';
-            return '#ef4444';
+            if (fraction > 0.5) return '#34d399'; // Grün
+            if (fraction > 0.2) return '#fbbf24'; // Gelb
+            return '#ef4444'; // Rot
         }
     },
     mounted() { if (this.isRunning) this.tick(); },
