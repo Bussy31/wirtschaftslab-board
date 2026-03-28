@@ -20,15 +20,18 @@ const app = createApp({
     },
     methods: {
         addWidget(type, icon) {
+            const isNotiz = type === 'notiz'; // Prüft, ob das neue Widget eine Notiz ist
+
             this.widgets.push({
                 id: Date.now(),
                 type: type,
                 icon: icon || '✨',
-                x: window.innerWidth / 2 - 150,
+                // Zentriert das Widget beim Spawnen (Notizen sind breiter, also müssen sie weiter nach links geschoben werden)
+                x: window.innerWidth / 2 - (isNotiz ? 300 : 150),
                 y: 100,
-                width: 300,  // NEU: Start-Breite
-                height: 200, // NEU: Start-Höhe
-                data: type === 'notiz' ? 'Hier tippen...' : ''
+                width: isNotiz ? 600 : 300,  // NEU: Notiz ist 600px breit, andere 300px
+                height: isNotiz ? 400 : 200, // NEU: Notiz ist 400px hoch, andere 200px
+                data: isNotiz ? 'Hier tippen...' : ''
             });
             this.saveToLocal();
         },
