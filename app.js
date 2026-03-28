@@ -170,4 +170,6 @@ app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
 app.component('countdown-widget', CountdownWidget);
 app.component('stoppuhr-widget', StoppuhrWidget);
+app.component('zufall-widget', ZufallWidget);
+app.component('qr-widget', QrWidget);
 app.mount('#app');
