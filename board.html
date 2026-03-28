@@ -11,7 +11,7 @@
             border: none !important;
             box-shadow: none !important;
             backdrop-filter: none !important;
-            resize: none !important;
+            resize: none !important; /* DAS VERSTECKT DIE STRICHE UNTEN RECHTS! */
         }
         .widget.ghost-mode .widget-header {
             opacity: 0;
@@ -35,16 +35,12 @@
 
         <div style="flex-grow: 1;"></div>
 
-        <button @click="$refs.bgInput.click()" class="btn-import">🖼️ Hintergrund</button>
-        <input type="file" ref="bgInput" @change="onBgSelected" style="display: none" accept="image/*">
-
         <button @click="exportBoard" class="btn-export">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
-    <div class="board" :style="boardBackgroundStyle">
-
+    <div class="board">
         <div v-for="(w, index) in widgets"
              :key="w.id"
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
@@ -77,30 +73,6 @@
 
             <div class="widget-content">
                 <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
-            </div>
-        </div>
-    </div>
-
-    <div v-if="bgPreviewUrl" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-        <div style="background: #2a2a2a; padding: 25px; border-radius: 12px; width: 90vw; max-width: 600px; display: flex; flex-direction: column; gap: 15px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            <h3 style="margin: 0; font-family: sans-serif;">🖼️ Hintergrund anpassen</h3>
-
-            <div style="width: 100%; height: 300px; border: 2px dashed #555; border-radius: 8px; overflow: hidden; background: #000;">
-                <div style="width: 100%; height: 100%;" :style="previewBackgroundStyle"></div>
-            </div>
-
-            <div style="display: flex; gap: 10px; align-items: center; font-family: sans-serif;">
-                <label>Darstellung:</label>
-                <select v-model="bgMode" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 6px; flex-grow: 1;">
-                    <option value="cover">Vollbild (ohne Ränder, evtl. beschnitten)</option>
-                    <option value="contain">Einpassen (Ganzes Bild, evtl. mit Rändern)</option>
-                    <option value="tile">Kacheln (Muster wiederholen)</option>
-                </select>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-                <button @click="cancelBackground" style="padding: 10px 16px; background: transparent; color: white; border: 1px solid #555; border-radius: 6px; cursor: pointer;">Abbrechen</button>
-                <button @click="applyBackground" style="padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">✅ Anwenden</button>
             </div>
         </div>
     </div>
