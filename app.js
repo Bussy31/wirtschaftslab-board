@@ -43,16 +43,14 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
-            // 1. Prüfen: Wurde der Header oder der spezielle Verschiebe-Button geklickt?
+            // 1. Prüfen: Wurde der Header geklickt?
             const isHeader = e.target.closest('.widget-header');
-            const isHandle = e.target.closest('.drag-handle');
 
-            // Wenn beides NICHT zutrifft -> sofort abbrechen (kein Verschieben)
-            if (!isHeader && !isHandle) return;
+            // Wenn NICHT der Header geklickt wurde -> sofort abbrechen
+            if (!isHeader) return;
 
-            // 2. Sicherheits-Check: Klicks auf das Schließen-X oder andere Buttons im Header ignorieren
-            // Ausnahme: Der Handle-Button (Verschiebe-Dings) darf natürlich ziehen
-            if (e.target.closest('.close-btn') || (e.target.tagName === 'BUTTON' && !isHandle)) {
+            // 2. Sicherheits-Check: Klicks auf das Schließen-X oder Buttons im Header ignorieren
+            if (e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') {
                 return;
             }
 
@@ -61,7 +59,6 @@ const app = createApp({
             this.offsetX = e.clientX - widget.x;
             this.offsetY = e.clientY - widget.y;
         },
-
         onDrag(e) {
             if (this.draggingIndex !== null) {
                 const w = this.widgets[this.draggingIndex];
