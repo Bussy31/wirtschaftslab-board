@@ -11,7 +11,7 @@
             border: none !important;
             box-shadow: none !important;
             backdrop-filter: none !important;
-            resize: none !important;
+            resize: none !important; /* DAS VERSTECKT DIE STRICHE UNTEN RECHTS! */
         }
         .widget.ghost-mode .widget-header {
             opacity: 0;
@@ -35,19 +35,12 @@
 
         <div style="flex-grow: 1;"></div>
 
-        <button @click="showGallery = true" class="btn-import">🖼️ Galerie</button>
-
         <button @click="exportBoard" class="btn-export">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
-    <div class="board" :style="{
-            backgroundImage: backgroundImage ? 'url(' + backgroundImage + ')' : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-         }">
-
+    <div class="board">
         <div v-for="(w, index) in widgets"
              :key="w.id"
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
@@ -80,28 +73,6 @@
 
             <div class="widget-content">
                 <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
-            </div>
-        </div>
-    </div>
-
-    <div v-if="showGallery" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px);">
-        <div style="background: #2a2a2a; padding: 25px; border-radius: 12px; width: 90vw; max-width: 800px; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-            <h3 style="margin: 0 0 20px 0; font-family: sans-serif;">🖼️ Wähle einen Hintergrund</h3>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                <div v-for="img in galleryImages" :key="img" @click="setBackground(img)"
-                     style="height: 140px; border-radius: 8px; cursor: pointer; background-size: cover; background-position: center; border: 2px solid transparent; transition: border-color 0.2s;"
-                     onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='transparent'"
-                     :style="{ backgroundImage: 'url(' + img + ')' }">
-                </div>
-            </div>
-
-            <div style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.9rem; color: #aaa;">Bilder von Unsplash</span>
-                <div style="display: flex; gap: 10px;">
-                    <button @click="removeBackground" style="padding: 10px 16px; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; border-radius: 6px; cursor: pointer;">🗑️ Ohne Bild</button>
-                    <button @click="showGallery = false" style="padding: 10px 16px; background: transparent; border: 1px solid #555; color: white; border-radius: 6px; cursor: pointer;">Abbrechen</button>
-                </div>
             </div>
         </div>
     </div>
