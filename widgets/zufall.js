@@ -1,9 +1,9 @@
 const ZufallWidget = {
     props: ['widgetData'],
     template: `
-        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 5px; gap: 10px; box-sizing: border-box;">
+        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 5px; gap: 10px; box-sizing: border-box;">
             
-            <div v-if="gewinner" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 10px; text-align: center; font-size: clamp(1.2rem, 10cqw, 3rem); font-weight: bold; color: #34d399; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+            <div v-if="gewinner" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 2cqh; text-align: center; font-size: clamp(1.2rem, 8cqw, 4rem); font-weight: bold; color: #34d399; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.2; word-wrap: break-word;">
                 🎉 {{ gewinner }} 🎉
             </div>
 
@@ -27,15 +27,13 @@ const ZufallWidget = {
     },
     methods: {
         zieheZufall() {
-            // Liste aufteilen, leere Zeilen und Leerzeichen filtern
             const namen = this.schuelerListe.split('\n').map(n => n.trim()).filter(n => n !== '');
 
             if (namen.length === 0) {
-                this.gewinner = "leer";
+                this.gewinner = "Leere Liste!";
                 return;
             }
 
-            // Zufälligen Index auswählen
             const randomIndex = Math.floor(Math.random() * namen.length);
             this.gewinner = namen[randomIndex];
         },
