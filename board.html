@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <title>wirtschaftslab-board</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Ghost-Modus: Macht Hintergrund durchsichtig, lässt Inhalt aber sichtbar */
+        .widget.ghost-mode {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+        }
+        /* Versteckt den Header (Rahmen) im Ghost-Modus... */
+        .widget.ghost-mode .widget-header {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        /* ...zeigt ihn aber wieder an, wenn man mit der Maus drüberfährt! */
+        .widget.ghost-mode:hover .widget-header {
+            opacity: 1;
+        }
+    </style>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
@@ -26,14 +44,13 @@
     <div class="board">
         <div v-for="(w, index) in widgets"
              :key="w.id"
-             class="widget"
+             :class="['widget', { 'ghost-mode': w.isTransparent }]"
              :style="{
                  left: w.x + 'px',
                  top: w.y + 'px',
                  width: w.width + 'px',
                  height: w.height + 'px',
-                 opacity: w.isTransparent ? 0.3 : 1,
-                 transition: 'opacity 0.3s ease'
+                 boxSizing: 'border-box' /* Das stoppt das nervige Wachsen! */
              }"
              @mousedown="startDrag($event, index)">
 
@@ -47,7 +64,7 @@
 
                     <button @click.stop="w.isTransparent = !w.isTransparent; saveToLocal()"
                             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
-                            title="Transparenz umschalten">
+                            title="Hintergrund ausblenden (Ghost-Modus)">
                         {{ w.isTransparent ? '👁️' : '👻' }}
                     </button>
 
@@ -59,6 +76,12 @@
                     <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
                 </div>
             </div>
+
+            <div class="widget-content">
+                <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
+            </div>
+        </div>
+    </div>
 
             <div class="widget-content">
                 <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
