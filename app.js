@@ -43,14 +43,12 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
-            const widget = this.widgets[index];
             const isHeader = e.target.closest('.widget-header');
             const isHandle = e.target.closest('.drag-handle');
-            const tagsDieIgnoriertWerden = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'];
 
             // --- SONDERREGEL NOTIZ ---
             // Wenn es eine Notiz ist, darf NUR am Header (der Leiste oben) gezogen werden
-            if (widget.type === 'notiz' && !isHeader && !isHandle) return;
+            if (!isHeader && !isHandle) return;
 
             // Generelle Regel für alle: Nicht an Buttons oder Eingabefeldern ziehen
             if (tagsDieIgnoriertWerden.includes(e.target.tagName) && !isHandle) return;
@@ -66,8 +64,6 @@ const app = createApp({
                 let newX = e.clientX - this.offsetX;
                 let newY = e.clientY - this.offsetY;
 
-                const toolbar = document.querySelector('.toolbar');
-                const toolbarHeight = toolbar ? toolbar.offsetHeight : 0; // Misst die echte Höhe der Leiste
                 // 2. Fenster-Grenzen ermitteln
                 const maxX = window.innerWidth - w.width;
                 const maxY = window.innerHeight - w.height;
