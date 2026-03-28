@@ -154,8 +154,8 @@ button:hover {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-width: 300px;
-    min-height: 200px;
+    min-width: 120px;
+    min-height: 80px;
 }
 
 .widget:hover {
