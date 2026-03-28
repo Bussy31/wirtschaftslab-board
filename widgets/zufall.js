@@ -31,7 +31,7 @@ const ZufallWidget = {
             const namen = this.schuelerListe.split('\n').map(n => n.trim()).filter(n => n !== '');
 
             if (namen.length === 0) {
-                this.gewinner = "Leere Liste!";
+                this.gewinner = "leer";
                 return;
             }
 
