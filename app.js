@@ -7,8 +7,8 @@ const app = createApp({
             draggingIndex: null,
             offsetX: 0,
             offsetY: 0,
-            // NEU: Globale Zeit für den Header-Button
-            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            backgroundImage: null // NEU: Hier merken wir uns das Hintergrundbild
         }
     },
     mounted() {
@@ -16,10 +16,16 @@ const app = createApp({
         if (saved) {
             this.widgets = JSON.parse(saved);
         }
+
+        // NEU: Hintergrundbild beim Starten laden
+        const savedBg = localStorage.getItem('meinBoard_bg');
+        if (savedBg) {
+            this.backgroundImage = savedBg;
+        }
+
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
 
-        // NEU: Aktualisiert die Uhrzeit für den Header-Button jede Sekunde
         setInterval(() => {
             this.aktuelleZeit = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         }, 1000);
@@ -102,6 +108,17 @@ const app = createApp({
                 this.saveToLocal();
             };
             reader.readAsText(file);
+        },
+        // NEU: Bild in einen Text-Code umwandeln und speichern
+        importBackground(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.backgroundImage = e.target.result;
+                localStorage.setItem('meinBoard_bg', this.backgroundImage);
+            };
+            reader.readAsDataURL(file); // Liest das Bild als Base64-String ein
         }
     }
 });
