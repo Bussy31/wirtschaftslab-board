@@ -39,10 +39,10 @@ const NotizWidget = {
                 
                 <button @mousedown.prevent="format('removeFormat')" title="Formatierung löschen" style="padding: 4px 10px; min-width: unset; background: rgba(239, 68, 68, 0.2); color: #fca5a5;">🧹</button>
 
-                <button class="drag-handle" title="Verschieben" 
-                    style="padding: 4px 10px; min-width: unset; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; cursor: grab; color: white; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-    ✥
-                </button>
+                <div class="drag-handle" title="Notiz hier anfassen zum Verschieben" 
+                     style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; cursor: grab; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; height: 28px;">
+                     drag
+                </div>
             </div>
 
             <div ref="editor" 
