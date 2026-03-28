@@ -172,4 +172,5 @@ app.component('countdown-widget', CountdownWidget);
 app.component('stoppuhr-widget', StoppuhrWidget);
 app.component('zufall-widget', ZufallWidget);
 app.component('qr-widget', QrWidget);
+app.component('handlungsplan-widget', HandlungsplanWidget);
 app.mount('#app');
