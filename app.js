@@ -43,12 +43,14 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
+            const widget = this.widgets[index];
             const isHeader = e.target.closest('.widget-header');
             const isHandle = e.target.closest('.drag-handle');
+            const tagsDieIgnoriertWerden = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'];
 
             // --- SONDERREGEL NOTIZ ---
             // Wenn es eine Notiz ist, darf NUR am Header (der Leiste oben) gezogen werden
-            if (!isHeader && !isHandle) return;
+            if (widget.type === 'notiz' && !isHeader && !isHandle) return;
 
             // Generelle Regel für alle: Nicht an Buttons oder Eingabefeldern ziehen
             if (tagsDieIgnoriertWerden.includes(e.target.tagName) && !isHandle) return;
