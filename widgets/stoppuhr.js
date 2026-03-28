@@ -24,25 +24,25 @@ const StoppuhrWidget = {
     data() {
         return {
             isRunning: this.widgetData.isRunning || false,
-            elapsed: this.widgetData.elapsed || 0, // Zeit in Millisekunden
-            lastTick: Date.now(),
+            elapsed: this.widgetData.elapsed || 0,
             frame: null
         }
     },
     mounted() {
-        // Falls die Seite neu geladen wird und die Stoppuhr lief, direkt weiterlaufen lassen
-        if (this.isRunning) {
-            this.lastTick = Date.now();
+        // Wenn die Stoppuhr lief und wir einen Start-Zeitstempel haben, berechne die exakte Zeit!
+        if (this.isRunning && this.widgetData.startTimestamp) {
+            this.elapsed = Date.now() - this.widgetData.startTimestamp;
             this.startLoop();
         }
     },
     unmounted() {
-        cancelAnimationFrame(this.frame); // Verhindert Hintergrund-Bugs, wenn das Widget gelöscht wird
+        cancelAnimationFrame(this.frame);
     },
     methods: {
         start() {
             this.isRunning = true;
-            this.lastTick = Date.now();
+            // Wir merken uns den exakten Start-Moment in der Zeit (abzüglich der Zeit, die schon lief)
+            this.widgetData.startTimestamp = Date.now() - this.elapsed;
             this.startLoop();
             this.save();
         },
@@ -55,31 +55,26 @@ const StoppuhrWidget = {
             this.isRunning = false;
             cancelAnimationFrame(this.frame);
             this.elapsed = 0;
+            this.widgetData.startTimestamp = null;
             this.save();
         },
         startLoop() {
-            // Eine extrem flüssige Schleife, die an die Bildwiederholrate deines Monitors gekoppelt ist
             const step = () => {
                 if (!this.isRunning) return;
-                const now = Date.now();
-                this.elapsed += (now - this.lastTick);
-                this.lastTick = now;
+                // Wir berechnen die Zeit immer relativ zum Start-Zeitstempel -> Perfekte Genauigkeit auch bei Refresh!
+                this.elapsed = Date.now() - this.widgetData.startTimestamp;
                 this.frame = requestAnimationFrame(step);
             };
             this.frame = requestAnimationFrame(step);
         },
         formatTime(ms) {
-            // Rechnet die Millisekunden in das Format mm:ss.ms um
             const totalSeconds = Math.floor(ms / 1000);
             const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
             const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-            // Wir zeigen nur zwei Stellen der Millisekunden an (Hundertstelsekunden), das liest sich besser
             const centiseconds = Math.floor((ms % 1000) / 10).toString().padStart(2, '0');
             return `${minutes}:${seconds}.${centiseconds}`;
         },
         save() {
-            // Wir sagen Vue, er soll den Zustand nur alle paar Sekunden speichern,
-            // damit der Browser nicht mit 60 Speicherungen pro Sekunde überlastet wird!
             this.widgetData.isRunning = this.isRunning;
             this.widgetData.elapsed = this.elapsed;
             this.$emit('save');
