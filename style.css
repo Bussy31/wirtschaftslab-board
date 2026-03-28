@@ -71,20 +71,38 @@ button:hover {
 .btn-import:hover { background: rgba(139, 92, 246, 0.3); }
 
 /* --- Widgets --- */
+/* --- Widgets --- */
 .widget {
     position: absolute;
     background: var(--widget-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-radius: 16px; /* Schön runde Ecken */
+    border-radius: 16px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    min-width: 220px;
     border: 1px solid var(--widget-border);
     transition: box-shadow 0.2s ease;
+
+    /* NEU: Erlaubt das Verändern der Größe */
+    resize: both;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* Mindestgrößen, damit es nicht zu klein wird */
+    min-width: 200px;
+    min-height: 100px;
 }
 
 .widget:hover {
-    box-shadow: 0 25px 50px rgba(0,0,0,0.5); /* Schatten wird größer bei Hover */
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+
+/* ... Header bleibt wie er ist ... */
+
+.widget-content {
+    padding: 20px;
+    flex-grow: 1; /* NEU: Inhalt füllt immer den neu gewonnenen Platz aus */
+    display: flex;
+    flex-direction: column;
 }
 
 /* --- Widget Header --- */

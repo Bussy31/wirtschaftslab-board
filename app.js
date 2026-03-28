@@ -15,16 +15,20 @@ const app = createApp({
             this.widgets = JSON.parse(saved);
         }
         window.addEventListener('mousemove', this.onDrag);
+        // Wir hören auf JEDES Loslassen der Maus, um Größenänderungen zu erfassen
         window.addEventListener('mouseup', this.stopDrag);
     },
     methods: {
-        addWidget(type) {
+        addWidget(type, icon) {
             this.widgets.push({
                 id: Date.now(),
                 type: type,
-                x: window.innerWidth / 2 - 100, // Spawnt in der Mitte
+                icon: icon || '✨',
+                x: window.innerWidth / 2 - 150,
                 y: 100,
-                data: ''
+                width: 300,  // NEU: Start-Breite
+                height: 200, // NEU: Start-Höhe
+                data: type === 'notiz' ? 'Hier tippen...' : ''
             });
             this.saveToLocal();
         },
@@ -47,10 +51,30 @@ const app = createApp({
             }
         },
         stopDrag() {
+            // Speichert die neue Position beim Verschieben
             if (this.draggingIndex !== null) {
                 this.draggingIndex = null;
                 this.saveToLocal();
             }
+            // NEU: Speichert die neue Größe beim Resizen
+            this.updateSizes();
+        },
+        // NEU: Liest die echte Pixelgröße aus dem Browser aus und speichert sie
+        updateSizes() {
+            const widgetElements = document.querySelectorAll('.widget');
+            let changed = false;
+            widgetElements.forEach((el, index) => {
+                if (this.widgets[index]) {
+                    const newWidth = el.offsetWidth;
+                    const newHeight = el.offsetHeight;
+                    if (this.widgets[index].width !== newWidth || this.widgets[index].height !== newHeight) {
+                        this.widgets[index].width = newWidth;
+                        this.widgets[index].height = newHeight;
+                        changed = true;
+                    }
+                }
+            });
+            if (changed) this.saveToLocal();
         },
         saveToLocal() {
             localStorage.setItem('meinBoard', JSON.stringify(this.widgets));
@@ -77,8 +101,6 @@ const app = createApp({
     }
 });
 
-// Hier verbinden wir unsere ausgelagerten Dateien mit der Haupt-App
 app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
-
 app.mount('#app');
