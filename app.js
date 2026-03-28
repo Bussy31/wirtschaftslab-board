@@ -11,8 +11,28 @@ const app = createApp({
 
             backgroundImage: null,
             bgMode: 'cover',
-            bgPreviewUrl: null,
-            bgBase64ToSave: null // NEU: Speichert den Text-Code heimlich im Hintergrund
+            bgPreviewUrl: null
+        }
+    },
+    // NEU: Berechnet den Hintergrund-Code sauber und fehlerfrei für den Browser
+    computed: {
+        boardBackgroundStyle() {
+            if (!this.backgroundImage) return {};
+            return {
+                backgroundImage: `url("${this.backgroundImage}")`,
+                backgroundSize: this.bgMode === 'tile' ? 'auto' : this.bgMode,
+                backgroundRepeat: this.bgMode === 'tile' ? 'repeat' : 'no-repeat',
+                backgroundPosition: 'center'
+            };
+        },
+        previewBackgroundStyle() {
+            if (!this.bgPreviewUrl) return {};
+            return {
+                backgroundImage: `url("${this.bgPreviewUrl}")`,
+                backgroundSize: this.bgMode === 'tile' ? 'auto' : this.bgMode,
+                backgroundRepeat: this.bgMode === 'tile' ? 'repeat' : 'no-repeat',
+                backgroundPosition: 'center'
+            };
         }
     },
     mounted() {
@@ -113,38 +133,28 @@ const app = createApp({
             reader.readAsText(file);
         },
 
-        // --- DIE NEUE HINTERGRUND-LOGIK ---
-
+        // --- DIE ROBUSTE OFFLINE-METHODE ---
         onBgSelected(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // 1. Erzeugt einen blitzschnellen, internen Link für die sofortige Anzeige
-            this.bgPreviewUrl = URL.createObjectURL(file);
-
-            // 2. Liest das Bild heimlich im Hintergrund ein, um es später zu speichern
+            // Liest das Bild direkt als "Text" ein, das funktioniert immer!
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.bgBase64ToSave = e.target.result;
+                this.bgPreviewUrl = e.target.result;
             };
             reader.readAsDataURL(file);
 
             event.target.value = '';
         },
         applyBackground() {
-            // Setzt das Bild sofort für das Board (nutzt den schnellen Link)
             this.backgroundImage = this.bgPreviewUrl;
-
-            // Speichert die echten Daten für den nächsten Neustart
             try {
-                if (this.bgBase64ToSave) {
-                    localStorage.setItem('meinBoard_bg', this.bgBase64ToSave);
-                }
+                localStorage.setItem('meinBoard_bg', this.backgroundImage);
                 localStorage.setItem('meinBoard_bgMode', this.bgMode);
             } catch (error) {
                 console.warn("Hinweis: Bild ist zu groß für den Langzeit-Speicher.");
             }
-
             this.bgPreviewUrl = null;
         },
         cancelBackground() {

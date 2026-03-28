@@ -43,12 +43,7 @@
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
-    <div class="board" :style="{
-            backgroundImage: backgroundImage ? 'url(\'' + backgroundImage + '\')' : 'none',
-            backgroundSize: bgMode === 'tile' ? 'auto' : bgMode,
-            backgroundRepeat: bgMode === 'tile' ? 'repeat' : 'no-repeat',
-            backgroundPosition: 'center'
-        }">
+    <div class="board" :style="boardBackgroundStyle">
 
         <div v-for="(w, index) in widgets"
              :key="w.id"
@@ -91,14 +86,7 @@
             <h3 style="margin: 0; font-family: sans-serif;">🖼️ Hintergrund anpassen</h3>
 
             <div style="width: 100%; height: 300px; border: 2px dashed #555; border-radius: 8px; overflow: hidden; background: #000;">
-                <div style="width: 100%; height: 100%;"
-                     :style="{
-                         backgroundImage: 'url(\'' + bgPreviewUrl + '\')',
-                         backgroundSize: bgMode === 'tile' ? 'auto' : bgMode,
-                         backgroundRepeat: bgMode === 'tile' ? 'repeat' : 'no-repeat',
-                         backgroundPosition: 'center'
-                     }">
-                </div>
+                <div style="width: 100%; height: 100%;" :style="previewBackgroundStyle"></div>
             </div>
 
             <div style="display: flex; gap: 10px; align-items: center; font-family: sans-serif;">
