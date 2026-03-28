@@ -18,6 +18,22 @@ body {
     width: 100vw;
 }
 
+.board {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+
+    /* 👇 HIER TRÄGST DU DEN NAMEN DEINES BILDES EIN: 👇 */
+    background-image: url('GenoKolleg.jpg');
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 /* --- Moderne Toolbar im Milchglas-Look --- */
 .toolbar {
     background: rgba(15, 23, 42, 0.6);
