@@ -62,18 +62,29 @@ const app = createApp({
             if (this.draggingIndex !== null) {
                 const w = this.widgets[this.draggingIndex];
 
-                // Berechne neue Position
+                // 1. Berechne die gewünschte neue Position
                 let newX = e.clientX - this.offsetX;
                 let newY = e.clientY - this.offsetY;
 
-                // --- SICHERHEITS-STOPP ---
-                // Verhindert, dass das Widget oben aus dem Bild verschwindet (min. 0px)
-                if (newY < 0) newY = 0;
+                // 2. Fenster-Grenzen ermitteln
+                const maxX = window.innerWidth - w.width;
+                const maxY = window.innerHeight - w.height;
 
+                // 3. Begrenzung anwenden (Constraint)
+
+                // Horizontal (Links/Rechts)
+                if (newX < 0) newX = 0; // Nicht links raus
+                if (newX > maxX) newX = maxX; // Nicht rechts raus
+
+                // Vertikal (Oben/Unten)
+                if (newY < 0) newY = 0; // Nicht oben raus (wichtig für die Leiste!)
+                if (newY > maxY) newY = maxY; // Nicht unten raus
+
+                // 4. Position im Widget speichern
                 w.x = newX;
                 w.y = newY;
-            }
-        },
+    }
+},
         stopDrag() {
             if (this.draggingIndex !== null) {
                 this.draggingIndex = null;
