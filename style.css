@@ -120,8 +120,8 @@ button:hover {
     flex-grow: 1; /* NEU: Inhalt füllt immer den neu gewonnenen Platz aus */
     display: flex;
     flex-direction: column;
-    cursor: default;
     cursor: text !important;
+    cursor: default;
 }
 
 /* --- Widget Header --- */
