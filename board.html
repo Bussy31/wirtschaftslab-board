@@ -13,9 +13,11 @@
         <div class="brand">🎓 wirtschaftslab-board</div>
 
         <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
-        <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
+        <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button> <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
 
-        <div style="flex-grow: 1;"></div> <button @click="exportBoard" class="btn-export">💾 Export</button>
+        <div style="flex-grow: 1;"></div>
+
+        <button @click="exportBoard" class="btn-export">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
@@ -32,7 +34,14 @@
                     <span>{{ w.icon }}</span>
                     <span>{{ w.type.toUpperCase() }}</span>
                 </div>
-                <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
+
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button v-if="w.type === 'uhr'" @click.stop="w.isAnalog = !w.isAnalog; saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;">
+                        {{ w.isAnalog ? aktuelleZeit : '⌚' }}
+                    </button>
+                    <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
+                </div>
             </div>
 
             <div class="widget-content">
@@ -44,7 +53,7 @@
 
 <script src="widgets/uhr.js"></script>
 <script src="widgets/notiz.js"></script>
-<script src="app.js"></script>
+<script src="widgets/countdown.js"></script> <script src="app.js"></script>
 
 </body>
 </html>

@@ -6,7 +6,9 @@ const app = createApp({
             widgets: [],
             draggingIndex: null,
             offsetX: 0,
-            offsetY: 0
+            offsetY: 0,
+            // NEU: Globale Zeit für den Header-Button
+            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
         }
     },
     mounted() {
@@ -15,22 +17,25 @@ const app = createApp({
             this.widgets = JSON.parse(saved);
         }
         window.addEventListener('mousemove', this.onDrag);
-        // Wir hören auf JEDES Loslassen der Maus, um Größenänderungen zu erfassen
         window.addEventListener('mouseup', this.stopDrag);
+
+        // NEU: Aktualisiert die Uhrzeit für den Header-Button jede Sekunde
+        setInterval(() => {
+            this.aktuelleZeit = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        }, 1000);
     },
     methods: {
         addWidget(type, icon) {
-            const isNotiz = type === 'notiz'; // Prüft, ob das neue Widget eine Notiz ist
+            const isNotiz = type === 'notiz';
 
             this.widgets.push({
                 id: Date.now(),
                 type: type,
                 icon: icon || '✨',
-                // Zentriert das Widget beim Spawnen (Notizen sind breiter, also müssen sie weiter nach links geschoben werden)
                 x: window.innerWidth / 2 - (isNotiz ? 300 : 150),
                 y: 100,
-                width: isNotiz ? 600 : 300,  // NEU: Notiz ist 600px breit, andere 300px
-                height: isNotiz ? 400 : 200, // NEU: Notiz ist 400px hoch, andere 200px
+                width: isNotiz ? 600 : 300,
+                height: isNotiz ? 400 : 200,
                 data: isNotiz ? 'Hier tippen...' : ''
             });
             this.saveToLocal();
@@ -54,15 +59,12 @@ const app = createApp({
             }
         },
         stopDrag() {
-            // Speichert die neue Position beim Verschieben
             if (this.draggingIndex !== null) {
                 this.draggingIndex = null;
                 this.saveToLocal();
             }
-            // NEU: Speichert die neue Größe beim Resizen
             this.updateSizes();
         },
-        // NEU: Liest die echte Pixelgröße aus dem Browser aus und speichert sie
         updateSizes() {
             const widgetElements = document.querySelectorAll('.widget');
             let changed = false;
@@ -106,4 +108,5 @@ const app = createApp({
 
 app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
+app.component('countdown-widget', CountdownWidget); // NEU: Hier melden wir den Timer an!
 app.mount('#app');
