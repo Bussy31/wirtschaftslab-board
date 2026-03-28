@@ -210,8 +210,6 @@ button:hover {
 }
 .close-btn:hover { opacity: 1; }
 
-.widget-content { padding: 20px; }
-
 /* --- Copyright Style --- */
 .copyright {
     position: fixed;
