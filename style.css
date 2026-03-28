@@ -1,12 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
 :root {
-    --bg-color: #0f172a;
-    --widget-bg: #1e293b;
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --widget-bg: rgba(30, 41, 59, 0.7); /* Leicht transparent für Milchglas */
+    --widget-border: rgba(255, 255, 255, 0.1);
     --accent: #3b82f6;
+    --accent-hover: #60a5fa;
 }
 
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: var(--bg-color);
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-gradient);
     color: white;
     margin: 0;
     overflow: hidden;
@@ -14,52 +18,105 @@ body {
     width: 100vw;
 }
 
+/* --- Moderne Toolbar im Milchglas-Look --- */
 .toolbar {
-    background: rgba(30, 41, 59, 0.9);
-    padding: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px); /* Der Milchglas-Effekt */
+    -webkit-backdrop-filter: blur(12px);
+    padding: 15px 20px;
     display: flex;
-    gap: 10px;
-    border-bottom: 1px solid #334155;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--widget-border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     position: relative;
     z-index: 1000;
 }
 
-button {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
+.brand {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #e2e8f0;
+    margin-right: 20px;
+    letter-spacing: 0.5px;
 }
-button:hover { opacity: 0.9; }
-.btn-export { background: #10b981; }
-.btn-import { background: #8b5cf6; }
 
+/* --- Schicke Buttons mit Hover-Animation --- */
+button {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e2e8f0;
+    border: 1px solid var(--widget-border);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px); /* Knopf hebt sich leicht an */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-primary { background: var(--accent); border: none; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-export { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
+.btn-export:hover { background: rgba(16, 185, 129, 0.3); }
+.btn-import { background: rgba(139, 92, 246, 0.2); border-color: rgba(139, 92, 246, 0.4); color: #a78bfa; }
+.btn-import:hover { background: rgba(139, 92, 246, 0.3); }
+
+/* --- Widgets --- */
 .widget {
     position: absolute;
     background: var(--widget-bg);
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    min-width: 200px;
-    user-select: none;
-    border: 1px solid #334155;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px; /* Schön runde Ecken */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    min-width: 220px;
+    border: 1px solid var(--widget-border);
+    transition: box-shadow 0.2s ease;
 }
 
+.widget:hover {
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5); /* Schatten wird größer bei Hover */
+}
+
+/* --- Widget Header --- */
 .widget-header {
-    background: #334155;
-    padding: 5px 10px;
-    border-radius: 8px 8px 0 0;
-    cursor: move;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px 15px;
+    border-radius: 15px 15px 0 0;
+    cursor: grab; /* Zeigt eine "Greif-Hand" an */
     display: flex;
     justify-content: space-between;
-    font-size: 0.8rem;
-    color: #94a3b8;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-.widget-content {
-    padding: 15px;
+.widget-header:active { cursor: grabbing; } /* Hand greift zu beim Ziehen */
+
+.widget-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.close-btn { color: #f87171; cursor: pointer; font-weight: bold; }
+.close-btn {
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1.1rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.close-btn:hover { opacity: 1; }
+
+.widget-content { padding: 20px; }

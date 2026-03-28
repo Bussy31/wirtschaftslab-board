@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>wirtschaftslab-board v2.1</title>
+    <title>wirtschaftslab-board</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
@@ -10,10 +10,12 @@
 
 <div id="app">
     <div class="toolbar">
-        <button @click="addWidget('uhr')">+ Uhr</button>
-        <button @click="addWidget('notiz')">+ Notiz</button>
-        <div style="flex-grow: 1;"></div>
-        <button @click="exportBoard" class="btn-export">💾 Export</button>
+        <div class="brand">🎓 wirtschaftslab-board</div>
+
+        <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
+        <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
+
+        <div style="flex-grow: 1;"></div> <button @click="exportBoard" class="btn-export">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
@@ -26,8 +28,11 @@
              @mousedown="startDrag($event, index)">
 
             <div class="widget-header">
-                <span>{{ w.type.toUpperCase() }}</span>
-                <span class="close-btn" @click.stop="removeWidget(index)">✕</span>
+                <div class="widget-title">
+                    <span>{{ w.icon }}</span>
+                    <span>{{ w.type.toUpperCase() }}</span>
+                </div>
+                <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
             </div>
 
             <div class="widget-content">
