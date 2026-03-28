@@ -4,7 +4,7 @@ const UhrWidget = {
         <div style="position: relative; container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
             
             <button @click="toggleModus" style="position: absolute; top: 0; right: 0; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer; color: white; font-size: 1rem; transition: background 0.2s; z-index: 10;" title="Ansicht wechseln">
-                {{ widgetData.isAnalog ? '12:30' : '⌚' }}
+                {{ widgetData.isAnalog ? kurzeZeit : '⌚' }}
             </button>
 
             <div v-if="!widgetData.isAnalog" style="font-size: clamp(1.5rem, 18cqw, 6rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">
@@ -28,17 +28,20 @@ const UhrWidget = {
         }
     },
     computed: {
+        // Die normale Zeit mit Sekunden für die große Digitaluhr
         zeit() { return this.jetzt.toLocaleTimeString('de-DE'); },
+
+        // NEU: Die kurze Zeit für den Button (nur Stunden und Minuten, z.B. 07:05)
+        kurzeZeit() { return this.jetzt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); },
+
         stundenWinkel() { return ((this.jetzt.getHours() % 12) * 30) + (this.jetzt.getMinutes() * 0.5); },
         minutenWinkel() { return (this.jetzt.getMinutes() * 6) + (this.jetzt.getSeconds() * 0.1); },
         sekundenWinkel() { return this.jetzt.getSeconds() * 6; }
     },
     mounted() {
-        // Falls das Widget neu ist, starten wir standardmäßig mit der digitalen Uhr
         if (this.widgetData.isAnalog === undefined) {
             this.widgetData.isAnalog = false;
         }
-
         this.timer = setInterval(() => {
             this.jetzt = new Date();
         }, 1000);
@@ -48,9 +51,7 @@ const UhrWidget = {
     },
     methods: {
         toggleModus() {
-            // Wechselt den Modus
             this.widgetData.isAnalog = !this.widgetData.isAnalog;
-            // Sagt der Haupt-App: "Bitte sofort im Browser abspeichern!"
             this.$emit('save');
         }
     }
