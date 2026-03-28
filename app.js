@@ -8,21 +8,25 @@ const app = createApp({
             offsetX: 0,
             offsetY: 0,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-            backgroundImage: null
+
+            // Hintergrund-Variablen
+            backgroundImage: null,
+            bgMode: 'cover', // cover (füllen), contain (einpassen) oder tile (kacheln)
+            bgPreviewUrl: null // Steuert das Vorschau-Fenster
         }
     },
     mounted() {
-        // Board laden
         const saved = localStorage.getItem('meinBoard');
         if (saved) {
             this.widgets = JSON.parse(saved);
         }
 
-        // Hintergrundbild laden
+        // Hintergrund und Modus beim Starten laden
         const savedBg = localStorage.getItem('meinBoard_bg');
-        if (savedBg) {
-            this.backgroundImage = savedBg;
-        }
+        if (savedBg) this.backgroundImage = savedBg;
+
+        const savedBgMode = localStorage.getItem('meinBoard_bgMode');
+        if (savedBgMode) this.bgMode = savedBgMode;
 
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
@@ -34,7 +38,6 @@ const app = createApp({
     methods: {
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
-
             this.widgets.push({
                 id: Date.now(),
                 type: type,
@@ -111,25 +114,36 @@ const app = createApp({
             reader.readAsText(file);
         },
 
-        // NEU & VERBESSERT: Der Hintergrund-Import
-        importBackground(event) {
+        // --- NEU: Die drei Schritte für das Hintergrundbild ---
+
+        // 1. Datei wurde ausgewählt -> Vorschau öffnen
+        onBgSelected(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // 1. Sofortige Anzeige (egal wie groß das Bild ist!)
-            const imageUrl = URL.createObjectURL(file);
-            this.backgroundImage = imageUrl;
-
-            // 2. Versuch, es für das nächste Neuladen zu speichern
             const reader = new FileReader();
             reader.onload = (e) => {
-                try {
-                    localStorage.setItem('meinBoard_bg', e.target.result);
-                } catch (error) {
-                    console.warn("Hinweis: Das Bild ist zu groß für den Dauer-Speicher (über 5MB). Es wird nach einem F5-Neuladen wieder verschwinden, funktioniert jetzt aber einwandfrei!");
-                }
+                this.bgPreviewUrl = e.target.result;
             };
             reader.readAsDataURL(file);
+
+            // Setzt das Feld zurück, damit man dasselbe Bild nochmal wählen kann
+            event.target.value = '';
+        },
+        // 2. Anwenden geklickt -> Ans Board übergeben und speichern
+        applyBackground() {
+            this.backgroundImage = this.bgPreviewUrl;
+            try {
+                localStorage.setItem('meinBoard_bg', this.backgroundImage);
+                localStorage.setItem('meinBoard_bgMode', this.bgMode);
+            } catch (error) {
+                console.warn("Bild ist sehr groß, wird nicht nach F5 gespeichert.");
+            }
+            this.bgPreviewUrl = null; // Vorschau schließen
+        },
+        // 3. Abbrechen geklickt -> Vorschau schließen
+        cancelBackground() {
+            this.bgPreviewUrl = null;
         }
     }
 });
