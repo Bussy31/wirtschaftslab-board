@@ -13,8 +13,9 @@
         <div class="brand">🎓 wirtschaftslab-board</div>
 
         <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
-        <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button> <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
-
+        <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button>
+        <button class="btn-primary" @click="addWidget('stoppuhr', '⏲️')">⏲️ Stoppuhr</button>
+        <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
         <div style="flex-grow: 1;"></div>
 
         <button @click="exportBoard" class="btn-export">💾 Export</button>
@@ -53,7 +54,8 @@
 
 <script src="widgets/uhr.js"></script>
 <script src="widgets/notiz.js"></script>
-<script src="widgets/countdown.js"></script> <script src="app.js"></script>
+<script src="widgets/countdown.js"></script>
+<script src="widgets/stoppuhr.js"></script> <script src="app.js"></script>
 
 </body>
 </html>

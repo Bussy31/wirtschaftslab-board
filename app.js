@@ -108,5 +108,6 @@ const app = createApp({
 
 app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
-app.component('countdown-widget', CountdownWidget); // NEU: Hier melden wir den Timer an!
+app.component('countdown-widget', CountdownWidget);
+app.component('stoppuhr-widget', StoppuhrWidget);
 app.mount('#app');
