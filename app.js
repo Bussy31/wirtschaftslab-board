@@ -8,16 +8,17 @@ const app = createApp({
             offsetX: 0,
             offsetY: 0,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-            backgroundImage: null // NEU: Hier merken wir uns das Hintergrundbild
+            backgroundImage: null
         }
     },
     mounted() {
+        // Board laden
         const saved = localStorage.getItem('meinBoard');
         if (saved) {
             this.widgets = JSON.parse(saved);
         }
 
-        // NEU: Hintergrundbild beim Starten laden
+        // Hintergrundbild laden
         const savedBg = localStorage.getItem('meinBoard_bg');
         if (savedBg) {
             this.backgroundImage = savedBg;
@@ -109,16 +110,26 @@ const app = createApp({
             };
             reader.readAsText(file);
         },
-        // NEU: Bild in einen Text-Code umwandeln und speichern
+
+        // NEU & VERBESSERT: Der Hintergrund-Import
         importBackground(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            // 1. Sofortige Anzeige (egal wie groß das Bild ist!)
+            const imageUrl = URL.createObjectURL(file);
+            this.backgroundImage = imageUrl;
+
+            // 2. Versuch, es für das nächste Neuladen zu speichern
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.backgroundImage = e.target.result;
-                localStorage.setItem('meinBoard_bg', this.backgroundImage);
+                try {
+                    localStorage.setItem('meinBoard_bg', e.target.result);
+                } catch (error) {
+                    console.warn("Hinweis: Das Bild ist zu groß für den Dauer-Speicher (über 5MB). Es wird nach einem F5-Neuladen wieder verschwinden, funktioniert jetzt aber einwandfrei!");
+                }
             };
-            reader.readAsDataURL(file); // Liest das Bild als Base64-String ein
+            reader.readAsDataURL(file);
         }
     }
 });
