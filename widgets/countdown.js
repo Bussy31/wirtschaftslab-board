@@ -11,12 +11,12 @@ const CountdownWidget = {
 
             <div v-else style="position: relative; width: 65cqmin; height: 65cqmin; display: flex; align-items: center; justify-content: center;">
                 <svg viewBox="0 0 100 100" style="position: absolute; width: 100%; height: 100%; transform: rotate(-90deg);">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8" />
-                    <circle cx="50" cy="50" r="45" fill="none" :stroke="ringColor" stroke-width="8" stroke-linecap="round"
-                            :stroke-dasharray="283" :stroke-dashoffset="dashOffset" 
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" />
+                    <circle cx="50" cy="50" r="42" fill="none" :stroke="ringColor" stroke-width="6" stroke-linecap="round"
+                            :stroke-dasharray="264" :stroke-dashoffset="dashOffset" 
                             style="transition: stroke-dashoffset 1s linear, stroke 0.5s;" />
                 </svg>
-                <div style="font-size: clamp(2rem, 15cqw, 4.5rem); font-weight: bold; font-variant-numeric: tabular-nums; z-index: 10;">
+                <div style="font-size: clamp(1.5rem, 12cqw, 3.5rem); font-weight: bold; font-variant-numeric: tabular-nums; z-index: 10; position: absolute;">
                     {{ formatTime(timeLeft) }}
                 </div>
             </div>
@@ -43,7 +43,8 @@ const CountdownWidget = {
     computed: {
         dashOffset() {
             if (this.totalTime === 0) return 0;
-            return 283 - ((this.timeLeft / this.totalTime) * 283);
+            // 264 ist der neue Umfang für Radius 42
+            return 264 - ((this.timeLeft / this.totalTime) * 264);
         },
         ringColor() {
             const fraction = this.timeLeft / this.totalTime;
