@@ -43,17 +43,32 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
-            if (!e.target.closest('.widget-header')) return;
+            // WICHTIG: Wenn wir auf einen Button, Input oder eine Notiz klicken,
+            // wollen wir NICHT ziehen, sondern tippen/schreiben.
+            const tagsDieIgnoriertWerden = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'];
+            if (tagsDieIgnoriertWerden.includes(e.target.tagName)) return;
+
             this.draggingIndex = index;
             const widget = this.widgets[index];
+
+            // Wir berechnen den Abstand vom Klick-Punkt zur linken oberen Ecke des Widgets
             this.offsetX = e.clientX - widget.x;
             this.offsetY = e.clientY - widget.y;
         },
         onDrag(e) {
             if (this.draggingIndex !== null) {
                 const w = this.widgets[this.draggingIndex];
-                w.x = e.clientX - this.offsetX;
-                w.y = e.clientY - this.offsetY;
+
+                // Berechne neue Position
+                let newX = e.clientX - this.offsetX;
+                let newY = e.clientY - this.offsetY;
+
+                // --- SICHERHEITS-STOPP ---
+                // Verhindert, dass das Widget oben aus dem Bild verschwindet (min. 0px)
+                if (newY < 0) newY = 0;
+
+                w.x = newX;
+                w.y = newY;
             }
         },
         stopDrag() {

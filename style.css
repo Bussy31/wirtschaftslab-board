@@ -97,6 +97,8 @@ button:hover {
     box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     border: 1px solid var(--widget-border);
     transition: box-shadow 0.2s ease;
+    cursor: move;
+    user-select: none;
 
     /* NEU: Erlaubt das Verändern der Größe */
     resize: both;
@@ -134,6 +136,7 @@ button:hover {
     font-weight: 600;
     color: #cbd5e1;
     border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: move;
 }
 
 .widget-header:active { cursor: grabbing; } /* Hand greift zu beim Ziehen */
@@ -142,6 +145,12 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.widget-content textarea,
+.widget-content input {
+    user-select: text;
+    cursor: text;
 }
 
 .close-btn {
