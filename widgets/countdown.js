@@ -1,7 +1,7 @@
 const CountdownWidget = {
     props: ['widgetData'],
     template: `
-        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); border-radius: 12px; padding: 2cqh;">
+        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             
             <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 3cqw; align-items: center; z-index: 10;">
                 <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 25cqw; min-width: 60px; font-size: clamp(1.2rem, 8cqw, 3.5rem); padding: 1cqw; text-align: center; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
