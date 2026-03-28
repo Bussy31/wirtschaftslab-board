@@ -7,32 +7,7 @@ const app = createApp({
             draggingIndex: null,
             offsetX: 0,
             offsetY: 0,
-            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-
-            backgroundImage: null,
-            bgMode: 'cover',
-            bgPreviewUrl: null
-        }
-    },
-    // NEU: Berechnet den Hintergrund-Code sauber und fehlerfrei für den Browser
-    computed: {
-        boardBackgroundStyle() {
-            if (!this.backgroundImage) return {};
-            return {
-                backgroundImage: `url("${this.backgroundImage}")`,
-                backgroundSize: this.bgMode === 'tile' ? 'auto' : this.bgMode,
-                backgroundRepeat: this.bgMode === 'tile' ? 'repeat' : 'no-repeat',
-                backgroundPosition: 'center'
-            };
-        },
-        previewBackgroundStyle() {
-            if (!this.bgPreviewUrl) return {};
-            return {
-                backgroundImage: `url("${this.bgPreviewUrl}")`,
-                backgroundSize: this.bgMode === 'tile' ? 'auto' : this.bgMode,
-                backgroundRepeat: this.bgMode === 'tile' ? 'repeat' : 'no-repeat',
-                backgroundPosition: 'center'
-            };
+            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
         }
     },
     mounted() {
@@ -40,12 +15,6 @@ const app = createApp({
         if (saved) {
             this.widgets = JSON.parse(saved);
         }
-
-        const savedBg = localStorage.getItem('meinBoard_bg');
-        if (savedBg) this.backgroundImage = savedBg;
-
-        const savedBgMode = localStorage.getItem('meinBoard_bgMode');
-        if (savedBgMode) this.bgMode = savedBgMode;
 
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
@@ -131,34 +100,6 @@ const app = createApp({
                 this.saveToLocal();
             };
             reader.readAsText(file);
-        },
-
-        // --- DIE ROBUSTE OFFLINE-METHODE ---
-        onBgSelected(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Liest das Bild direkt als "Text" ein, das funktioniert immer!
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.bgPreviewUrl = e.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            event.target.value = '';
-        },
-        applyBackground() {
-            this.backgroundImage = this.bgPreviewUrl;
-            try {
-                localStorage.setItem('meinBoard_bg', this.backgroundImage);
-                localStorage.setItem('meinBoard_bgMode', this.bgMode);
-            } catch (error) {
-                console.warn("Hinweis: Bild ist zu groß für den Langzeit-Speicher.");
-            }
-            this.bgPreviewUrl = null;
-        },
-        cancelBackground() {
-            this.bgPreviewUrl = null;
         }
     }
 });
