@@ -25,7 +25,7 @@
 <body>
 
 <div id="app">
-    <div class="toolbar">
+    <<div :class="['toolbar', { 'hidden': isFullscreen }]">>
         <div class="brand">🎓 wirtschaftslab-board</div>
 
         <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
@@ -35,8 +35,9 @@
 
         <div style="flex-grow: 1;"></div>
 
-        <button @click="exportBoard" class="btn-export">💾 Export</button>
-        <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
+        <button @click="toggleFullscreen" class="btn-primary" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
+        <button @click="exportBoard" class="btn-export btn-small">💾 Export</button>
+        <button @click="$refs.fileInput.click()" class="btn-import btn-small">📂 Import</button>
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
@@ -88,6 +89,8 @@
             </div>
         </div>
     </div>
+    <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn" title="Vollbild beenden">🗗 Beenden</button>
+    <div class="copyright">© 2026 Philipp Bußmann</div>
 </div>
 
 <script src="widgets/uhr.js"></script>

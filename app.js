@@ -5,8 +5,15 @@ const app = createApp({
         return {
             widgets: [],
             draggingIndex: null,
+            resizingIndex: null,
             offsetX: 0,
             offsetY: 0,
+            initialWidth: 0,
+            initialHeight: 0,
+            initialX: 0,
+            initialY: 0,
+            showCloseAllPrompt: false,
+            isFullscreen: false,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
         }
     },
@@ -18,6 +25,8 @@ const app = createApp({
 
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
+
+        document.addEventListener('fullscreenchange', this.onFullscreenChange);
 
         setInterval(() => {
             this.aktuelleZeit = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -135,6 +144,24 @@ const app = createApp({
                 this.saveToLocal();
             };
             reader.readAsText(file);
+        },
+        async toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                try {
+                    await document.documentElement.requestFullscreen();
+                    this.isFullscreen = true;
+                } catch (err) {
+                    console.error("Vollbild Fehler:", err);
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                    this.isFullscreen = false;
+                }
+            }
+        },
+        onFullscreenChange() {
+            this.isFullscreen = !!document.fullscreenElement;
         }
     }
 });

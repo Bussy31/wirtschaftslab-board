@@ -50,12 +50,54 @@ body {
     z-index: 1000;
 }
 
+.toolbar.hidden {
+    display: none !important;
+}
+
+.toolbar-right-group .btn-primary[title="Export"],
+.toolbar-right-group .btn-primary[title="Import"] {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    min-width: unset;
+    text-shadow: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-right-group .btn-primary[title="Export"]:hover,
+.toolbar-right-group .btn-primary[title="Import"]:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .brand {
     font-weight: 600;
     font-size: 1.2rem;
     color: #e2e8f0;
     margin-right: 20px;
     letter-spacing: 0.5px;
+}
+
+/* Der kleine, schwebende Button, um den Vollbildmodus zu beenden */
+.floating-exit-btn {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent */
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    z-index: 2000; /* Immer im Vordergrund */
+    backdrop-filter: blur(5px);
+    transition: all 0.2s ease;
+}
+
+.floating-exit-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    transform: scale(1.05);
 }
 
 /* --- Schicke Buttons mit Hover-Animation --- */
@@ -86,6 +128,13 @@ button:hover {
 .btn-export:hover { background: rgba(16, 185, 129, 0.3); }
 .btn-import { background: rgba(139, 92, 246, 0.2); border-color: rgba(139, 92, 246, 0.4); color: #a78bfa; }
 .btn-import:hover { background: rgba(139, 92, 246, 0.3); }
+
+.btn-small {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
 
 /* --- Widgets --- */
 /* --- Widgets --- */
@@ -163,3 +212,15 @@ button:hover {
 .close-btn:hover { opacity: 1; }
 
 .widget-content { padding: 20px; }
+
+/* --- Copyright Style --- */
+.copyright {
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4); /* Sehr dezent */
+    pointer-events: none; /* Klicks gehen "hindurch" */
+    z-index: 1000;
+    font-family: inherit;
+}
