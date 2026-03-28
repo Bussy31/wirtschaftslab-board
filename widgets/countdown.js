@@ -1,36 +1,36 @@
 const CountdownWidget = {
     props: ['widgetData'],
     template: `
-        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); border-radius: 12px; padding: 2cqh;">
             
-            <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 2cqw; align-items: center; z-index: 10;">
-                <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 20cqw; min-width: 50px; font-size: clamp(1.2rem, 8cqw, 4rem); padding: 1cqw; text-align: center; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-                <span style="font-size: clamp(1.2rem, 6cqw, 3rem);">min</span>
-                <button @click="startTimer" style="background: #10b981; border: none; padding: 1.5cqw 3cqw; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: clamp(1rem, 6cqw, 3rem);">Start</button>
+            <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 3cqw; align-items: center; z-index: 10;">
+                <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 25cqw; min-width: 60px; font-size: clamp(1.2rem, 8cqw, 3.5rem); padding: 1cqw; text-align: center; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+                <span style="font-size: clamp(1.2rem, 6cqw, 2.5rem); color: rgba(255,255,255,0.7);">min</span>
+                <button @click="startTimer" style="background: #10b981; border: none; padding: 1.5cqw 3cqw; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: clamp(1rem, 6cqw, 2.5rem);">Start</button>
             </div>
 
-            <div v-else style="width: 90cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqh;">
+            <div v-else style="width: 90cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5cqh;">
                 
-                <div style="font-size: clamp(2.5rem, 25cqw, 15rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 2px 5px rgba(0,0,0,0.5); line-height: 1;">
+                <div style="font-size: clamp(2rem, 14cqw, 9rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 4px 10px rgba(0,0,0,0.6); line-height: 1.1; color: white;">
                     {{ formatTime(timeLeft) }}
                 </div>
                 
-                <div style="width: 100%; height: clamp(12px, 6cqh, 40px); background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
+                <div style="width: 100%; height: clamp(24px, 14cqh, 80px); background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; box-shadow: inset 0 4px 10px rgba(0,0,0,0.7);">
                     <div :style="{ 
                         width: barWidth + '%', 
                         backgroundColor: barColor, 
                         height: '100%', 
                         transition: 'width 1s linear, background-color 0.5s ease',
-                        boxShadow: '0 0 2cqw ' + barColor 
+                        boxShadow: '0 0 4cqw ' + barColor 
                     }"></div>
                 </div>
             </div>
 
-            <div v-if="timeLeft > 0" style="margin-top: 4cqh; display: flex; gap: 2cqw; z-index: 10;">
-                <button @click="togglePause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 1cqw 3cqw; color: white; cursor: pointer; font-size: clamp(0.9rem, 4cqw, 2rem);">
+            <div v-if="timeLeft > 0" style="margin-top: 5cqh; display: flex; gap: 3cqw; z-index: 10;">
+                <button @click="togglePause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 1.5cqw 3cqw; color: white; cursor: pointer; font-size: clamp(0.9rem, 4cqw, 2rem);">
                     {{ isRunning ? '⏸ Pause' : '▶ Weiter' }}
                 </button>
-                <button @click="resetTimer" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 1cqw 3cqw; color: #fca5a5; cursor: pointer; font-size: clamp(0.9rem, 4cqw, 2rem);">
+                <button @click="resetTimer" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 8px; padding: 1.5cqw 3cqw; color: #fca5a5; cursor: pointer; font-size: clamp(0.9rem, 4cqw, 2rem);">
                     ⏹ Stopp
                 </button>
             </div>
@@ -52,9 +52,9 @@ const CountdownWidget = {
         },
         barColor() {
             const fraction = this.timeLeft / this.totalTime;
-            if (fraction > 0.5) return '#34d399';
-            if (fraction > 0.2) return '#fbbf24';
-            return '#ef4444';
+            if (fraction > 0.5) return '#10b981'; // Grün
+            if (fraction > 0.2) return '#fbbf24'; // Gelb
+            return '#ef4444'; // Rot
         }
     },
     mounted() { if (this.isRunning) this.tick(); },
