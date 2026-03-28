@@ -98,14 +98,14 @@ button:hover {
     box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     border: 1px solid var(--widget-border);
     transition: box-shadow 0.2s ease;
-    cursor: grab;
 
-    /* NEU: Erlaubt das Verändern der Größe */
+    /* ÄNDERUNG: Standard-Mauszeiger für das normale Fenster */
+    cursor: default;
+
     resize: both;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    /* Mindestgrößen, damit es nicht zu klein wird */
     min-width: 200px;
     min-height: 100px;
 }

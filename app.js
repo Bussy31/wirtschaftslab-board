@@ -43,21 +43,25 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
-            const widget = this.widgets[index];
+            // 1. Prüfen: Wurde der Header oder der spezielle Verschiebe-Button geklickt?
             const isHeader = e.target.closest('.widget-header');
             const isHandle = e.target.closest('.drag-handle');
-            const tagsDieIgnoriertWerden = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'];
 
-            // --- SONDERREGEL NOTIZ ---
-            // Wenn es eine Notiz ist, darf NUR am Header (der Leiste oben) gezogen werden
-            if (widget.type === 'notiz' && !isHeader && !isHandle) return;
+            // Wenn beides NICHT zutrifft -> sofort abbrechen (kein Verschieben)
+            if (!isHeader && !isHandle) return;
 
-            // Generelle Regel für alle: Nicht an Buttons oder Eingabefeldern ziehen
-            if (tagsDieIgnoriertWerden.includes(e.target.tagName) && !isHandle) return;
+            // 2. Sicherheits-Check: Klicks auf das Schließen-X oder andere Buttons im Header ignorieren
+            // Ausnahme: Der Handle-Button (Verschiebe-Dings) darf natürlich ziehen
+            if (e.target.closest('.close-btn') || (e.target.tagName === 'BUTTON' && !isHandle)) {
+                return;
+            }
+
             this.draggingIndex = index;
+            const widget = this.widgets[index];
             this.offsetX = e.clientX - widget.x;
             this.offsetY = e.clientY - widget.y;
         },
+
         onDrag(e) {
             if (this.draggingIndex !== null) {
                 const w = this.widgets[this.draggingIndex];
@@ -66,25 +70,30 @@ const app = createApp({
                 let newX = e.clientX - this.offsetX;
                 let newY = e.clientY - this.offsetY;
 
-                // 2. Fenster-Grenzen ermitteln
+                // 2. Toolbar-Höhe auslesen, damit wir nicht dahinter rutschen
+                const toolbar = document.querySelector('.toolbar');
+                const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
+
+                // 3. Fenster-Grenzen ermitteln
                 const maxX = window.innerWidth - w.width;
                 const maxY = window.innerHeight - w.height;
 
-                // 3. Begrenzung anwenden (Constraint)
+                // 4. Begrenzung anwenden (Constraint)
 
                 // Horizontal (Links/Rechts)
                 if (newX < 0) newX = 0; // Nicht links raus
                 if (newX > maxX) newX = maxX; // Nicht rechts raus
 
                 // Vertikal (Oben/Unten)
-                if (newY < 0) newY = 0; // Nicht oben raus (wichtig für die Leiste!)
+                // HIER IST DIE MAGIE: Nicht kleiner als die Toolbar-Höhe!
+                if (newY < toolbarHeight) newY = toolbarHeight;
                 if (newY > maxY) newY = maxY; // Nicht unten raus
 
-                // 4. Position im Widget speichern
+                // 5. Position im Widget speichern
                 w.x = newX;
                 w.y = newY;
-    }
-},
+            }
+        },
         stopDrag() {
             if (this.draggingIndex !== null) {
                 this.draggingIndex = null;
