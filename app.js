@@ -6,7 +6,13 @@ const app = createApp({
             widgets: [],
             draggingIndex: null,
             offsetX: 0,
-            offsetY: 0
+            offsetY: 0,
+            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+
+            backgroundImage: null,
+            bgMode: 'cover',
+            bgPreviewUrl: null,
+            bgBase64ToSave: null // NEU: Speichert den Text-Code heimlich im Hintergrund
         }
     },
     mounted() {
@@ -14,17 +20,32 @@ const app = createApp({
         if (saved) {
             this.widgets = JSON.parse(saved);
         }
+
+        const savedBg = localStorage.getItem('meinBoard_bg');
+        if (savedBg) this.backgroundImage = savedBg;
+
+        const savedBgMode = localStorage.getItem('meinBoard_bgMode');
+        if (savedBgMode) this.bgMode = savedBgMode;
+
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
+
+        setInterval(() => {
+            this.aktuelleZeit = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        }, 1000);
     },
     methods: {
-        addWidget(type) {
+        addWidget(type, icon) {
+            const isNotiz = type === 'notiz';
             this.widgets.push({
                 id: Date.now(),
                 type: type,
-                x: window.innerWidth / 2 - 100, // Spawnt in der Mitte
+                icon: icon || '✨',
+                x: window.innerWidth / 2 - (isNotiz ? 300 : 150),
                 y: 100,
-                data: ''
+                width: isNotiz ? 600 : 300,
+                height: isNotiz ? 400 : 200,
+                data: isNotiz ? 'Hier tippen...' : ''
             });
             this.saveToLocal();
         },
@@ -51,6 +72,23 @@ const app = createApp({
                 this.draggingIndex = null;
                 this.saveToLocal();
             }
+            this.updateSizes();
+        },
+        updateSizes() {
+            const widgetElements = document.querySelectorAll('.widget');
+            let changed = false;
+            widgetElements.forEach((el, index) => {
+                if (this.widgets[index]) {
+                    const newWidth = el.offsetWidth;
+                    const newHeight = el.offsetHeight;
+                    if (this.widgets[index].width !== newWidth || this.widgets[index].height !== newHeight) {
+                        this.widgets[index].width = newWidth;
+                        this.widgets[index].height = newHeight;
+                        changed = true;
+                    }
+                }
+            });
+            if (changed) this.saveToLocal();
         },
         saveToLocal() {
             localStorage.setItem('meinBoard', JSON.stringify(this.widgets));
@@ -73,12 +111,50 @@ const app = createApp({
                 this.saveToLocal();
             };
             reader.readAsText(file);
+        },
+
+        // --- DIE NEUE HINTERGRUND-LOGIK ---
+
+        onBgSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 1. Erzeugt einen blitzschnellen, internen Link für die sofortige Anzeige
+            this.bgPreviewUrl = URL.createObjectURL(file);
+
+            // 2. Liest das Bild heimlich im Hintergrund ein, um es später zu speichern
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.bgBase64ToSave = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            event.target.value = '';
+        },
+        applyBackground() {
+            // Setzt das Bild sofort für das Board (nutzt den schnellen Link)
+            this.backgroundImage = this.bgPreviewUrl;
+
+            // Speichert die echten Daten für den nächsten Neustart
+            try {
+                if (this.bgBase64ToSave) {
+                    localStorage.setItem('meinBoard_bg', this.bgBase64ToSave);
+                }
+                localStorage.setItem('meinBoard_bgMode', this.bgMode);
+            } catch (error) {
+                console.warn("Hinweis: Bild ist zu groß für den Langzeit-Speicher.");
+            }
+
+            this.bgPreviewUrl = null;
+        },
+        cancelBackground() {
+            this.bgPreviewUrl = null;
         }
     }
 });
 
-// Hier verbinden wir unsere ausgelagerten Dateien mit der Haupt-App
 app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
-
+app.component('countdown-widget', CountdownWidget);
+app.component('stoppuhr-widget', StoppuhrWidget);
 app.mount('#app');
