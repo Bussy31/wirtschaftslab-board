@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>wirtschaftslab-board</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         /* Ghost-Modus: Macht Hintergrund durchsichtig, lässt Inhalt aber sichtbar */
         .widget.ghost-mode {
@@ -22,7 +23,6 @@
             opacity: 1;
         }
     </style>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
 
@@ -34,6 +34,7 @@
         <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button>
         <button class="btn-primary" @click="addWidget('stoppuhr', '⏲️')">⏲️ Stoppuhr</button>
         <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
+
         <div style="flex-grow: 1;"></div>
 
         <button @click="exportBoard" class="btn-export">💾 Export</button>
@@ -50,7 +51,7 @@
                  top: w.y + 'px',
                  width: w.width + 'px',
                  height: w.height + 'px',
-                 boxSizing: 'border-box' /* Das stoppt das nervige Wachsen! */
+                 boxSizing: 'border-box'
              }"
              @mousedown="startDrag($event, index)">
 
@@ -82,18 +83,13 @@
             </div>
         </div>
     </div>
-
-            <div class="widget-content">
-                <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script src="widgets/uhr.js"></script>
 <script src="widgets/notiz.js"></script>
 <script src="widgets/countdown.js"></script>
-<script src="widgets/stoppuhr.js"></script> <script src="app.js"></script>
+<script src="widgets/stoppuhr.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
