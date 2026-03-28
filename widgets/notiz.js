@@ -5,7 +5,7 @@ const NotizWidget = {
             
             <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; align-items: center;">
                 
-                <button @mousedown.prevent="format('bold')" title="Fett" style="padding: 4px 10px; min-width: unset;"><b>B</b></button>
+                <button @mousedown.prevent="format('bold')" title="Fett" style="padding: 4px 10px; min-width: unset;">B<</button>
                 <button @mousedown.prevent="format('italic')" title="Kursiv" style="padding: 4px 10px; min-width: unset;"><i>I</i></button>
                 <button @mousedown.prevent="format('underline')" title="Unterstrichen" style="padding: 4px 10px; min-width: unset;"><u>U</u></button>
                 
