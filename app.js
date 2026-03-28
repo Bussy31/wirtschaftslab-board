@@ -43,15 +43,18 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
-            // WICHTIG: Wenn wir auf einen Button, Input oder eine Notiz klicken,
-            // wollen wir NICHT ziehen, sondern tippen/schreiben.
+            const widget = this.widgets[index];
+            const isHeader = e.target.closest('.widget-header');
             const tagsDieIgnoriertWerden = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'];
+
+            // --- SONDERREGEL NOTIZ ---
+            // Wenn es eine Notiz ist, darf NUR am Header (der Leiste oben) gezogen werden
+            if (widget.type === 'notiz' && !isHeader) return;
+
+            // Generelle Regel für alle: Nicht an Buttons oder Eingabefeldern ziehen
             if (tagsDieIgnoriertWerden.includes(e.target.tagName)) return;
 
             this.draggingIndex = index;
-            const widget = this.widgets[index];
-
-            // Wir berechnen den Abstand vom Klick-Punkt zur linken oberen Ecke des Widgets
             this.offsetX = e.clientX - widget.x;
             this.offsetY = e.clientY - widget.y;
         },
