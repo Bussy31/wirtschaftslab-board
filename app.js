@@ -7,7 +7,19 @@ const app = createApp({
             draggingIndex: null,
             offsetX: 0,
             offsetY: 0,
-            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+
+            // Hintergrund-Galerie
+            backgroundImage: null,
+            showGallery: false,
+            galleryImages: [
+                'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?auto=format&fit=crop&w=1600&q=80', // Natur
+                'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1600&q=80', // Berge/Sterne
+                'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1600&q=80', // Bunt
+                'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1600&q=80', // Office
+                'https://images.unsplash.com/photo-1478719059408-592965723cbc?auto=format&fit=crop&w=1600&q=80', // Dunkel/Abstrakt
+                'https://images.unsplash.com/photo-1518655048521-f130df041f66?auto=format&fit=crop&w=1600&q=80'  // Holz Textur
+            ]
         }
     },
     mounted() {
@@ -15,6 +27,10 @@ const app = createApp({
         if (saved) {
             this.widgets = JSON.parse(saved);
         }
+
+        // Geladenen Hintergrund abrufen
+        const savedBg = localStorage.getItem('meinBoard_bg');
+        if (savedBg) this.backgroundImage = savedBg;
 
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
@@ -100,6 +116,18 @@ const app = createApp({
                 this.saveToLocal();
             };
             reader.readAsText(file);
+        },
+
+        // --- Hintergrund Funktionen ---
+        setBackground(url) {
+            this.backgroundImage = url;
+            this.showGallery = false;
+            localStorage.setItem('meinBoard_bg', url); // Das speichert den Link sicher für F5!
+        },
+        removeBackground() {
+            this.backgroundImage = null;
+            this.showGallery = false;
+            localStorage.removeItem('meinBoard_bg');
         }
     }
 });
