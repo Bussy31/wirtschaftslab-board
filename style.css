@@ -155,8 +155,8 @@ button:hover {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-width: 200px;
-    min-height: 100px;
+    min-width: 300px;
+    min-height: 200px;
 }
 
 .widget:hover {
@@ -166,7 +166,7 @@ button:hover {
 /* ... Header bleibt wie er ist. ... */
 
 .widget-content {
-    padding: 20px;
+    padding: 5px;
     flex-grow: 1; /* NEU: Inhalt füllt immer den neu gewonnenen Platz aus */
     display: flex;
     flex-direction: column;
