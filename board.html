@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>wirtschaftslab-board v2.1</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <div class="toolbar">
+        <button @click="addWidget('uhr')">+ Uhr</button>
+        <button @click="addWidget('notiz')">+ Notiz</button>
+        <div style="flex-grow: 1;"></div>
+        <button @click="exportBoard" class="btn-export">💾 Export</button>
+        <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
+        <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
+    </div>
+
+    <div class="board">
+        <div v-for="(w, index) in widgets"
+             :key="w.id"
+             class="widget"
+             :style="{ left: w.x + 'px', top: w.y + 'px' }"
+             @mousedown="startDrag($event, index)">
+
+            <div class="widget-header">
+                <span>{{ w.type.toUpperCase() }}</span>
+                <span class="close-btn" @click.stop="removeWidget(index)">✕</span>
+            </div>
+
+            <div class="widget-content">
+                <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="widgets/uhr.js"></script>
+<script src="widgets/notiz.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
