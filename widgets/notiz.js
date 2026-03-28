@@ -50,7 +50,7 @@ const NotizWidget = {
     `,
     mounted() {
         if (!this.widgetData.data || this.widgetData.data === 'Hier tippen...') {
-            this.$refs.editor.innerHTML = 'Hier deine Notiz...';
+            this.$refs.editor.innerHTML = '';
         } else {
             this.$refs.editor.innerHTML = this.widgetData.data;
         }
