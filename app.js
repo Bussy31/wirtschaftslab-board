@@ -9,10 +9,10 @@ const app = createApp({
             offsetY: 0,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
 
-            // Hintergrund-Variablen
             backgroundImage: null,
-            bgMode: 'cover', // cover (füllen), contain (einpassen) oder tile (kacheln)
-            bgPreviewUrl: null // Steuert das Vorschau-Fenster
+            bgMode: 'cover',
+            bgPreviewUrl: null,
+            bgBase64ToSave: null // NEU: Speichert den Text-Code heimlich im Hintergrund
         }
     },
     mounted() {
@@ -21,7 +21,6 @@ const app = createApp({
             this.widgets = JSON.parse(saved);
         }
 
-        // Hintergrund und Modus beim Starten laden
         const savedBg = localStorage.getItem('meinBoard_bg');
         if (savedBg) this.backgroundImage = savedBg;
 
@@ -114,34 +113,40 @@ const app = createApp({
             reader.readAsText(file);
         },
 
-        // --- NEU: Die drei Schritte für das Hintergrundbild ---
+        // --- DIE NEUE HINTERGRUND-LOGIK ---
 
-        // 1. Datei wurde ausgewählt -> Vorschau öffnen
         onBgSelected(event) {
             const file = event.target.files[0];
             if (!file) return;
 
+            // 1. Erzeugt einen blitzschnellen, internen Link für die sofortige Anzeige
+            this.bgPreviewUrl = URL.createObjectURL(file);
+
+            // 2. Liest das Bild heimlich im Hintergrund ein, um es später zu speichern
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.bgPreviewUrl = e.target.result;
+                this.bgBase64ToSave = e.target.result;
             };
             reader.readAsDataURL(file);
 
-            // Setzt das Feld zurück, damit man dasselbe Bild nochmal wählen kann
             event.target.value = '';
         },
-        // 2. Anwenden geklickt -> Ans Board übergeben und speichern
         applyBackground() {
+            // Setzt das Bild sofort für das Board (nutzt den schnellen Link)
             this.backgroundImage = this.bgPreviewUrl;
+
+            // Speichert die echten Daten für den nächsten Neustart
             try {
-                localStorage.setItem('meinBoard_bg', this.backgroundImage);
+                if (this.bgBase64ToSave) {
+                    localStorage.setItem('meinBoard_bg', this.bgBase64ToSave);
+                }
                 localStorage.setItem('meinBoard_bgMode', this.bgMode);
             } catch (error) {
-                console.warn("Bild ist sehr groß, wird nicht nach F5 gespeichert.");
+                console.warn("Hinweis: Bild ist zu groß für den Langzeit-Speicher.");
             }
-            this.bgPreviewUrl = null; // Vorschau schließen
+
+            this.bgPreviewUrl = null;
         },
-        // 3. Abbrechen geklickt -> Vorschau schließen
         cancelBackground() {
             this.bgPreviewUrl = null;
         }
