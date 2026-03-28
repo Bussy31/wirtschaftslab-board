@@ -6,19 +6,17 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        /* Ghost-Modus: Macht Hintergrund durchsichtig, lässt Inhalt aber sichtbar */
         .widget.ghost-mode {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             backdrop-filter: none !important;
+            resize: none !important; /* DAS VERSTECKT DIE STRICHE UNTEN RECHTS! */
         }
-        /* Versteckt den Header (Rahmen) im Ghost-Modus... */
         .widget.ghost-mode .widget-header {
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        /* ...zeigt ihn aber wieder an, wenn man mit der Maus drüberfährt! */
         .widget.ghost-mode:hover .widget-header {
             opacity: 1;
         }
@@ -37,12 +35,16 @@
 
         <div style="flex-grow: 1;"></div>
 
+        <button @click="$refs.bgInput.click()" class="btn-import">🖼️ Hintergrund</button>
+        <input type="file" ref="bgInput" @change="importBackground" style="display: none" accept="image/*">
+
         <button @click="exportBoard" class="btn-export">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
-    <div class="board">
+    <div class="board" :style="{ backgroundImage: backgroundImage ? 'url(' + backgroundImage + ')' : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }">
+
         <div v-for="(w, index) in widgets"
              :key="w.id"
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
@@ -62,7 +64,6 @@
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 8px;">
-
                     <button @click.stop="w.isTransparent = !w.isTransparent; saveToLocal()"
                             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
                             title="Hintergrund ausblenden (Ghost-Modus)">
