@@ -25,15 +25,6 @@ const CountdownWidget = {
                     }"></div>
                 </div>
             </div>
-
-            <div v-if="timeLeft > 0" style="margin-top: 5cqh; display: flex; gap: 3cqw; z-index: 10;">
-                <button @click="togglePause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 1.5cqw 3cqw; color: white; cursor: pointer; font-size: clamp(0.9rem, 4cqw, 2rem);">
-                    {{ isRunning ? '⏸ Pause' : '▶ Weiter' }}
-                </button>
-                <button @click="resetTimer" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 8px; padding: 1.5cqw 3cqw; color: #fca5a5; cursor: pointer; font-size: clamp(0.9rem, 4cqw, 2rem);">
-                    ⏹ Stopp
-                </button>
-            </div>
         </div>
     `,
     data() {
@@ -45,6 +36,20 @@ const CountdownWidget = {
             timerInterval: null
         }
     },
+    // NEU: Hier lauscht das Widget auf Klicks aus der Kopfzeile
+    watch: {
+        'widgetData.isRunning'(newVal) {
+            this.isRunning = newVal;
+            if (newVal) {
+                this.tick();
+            } else {
+                clearInterval(this.timerInterval);
+            }
+        },
+        'widgetData.resetTrigger'() {
+            this.resetTimer();
+        }
+    },
     computed: {
         barWidth() {
             if (this.totalTime === 0) return 0;
@@ -52,9 +57,9 @@ const CountdownWidget = {
         },
         barColor() {
             const fraction = this.timeLeft / this.totalTime;
-            if (fraction > 0.5) return '#10b981'; // Grün
-            if (fraction > 0.2) return '#fbbf24'; // Gelb
-            return '#ef4444'; // Rot
+            if (fraction > 0.5) return '#10b981';
+            if (fraction > 0.2) return '#fbbf24';
+            return '#ef4444';
         }
     },
     mounted() { if (this.isRunning) this.tick(); },
@@ -67,12 +72,6 @@ const CountdownWidget = {
             this.isRunning = true;
             this.saveState();
             this.tick();
-        },
-        togglePause() {
-            this.isRunning = !this.isRunning;
-            this.saveState();
-            if (this.isRunning) this.tick();
-            else clearInterval(this.timerInterval);
         },
         resetTimer() {
             clearInterval(this.timerInterval);
