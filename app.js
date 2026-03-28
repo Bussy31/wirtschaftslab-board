@@ -66,6 +66,8 @@ const app = createApp({
                 let newX = e.clientX - this.offsetX;
                 let newY = e.clientY - this.offsetY;
 
+                const toolbar = document.querySelector('.toolbar');
+                const toolbarHeight = toolbar ? toolbar.offsetHeight : 0; // Misst die echte Höhe der Leiste
                 // 2. Fenster-Grenzen ermitteln
                 const maxX = window.innerWidth - w.width;
                 const maxY = window.innerHeight - w.height;
