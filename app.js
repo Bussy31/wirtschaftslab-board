@@ -110,6 +110,15 @@ const app = createApp({
         // --- WIDGET-LOGIK ---
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
+            let startListe = '';
+            if (type === 'zufall') {
+                const aktuelleKlasseObj = this.settings.klassen.find(k => k.name === this.aktiveKlasse);
+                if (aktuelleKlasseObj && aktuelleKlasseObj.schueler) {
+                    const anwesendeSchueler = aktuelleKlasseObj.schueler
+                        .filter(s => !s.absent)
+                        .map(s => s.name);
+
+                    startListe = anwesendeSchueler.join('\n');
             this.widgets.push({
                 id: Date.now(),
                 type: type,
