@@ -72,7 +72,6 @@
                                 {{ s.name }}
                                 <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)" title="Schüler löschen">×</span>
                             </span>
-                            <button @click="addSchueler(klasse)" class="add-s-btn">+ Schüler</button>
                         </div>
                     </div>
                     <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">

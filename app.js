@@ -246,6 +246,23 @@ const app = createApp({
         saveSettings() {
             localStorage.setItem('boardSettings', JSON.stringify(this.settings));
         },
+        loadBoard() {
+            const saved = localStorage.getItem('board_' + this.aktiveKlasse);
+            if (saved) {
+                this.widgets = JSON.parse(saved);
+            } else {
+                this.widgets = []; // Leeres Board, wenn die Klasse neu ist
+            }
+        },
+        saveToLocal() {
+            localStorage.setItem('board_' + this.aktiveKlasse, JSON.stringify(this.widgets));
+        },
+        wechsleKlasse(klassenName) {
+            this.aktiveKlasse = klassenName;
+            localStorage.setItem('aktiveKlasse', klassenName);
+            this.loadBoard();
+            this.showSettings = false;
+        },
     }
 });
 
