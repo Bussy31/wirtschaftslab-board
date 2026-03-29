@@ -20,7 +20,7 @@ const HandlungsplanWidget = {
                                  border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.05)',
                                  boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : 'none'
                              }">
-                            <input type="checkbox" :checked="schritt.done" @change="toggleSchritt(index)" style="cursor: pointer; width: 20px; height: 20px; accent-color: #2db330; flex-shrink: 0;">
+                            <input type="checkbox" :checked="schritt.done" @change="toggleSchritt(index)" style="cursor: pointer; width: 20px; height: 20px; accent-color: #10b981; flex-shrink: 0;">
                             <span :style="{ textDecoration: schritt.done ? 'line-through' : 'none', color: schritt.done ? 'rgba(255,255,255,0.5)' : 'white', flexGrow: 1, fontSize: '1.05rem', cursor: 'pointer', textShadow: widgetData.isTransparent ? '0px 1px 3px rgba(0,0,0,0.8)' : 'none' }"
                                   @click="toggleSchritt(index)">
                                 {{ schritt.text }}
