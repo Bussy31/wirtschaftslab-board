@@ -4,8 +4,13 @@ const HandlungsplanWidget = {
         <div style="display: flex; flex-direction: column; height: 100%; width: 100%; padding: 5px; box-sizing: border-box; overflow: hidden;">
             
             <div v-if="schritte.length > 0" 
-                 style="height: 10px; min-height: 10px; background: rgba(0,0,0,0.6); border-radius: 5px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                 style="position: relative; height: 22px; min-height: 22px; background: rgba(0,0,0,0.6); border-radius: 11px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                
                 <div :style="{ width: progress + '%', background: progress === 100 ? '#10b981' : '#3b82f6', height: '100%', transition: 'width 0.4s ease, background 0.4s ease' }"></div>
+                
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.9); pointer-events: none;">
+                    Fortschritt ({{ progress }}%)
+                </div>
             </div>
 
             <div style="position: relative; flex-grow: 1; margin-bottom: 10px;">
