@@ -129,7 +129,8 @@ const app = createApp({
                 y: 100,
                 width: isNotiz ? 600 : 300,
                 height: isNotiz ? 400 : 200,
-                data: isNotiz ? 'Hier tippen...' : ''
+                data: isNotiz ? 'Hier tippen...' : '',
+                schuelerListe: type === 'zufall' ? startListe : ''
             });
             this.saveToLocal();
         },
