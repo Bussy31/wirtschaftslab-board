@@ -109,14 +109,17 @@ const app = createApp({
 
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
+            const isGruppen = type === 'gruppen';
+
+            // Vorbefüllung für Zufall ODER Gruppen
             let startListe = '';
-            if (type === 'zufall') {
+            if (type === 'zufall' || type === 'gruppen') {
                 const aktuelleKlasseObj = this.settings.klassen.find(k => k.name === this.aktiveKlasse);
+
                 if (aktuelleKlasseObj && aktuelleKlasseObj.schueler) {
                     const anwesendeSchueler = aktuelleKlasseObj.schueler
                         .filter(s => !s.absent)
                         .map(s => s.name);
-
                     startListe = anwesendeSchueler.join('\n');
                 }
             }
@@ -125,12 +128,12 @@ const app = createApp({
                 id: Date.now(),
                 type: type,
                 icon: icon || '✨',
-                x: window.innerWidth / 2 - (isNotiz ? 300 : 150),
+                x: window.innerWidth / 2 - (isNotiz ? 300 : (isGruppen ? 250 : 150)),
                 y: 100,
-                width: isNotiz ? 600 : 300,
-                height: isNotiz ? 400 : 200,
+                width: isNotiz ? 600 : (isGruppen ? 500 : 300),
+                height: isNotiz ? 400 : (isGruppen ? 350 : 200),
                 data: isNotiz ? 'Hier tippen...' : '',
-                schuelerListe: type === 'zufall' ? startListe : ''
+                schuelerListe: (type === 'zufall' || type === 'gruppen') ? startListe : ''
             });
             this.saveToLocal();
         },
@@ -323,5 +326,6 @@ app.component('stoppuhr-widget', StoppuhrWidget);
 app.component('zufall-widget', ZufallWidget);
 app.component('qr-widget', QrWidget);
 app.component('handlungsplan-widget', HandlungsplanWidget);
+app.component('gruppen-widget', GruppenWidget);
 
 app.mount('#app');

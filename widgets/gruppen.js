@@ -1,0 +1,171 @@
+const GruppenWidget = {
+    props: ['widgetData'],
+    data() {
+        return {
+            modus: this.widgetData.modus || 'anzahl',
+            parameter: this.widgetData.parameter || 4,
+            gruppen: this.widgetData.gruppen || [],
+            unassigned: this.widgetData.unassigned || [],
+            schuelerText: this.widgetData.schuelerListe || '',
+            showList: false
+        };
+    },
+    methods: {
+        getNamen() {
+            return this.schuelerText.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+        },
+        saveState() {
+            this.widgetData.modus = this.modus;
+            this.widgetData.parameter = this.parameter;
+            this.widgetData.gruppen = this.gruppen;
+            this.widgetData.unassigned = this.unassigned;
+            this.widgetData.schuelerListe = this.schuelerText;
+            this.$emit('save');
+        },
+        switchMode(newMode) {
+            this.modus = newMode;
+            this.showList = false;
+
+            if (newMode === 'manuell') {
+                this.gruppen = [];
+                let numGroups = parseInt(this.parameter) || 4;
+                for (let i = 0; i < numGroups; i++) this.gruppen.push([]);
+                this.unassigned = this.getNamen(); // Alle ins Sammelbecken
+            } else {
+                this.gruppen = []; // Ansicht leeren
+                this.unassigned = [];
+            }
+            this.saveState();
+        },
+        updateManuellGroups() {
+            if (this.modus !== 'manuell') return;
+            // Wenn man im manuellen Modus die Gruppenanzahl ändert
+            let numGroups = parseInt(this.parameter) || 4;
+            while (this.gruppen.length < numGroups) this.gruppen.push([]);
+            while (this.gruppen.length > numGroups) {
+                // Schüler aus gelöschten Gruppen zurück ins Sammelbecken werfen
+                let removed = this.gruppen.pop();
+                this.unassigned.push(...removed);
+            }
+            this.saveState();
+        },
+        shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        },
+        generiereGruppen() {
+            let namen = this.shuffleArray(this.getNamen());
+            this.gruppen = [];
+            this.unassigned = [];
+
+            if (namen.length === 0) return;
+
+            if (this.modus === 'anzahl') {
+                let numGroups = parseInt(this.parameter) || 1;
+                for (let i = 0; i < numGroups; i++) this.gruppen.push([]);
+                namen.forEach((name, i) => {
+                    this.gruppen[i % numGroups].push(name);
+                });
+            } else if (this.modus === 'groesse') {
+                let groupSize = parseInt(this.parameter) || 2;
+                for (let i = 0; i < namen.length; i += groupSize) {
+                    this.gruppen.push(namen.slice(i, i + groupSize));
+                }
+            }
+            this.saveState();
+        },
+        // --- DRAG & DROP LOGIK ---
+        dragStart(e, name, fromIndex) {
+            e.dataTransfer.setData('text/plain', name);
+            e.dataTransfer.setData('fromIndex', fromIndex); // -1 = Sammelbecken
+            e.dataTransfer.effectAllowed = 'move';
+        },
+        drop(e, toIndex) {
+            const name = e.dataTransfer.getData('text/plain');
+            const fromIndex = parseInt(e.dataTransfer.getData('fromIndex'));
+
+            if (!name || isNaN(fromIndex)) return;
+            if (fromIndex === toIndex) return; // Nichts zu tun
+
+            // 1. Aus der alten Quelle entfernen
+            if (fromIndex === -1) {
+                this.unassigned = this.unassigned.filter(n => n !== name);
+            } else {
+                this.gruppen[fromIndex] = this.gruppen[fromIndex].filter(n => n !== name);
+            }
+
+            // 2. Ins neue Ziel einfügen
+            if (toIndex === -1) {
+                if (!this.unassigned.includes(name)) this.unassigned.push(name);
+            } else {
+                if (!this.gruppen[toIndex].includes(name)) this.gruppen[toIndex].push(name);
+            }
+            this.saveState();
+        }
+    },
+    template: `
+        <div style="display:flex; flex-direction:column; height:100%; gap:10px; padding: 5px; box-sizing: border-box;">
+            
+            <div style="display:flex; gap:5px;">
+                <button @click="switchMode('anzahl')" :style="{background: modus==='anzahl' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">🔢 Gruppenanzahl</button>
+                <button @click="switchMode('groesse')" :style="{background: modus==='groesse' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">📏 Gruppengröße</button>
+                <button @click="switchMode('manuell')" :style="{background: modus==='manuell' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">🖐️ Manuell (Drag)</button>
+                <button @click="showList = !showList" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:4px; padding:6px; cursor:pointer;" title="Schülerliste bearbeiten">⚙️</button>
+            </div>
+
+            <textarea v-if="showList" v-model="schuelerText" @input="saveState" style="width:100%; height:80px; background:rgba(0,0,0,0.3); color:white; border:1px solid var(--widget-border); border-radius:4px; padding:5px; resize:none; font-family:inherit; box-sizing:border-box;" placeholder="Namen (einer pro Zeile)"></textarea>
+
+            <div style="display:flex; gap:10px; align-items:center; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">
+                <label style="font-size:0.85rem; color:#cbd5e1;">
+                    {{ modus === 'anzahl' ? 'Wie viele Gruppen?' : (modus === 'groesse' ? 'Schüler pro Gruppe?' : 'Gruppen insgesamt:') }}
+                </label>
+                <input type="number" min="1" v-model="parameter" @change="updateManuellGroups" style="width:50px; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:4px; text-align:center; font-weight:bold;">
+                
+                <button v-if="modus !== 'manuell'" @click="generiereGruppen" style="background:#10b981; color:white; border:none; border-radius:4px; padding:4px 12px; cursor:pointer; font-weight:bold; margin-left:auto; box-shadow:0 2px 4px rgba(0,0,0,0.2);">🎲 Auslosen</button>
+                <span v-else style="font-size:0.75rem; color:#94a3b8; margin-left:auto; font-style:italic;">(Namen einfach ziehen)</span>
+            </div>
+
+            <div v-if="modus === 'manuell'" 
+                 @dragover.prevent 
+                 @drop="drop($event, -1)"
+                 style="background:rgba(245, 158, 11, 0.1); border:1px dashed rgba(245, 158, 11, 0.4); border-radius:6px; padding:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:45px; align-items:center;">
+                <div v-if="unassigned.length === 0" style="color:rgba(251, 191, 36, 0.5); font-size:0.8rem; width:100%; text-align:center;">Alle Schüler sind eingeteilt! 🎉</div>
+                <span v-for="name in unassigned" :key="name"
+                      draggable="true" 
+                      @dragstart="dragStart($event, name, -1)"
+                      style="background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); color:#fcd34d; padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; cursor:grab; box-shadow:0 2px 2px rgba(0,0,0,0.1);">
+                      {{ name }}
+                </span>
+            </div>
+
+            <div style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; align-items:start; padding-right:5px;">
+                <div v-for="(gruppe, index) in gruppen" :key="index"
+                     @dragover.prevent
+                     @drop="drop($event, index)"
+                     style="background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.3); border-radius:8px; padding:10px; min-height:100px; display:flex; flex-direction:column; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
+                     
+                     <div style="font-weight:bold; font-size:0.9rem; color:#93c5fd; margin-bottom:8px; border-bottom:1px solid rgba(59, 130, 246, 0.2); padding-bottom:4px; display:flex; justify-content:space-between;">
+                         <span>Gruppe {{ index + 1 }}</span>
+                         <span style="font-size:0.7rem; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:10px;">{{ gruppe.length }}</span>
+                     </div>
+                     
+                     <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+                         <span v-for="name in gruppe" :key="name"
+                               :draggable="modus === 'manuell'"
+                               @dragstart="dragStart($event, name, index)"
+                               style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:4px; font-size:0.85rem;"
+                               :style="{cursor: modus === 'manuell' ? 'grab' : 'default'}">
+                             {{ name }}
+                         </span>
+                         <div v-if="gruppe.length === 0" style="color:rgba(255,255,255,0.2); font-size:0.75rem; font-style:italic; text-align:center; margin-top:10px;">(Leer)</div>
+                     </div>
+                </div>
+            </div>
+
+        </div>
+    `
+};
