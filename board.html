@@ -38,10 +38,49 @@
 
         <div style="flex-grow: 1;"></div>
 
-        <button @click="toggleFullscreen" class="btn-primary" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
+        <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️ Einstellungen</button>
         <button @click="exportBoard" class="btn-export btn-small">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import btn-small">📂 Import</button>
+        <button @click="toggleFullscreen" class="btn-primary" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
+
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
+    </div>
+
+    <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>⚙️ Einstellungen & Klassen</h2>
+                <span @click="showSettings = false" class="close-btn" style="font-size: 1.5rem;">✖</span>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" v-model="neuerKlassenName" placeholder="Neue Klasse (z.B. 9b)" @keyup.enter="addKlasse">
+                    <button @click="addKlasse" class="btn-primary">Hinzufügen</button>
+                </div>
+
+                <div class="klassen-liste">
+                    <div v-for="(klasse, index) in settings.klassen" :key="index" class="klasse-item">
+                        <div class="klasse-header">
+                            <strong>🏫 {{ klasse.name }}</strong>
+                            <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
+                        </div>
+                        <div class="schueler-tags">
+                            <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
+                                  :class="['schueler-tag', { 'is-absent': s.absent }]"
+                                  @click="toggleAbsent(s)"
+                                  title="Klicken, um anwesend/krank zu wechseln">
+                                {{ s.name }}
+                                <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)" title="Schüler löschen">×</span>
+                            </span>
+                            <button @click="addSchueler(klasse)" class="add-s-btn">+ Schüler</button>
+                        </div>
+                    </div>
+                    <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">
+                        Noch keine Klassen angelegt.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="board">

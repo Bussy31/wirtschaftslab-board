@@ -8,13 +8,21 @@ const app = createApp({
             offsetX: 0,
             offsetY: 0,
             isFullscreen: false,
-            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+            aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            showSettings: false,
+            settings: { klassen: [] },
+            neuerKlassenName: ''
         }
     },
     mounted() {
         const saved = localStorage.getItem('meinBoard');
         if (saved) {
             this.widgets = JSON.parse(saved);
+        }
+
+        const savedSettings = localStorage.getItem('boardSettings');
+        if (savedSettings) {
+            this.settings = JSON.parse(savedSettings);
         }
 
         // --- MAUS EVENTS ---
@@ -185,6 +193,40 @@ const app = createApp({
         },
         onFullscreenChange() {
             this.isFullscreen = !!document.fullscreenElement;
+        },
+        // --- NEUE METHODEN FÜR KLASSEN ---
+        addKlasse() {
+            if (!this.neuerKlassenName.trim()) return;
+            if (!this.settings.klassen) this.settings.klassen = []; // Fallback
+            this.settings.klassen.push({ name: this.neuerKlassenName.trim(), schueler: [] });
+            this.neuerKlassenName = '';
+            this.saveSettings();
+        },
+        removeKlasse(index) {
+            if(confirm('Möchtest du diese Klasse wirklich löschen?')) {
+                this.settings.klassen.splice(index, 1);
+                this.saveSettings();
+            }
+        },
+        addSchueler(klasse) {
+            const name = prompt("Name des Schülers / der Schülerin:");
+            if (name && name.trim()) {
+                // NEU: Wir speichern ein Objekt { name, absent } statt nur den String
+                klasse.schueler.push({ name: name.trim(), absent: false });
+                this.saveSettings();
+            }
+        },
+        removeSchueler(klasse, sIndex) {
+            klasse.schueler.splice(sIndex, 1);
+            this.saveSettings();
+        },
+        toggleAbsent(schueler) {
+            // Umschalten zwischen Krank(true) und Anwesend(false)
+            schueler.absent = !schueler.absent;
+            this.saveSettings();
+        },
+        saveSettings() {
+            localStorage.setItem('boardSettings', JSON.stringify(this.settings));
         }
     }
 });

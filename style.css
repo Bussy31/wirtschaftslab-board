@@ -221,6 +221,77 @@ button:hover {
 }
 .close-btn:hover { opacity: 1; }
 
+/* --- Settings Modal & Klassenverwaltung --- */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center; z-index: 3000;
+}
+
+.settings-modal {
+    background: rgba(15, 23, 42, 0.95); width: 550px; max-width: 90vw; max-height: 85vh;
+    border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);
+    display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.modal-header h2 { margin: 0; font-size: 1.3rem; color: #e2e8f0; }
+
+.modal-body { padding: 20px; overflow-y: auto; }
+
+.input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+.input-group input {
+    flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.2); color: white; outline: none; font-size: 1rem;
+}
+.input-group input:focus { border-color: var(--accent); }
+
+.klasse-item {
+    background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;
+    margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
+}
+
+.klasse-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+.schueler-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Normaler Schüler (Anwesend) */
+.schueler-tag {
+    background: var(--accent); color: white; padding: 4px 10px; border-radius: 6px;
+    font-size: 0.9rem; display: flex; align-items: center; gap: 6px; cursor: pointer;
+    transition: all 0.2s; user-select: none; border: 1px solid transparent;
+}
+.schueler-tag:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* Kranker Schüler (Abwesend) */
+.schueler-tag.is-absent {
+    background: rgba(239, 68, 68, 0.15);
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: line-through;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.schueler-tag.is-absent:hover { background: rgba(239, 68, 68, 0.25); }
+
+/* Das X zum Löschen eines Schülers */
+.remove-s {
+    background: rgba(0,0,0,0.2); border-radius: 50%; width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+    transition: all 0.2s;
+}
+.remove-s:hover { background: #ef4444; color: white; }
+
+/* Button um neuen Schüler hinzuzufügen */
+.add-s-btn {
+    background: transparent; border: 1px dashed rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.add-s-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: white; }
+
 /* --- Copyright Style --- */
 .copyright {
     position: fixed;
