@@ -62,7 +62,7 @@ const HandlungsplanWidget = {
 
             <div v-if="!widgetData.isTransparent" style="display: flex; gap: 8px; flex-shrink: 0; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <input type="text" v-model="neuerSchritt" @keyup.enter="addSchritt" placeholder="Neuer Schritt..." style="flex-grow: 1; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px;">
-                <button @click="addSchritt" style="background: #3b82f6; border: none; padding: 0 15px; border-radius: 8px; color: white; cursor: pointer;">➕</button>
+                <button @click="addSchritt" style="background: #2db330; border: none; padding: 0 15px; border-radius: 8px; color: white; cursor: pointer;">➕</button>
             </div>
         </div>
     `,
