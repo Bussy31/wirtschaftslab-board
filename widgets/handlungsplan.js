@@ -20,7 +20,7 @@ const HandlungsplanWidget = {
                                  border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.05)',
                                  boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : 'none'
                              }">
-                            <input type="checkbox" :checked="schritt.done" @change="toggleSchritt(index)" style="cursor: pointer; width: 20px; height: 20px; accent-color: #10b981; flex-shrink: 0;">
+                            <input type="checkbox" :checked="schritt.done" @change="toggleSchritt(index)" style="cursor: pointer; width: 20px; height: 20px; accent-color: #2db330; flex-shrink: 0;">
                             <span :style="{ textDecoration: schritt.done ? 'line-through' : 'none', color: schritt.done ? 'rgba(255,255,255,0.5)' : 'white', flexGrow: 1, fontSize: '1.05rem', cursor: 'pointer', textShadow: widgetData.isTransparent ? '0px 1px 3px rgba(0,0,0,0.8)' : 'none' }"
                                   @click="toggleSchritt(index)">
                                 {{ schritt.text }}
@@ -62,7 +62,7 @@ const HandlungsplanWidget = {
 
             <div v-if="!widgetData.isTransparent" style="display: flex; gap: 8px; flex-shrink: 0; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <input type="text" v-model="neuerSchritt" @keyup.enter="addSchritt" placeholder="Neuer Schritt..." style="flex-grow: 1; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px;">
-                <button @click="addSchritt" style="background: #2db330; border: none; padding: 0 15px; border-radius: 8px; color: white; cursor: pointer;">➕</button>
+                <button @click="addSchritt" style="background: #3b82f6; border: none; padding: 0 15px; border-radius: 8px; color: white; cursor: pointer;">➕</button>
             </div>
         </div>
     `,
