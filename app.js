@@ -16,26 +16,21 @@ const app = createApp({
         }
     },
     mounted() {
-        // 1. Einstellungen (Klassen) laden
         const savedSettings = localStorage.getItem('boardSettings');
         if (savedSettings) {
             this.settings = JSON.parse(savedSettings);
         }
 
-        // 2. Zuletzt aktives Profil laden (oder 'Standard' behalten)
         const lastActive = localStorage.getItem('aktiveKlasse');
         if (lastActive) {
             this.aktiveKlasse = lastActive;
         }
 
-        // 3. Das Board für das aktuelle Profil laden
         this.loadBoard();
 
-        // --- MAUS EVENTS ---
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
 
-        // --- TOUCH EVENTS FÜRS iPAD ---
         window.addEventListener('touchmove', this.onDrag, { passive: false });
         window.addEventListener('touchend', this.stopDrag);
         window.addEventListener('touchcancel', this.stopDrag);
@@ -53,7 +48,7 @@ const app = createApp({
             if (saved) {
                 this.widgets = JSON.parse(saved);
             } else {
-                this.widgets = []; // Leeres Board
+                this.widgets = [];
             }
         },
         saveToLocal() {
@@ -205,25 +200,89 @@ const app = createApp({
             });
             if (changed) this.saveToLocal();
         },
+
+        // ==========================================
+        // NEU: KOMPLETT-BACKUP (EXPORT & IMPORT)
+        // ==========================================
         exportBoard() {
-            const dataStr = JSON.stringify(this.widgets);
+            // Wir erstellen ein großes Paket mit Settings und allen Boards
+            const backupData = {
+                settings: this.settings,
+                boards: {}
+            };
+
+            // Wir sammeln die Boards von allen Klassen ein
+            if (this.settings.klassen) {
+                this.settings.klassen.forEach(klasse => {
+                    const boardData = localStorage.getItem('board_' + klasse.name);
+                    if (boardData) {
+                        backupData.boards[klasse.name] = JSON.parse(boardData);
+                    }
+                });
+            }
+
+            // Zur Sicherheit auch das "Standard"-Board mitnehmen
+            const standardBoard = localStorage.getItem('board_Standard');
+            if (standardBoard) {
+                backupData.boards['Standard'] = JSON.parse(standardBoard);
+            }
+
+            // Paket schnüren und herunterladen
+            const dataStr = JSON.stringify(backupData);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = "mein-wirtschaftslab-board.json";
+            link.download = "wirtschaftslab-komplett-backup.json";
             link.click();
         },
         importBoard(event) {
             const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.widgets = JSON.parse(e.target.result);
-                this.saveToLocal();
+                try {
+                    const importedData = JSON.parse(e.target.result);
+
+                    // Prüfen: Ist es ein neues Komplett-Backup?
+                    if (importedData.settings && importedData.boards) {
+
+                        // 1. Settings (Klassen & Schüler) überschreiben
+                        this.settings = importedData.settings;
+                        this.saveSettings();
+
+                        // 2. Alle Boards in den Speicher des Browsers schreiben
+                        for (const [klasseName, widgets] of Object.entries(importedData.boards)) {
+                            localStorage.setItem('board_' + klasseName, JSON.stringify(widgets));
+                        }
+
+                        // 3. Auf die erste importierte Klasse wechseln
+                        if (this.settings.klassen && this.settings.klassen.length > 0) {
+                            this.wechsleKlasse(this.settings.klassen[0].name);
+                        } else {
+                            this.wechsleKlasse('Standard');
+                        }
+
+                        alert("✅ Komplett-Backup erfolgreich geladen! Alle Klassen und Boards sind da.");
+
+                    } else {
+                        // Abwärtskompatibilität: Falls jemand ein altes Backup hochlädt
+                        this.widgets = importedData;
+                        this.saveToLocal();
+                        alert("ℹ️ Einzelnes Board in die aktuelle Klasse importiert.");
+                    }
+                } catch (err) {
+                    alert("❌ Fehler beim Importieren. Ist das die richtige Datei?");
+                    console.error(err);
+                }
+
+                // Input-Feld leeren, damit man dieselbe Datei bei Bedarf nochmal wählen kann
+                event.target.value = '';
             };
             reader.readAsText(file);
         },
+
         async toggleFullscreen() {
             if (!document.fullscreenElement) {
                 try {
