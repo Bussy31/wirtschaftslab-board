@@ -47,9 +47,15 @@ const HandlungsplanWidget = {
                             <div @click="toggleSchritt(index)" 
                                  :style="{
                                     width: '90%',
-                                    background: schritt.done ? 'rgba(16, 185, 129, 0.95)' : 'rgba(37, 99, 235, 0.95)',
-                                    border: schritt.done ? '2px solid #059669' : '2px solid #1d4ed8',
-                                    color: schritt.done ? 'rgba(255,255,255,0.6)' : 'white',
+                                    background: widgetData.isTransparent 
+                                        ? 'rgba(15, 23, 42, 0.9)' 
+                                        : (schritt.done ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)'),
+                                    border: widgetData.isTransparent 
+                                        ? '1px solid rgba(255,255,255,0.2)' 
+                                        : (schritt.done ? '2px solid rgba(16, 185, 129, 0.4)' : '2px solid rgba(59, 130, 246, 0.6)'),
+                                    color: schritt.done 
+                                        ? (widgetData.isTransparent ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)') 
+                                        : 'white',
                                     textDecoration: schritt.done ? 'line-through' : 'none',
                                     padding: '10px 15px',
                                     borderRadius: '8px',
@@ -57,8 +63,8 @@ const HandlungsplanWidget = {
                                     fontWeight: 'bold',
                                     textAlign: 'center',
                                     transition: 'all 0.3s',
-                                    boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
-                                    textShadow: schritt.done ? 'none' : '0 1px 2px rgba(0,0,0,0.5)'
+                                    boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : (schritt.done ? 'none' : '0 4px 6px rgba(0,0,0,0.3)'),
+                                    textShadow: widgetData.isTransparent ? (schritt.done ? 'none' : '0px 1px 3px rgba(0,0,0,0.8)') : 'none'
                                  }">
                                 {{ index + 1 }}. {{ schritt.text }}
                             </div>
