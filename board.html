@@ -11,7 +11,7 @@
             border: none !important;
             box-shadow: none !important;
             backdrop-filter: none !important;
-            resize: none !important; /* DAS VERSTECKT DIE STRICHE UNTEN RECHTS! */
+            resize: none !important;
         }
         .widget.ghost-mode .widget-header {
             opacity: 0;
@@ -53,6 +53,11 @@
                 <span @click="showSettings = false" class="close-btn" style="font-size: 1.5rem;">✖</span>
             </div>
             <div class="modal-body">
+
+                <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                    Aktives Board: <strong>{{ aktiveKlasse }}</strong>
+                </div>
+
                 <div class="input-group">
                     <input type="text" v-model="neuerKlassenName" placeholder="Neue Klasse (z.B. 9b)" @keyup.enter="addKlasse">
                     <button @click="addKlasse" class="btn-primary">Hinzufügen</button>
@@ -61,17 +66,26 @@
                 <div class="klassen-liste">
                     <div v-for="(klasse, index) in settings.klassen" :key="index" class="klasse-item">
                         <div class="klasse-header">
-                            <strong>🏫 {{ klasse.name }}</strong>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
+
+                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
+                                <span v-else class="active-badge">Aktuell geladen</span>
+                            </div>
+
                             <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
                         </div>
+
                         <div class="schueler-tags">
                             <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
                                   :class="['schueler-tag', { 'is-absent': s.absent }]"
                                   @click="toggleAbsent(s)"
                                   title="Klicken, um anwesend/krank zu wechseln">
                                 {{ s.name }}
-                                <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)" title="Schüler löschen">×</span>
+                                <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)">×</span>
                             </span>
+
+                            <input type="text" class="inline-s-input" placeholder="Schüler + Enter..." @keyup.enter="addSchuelerInline(klasse, $event)">
                         </div>
                     </div>
                     <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">
@@ -127,7 +141,6 @@
                             title="Ansicht wechseln">
                         {{ w.isVisual ? '📋' : '🗺️' }}
                     </button>
-
 
                     <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
                 </div>

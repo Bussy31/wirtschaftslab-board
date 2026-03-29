@@ -9,7 +9,6 @@ const app = createApp({
             offsetY: 0,
             isFullscreen: false,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-
             showSettings: false,
             settings: { klassen: [] },
             neuerKlassenName: '',
@@ -48,31 +47,26 @@ const app = createApp({
         }, 1000);
     },
     methods: {
-        // ==========================================
-        // NEU: BOARD LADEN, SPEICHERN & WECHSELN
-        // ==========================================
+        // --- BOARD LADEN, SPEICHERN & WECHSELN ---
         loadBoard() {
             const saved = localStorage.getItem('board_' + this.aktiveKlasse);
             if (saved) {
                 this.widgets = JSON.parse(saved);
             } else {
-                this.widgets = []; // Leeres Board, wenn die Klasse neu ist
+                this.widgets = []; // Leeres Board
             }
         },
         saveToLocal() {
-            // Speichert jetzt immer unter dem Namen der aktuellen Klasse!
             localStorage.setItem('board_' + this.aktiveKlasse, JSON.stringify(this.widgets));
         },
         wechsleKlasse(klassenName) {
             this.aktiveKlasse = klassenName;
             localStorage.setItem('aktiveKlasse', klassenName);
-            this.loadBoard(); // Lädt die Widgets der neuen Klasse
-            this.showSettings = false; // Schließt das Menü
+            this.loadBoard();
+            this.showSettings = false;
         },
 
-        // ==========================================
-        // KLASSEN & SCHÜLER VERWALTUNG
-        // ==========================================
+        // --- KLASSEN & SCHÜLER VERWALTUNG ---
         addKlasse() {
             if (!this.neuerKlassenName.trim()) return;
             if (!this.settings.klassen) this.settings.klassen = [];
@@ -102,7 +96,7 @@ const app = createApp({
             const name = event.target.value;
             if (name && name.trim()) {
                 klasse.schueler.push({ name: name.trim(), absent: false });
-                event.target.value = ''; // Eingabefeld wieder leeren
+                event.target.value = '';
                 this.saveSettings();
             }
         },
@@ -118,9 +112,7 @@ const app = createApp({
             localStorage.setItem('boardSettings', JSON.stringify(this.settings));
         },
 
-        // ==========================================
-        // WIDGET-LOGIK (Unverändert)
-        // ==========================================
+        // --- WIDGET-LOGIK ---
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
             this.widgets.push({
@@ -253,7 +245,6 @@ const app = createApp({
     }
 });
 
-// Komponenten registrieren
 app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
 app.component('countdown-widget', CountdownWidget);
