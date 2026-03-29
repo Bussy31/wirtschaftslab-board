@@ -53,7 +53,7 @@
                  boxSizing: 'border-box'
              }"
              @mousedown="startDrag($event, index)">
-
+             @touchstart="startDrag($event, index)">
             <div class="widget-header">
                 <div class="widget-title">
                     <span>{{ w.icon }}</span>
