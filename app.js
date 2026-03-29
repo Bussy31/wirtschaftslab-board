@@ -11,19 +11,25 @@ const app = createApp({
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
             showSettings: false,
             settings: { klassen: [] },
-            neuerKlassenName: ''
+            neuerKlassenName: '',
+            aktiveKlasse: 'Standard'
         }
     },
     mounted() {
-        const saved = localStorage.getItem('meinBoard');
-        if (saved) {
-            this.widgets = JSON.parse(saved);
-        }
-
+        // 1. Einstellungen (Klassen) laden
         const savedSettings = localStorage.getItem('boardSettings');
         if (savedSettings) {
             this.settings = JSON.parse(savedSettings);
         }
+
+        // 2. Zuletzt aktives Profil laden (oder 'Standard' behalten)
+        const lastActive = localStorage.getItem('aktiveKlasse');
+        if (lastActive) {
+            this.aktiveKlasse = lastActive;
+        }
+
+        // 3. Das Board für das aktuelle Profil laden
+        this.loadBoard();
 
         // --- MAUS EVENTS ---
         window.addEventListener('mousemove', this.onDrag);
@@ -194,25 +200,38 @@ const app = createApp({
         onFullscreenChange() {
             this.isFullscreen = !!document.fullscreenElement;
         },
-        // --- NEUE METHODEN FÜR KLASSEN ---
         addKlasse() {
             if (!this.neuerKlassenName.trim()) return;
-            if (!this.settings.klassen) this.settings.klassen = []; // Fallback
-            this.settings.klassen.push({ name: this.neuerKlassenName.trim(), schueler: [] });
+            if (!this.settings.klassen) this.settings.klassen = [];
+
+            const name = this.neuerKlassenName.trim();
+            this.settings.klassen.push({ name: name, schueler: [] });
             this.neuerKlassenName = '';
             this.saveSettings();
+
+            // Wenn es die allererste Klasse ist, direkt dorthin wechseln
+            if (this.settings.klassen.length === 1) {
+                this.wechsleKlasse(name);
+            }
         },
         removeKlasse(index) {
-            if(confirm('Möchtest du diese Klasse wirklich löschen?')) {
+            if(confirm('Möchtest du diese Klasse und ihr Board wirklich löschen?')) {
+                const klasseName = this.settings.klassen[index].name;
+                localStorage.removeItem('board_' + klasseName); // Board-Daten löschen
                 this.settings.klassen.splice(index, 1);
+
+                // Falls wir die aktive Klasse gelöscht haben, auf Standard wechseln
+                if (this.aktiveKlasse === klasseName) {
+                    this.wechsleKlasse('Standard');
+                }
                 this.saveSettings();
             }
         },
-        addSchueler(klasse) {
-            const name = prompt("Name des Schülers / der Schülerin:");
+        addSchuelerInline(klasse, event) {
+            const name = event.target.value;
             if (name && name.trim()) {
-                // NEU: Wir speichern ein Objekt { name, absent } statt nur den String
                 klasse.schueler.push({ name: name.trim(), absent: false });
+                event.target.value = ''; // Eingabefeld wieder leeren
                 this.saveSettings();
             }
         },
@@ -221,13 +240,12 @@ const app = createApp({
             this.saveSettings();
         },
         toggleAbsent(schueler) {
-            // Umschalten zwischen Krank(true) und Anwesend(false)
             schueler.absent = !schueler.absent;
             this.saveSettings();
         },
         saveSettings() {
             localStorage.setItem('boardSettings', JSON.stringify(this.settings));
-        }
+        },
     }
 });
 

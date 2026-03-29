@@ -26,7 +26,7 @@
 
 <div id="app">
     <div :class="['toolbar', { 'hidden': isFullscreen }]">
-        <div class="brand">🎓 wirtschaftslab-board</div>
+        <div class="brand">🎓 wirtschaftslab-board <span class="active-profile-badge">{{ aktiveKlasse }}</span></div>
 
         <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
         <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button>
