@@ -9,6 +9,7 @@ const app = createApp({
             offsetY: 0,
             isFullscreen: false,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+
             showSettings: false,
             settings: { klassen: [] },
             neuerKlassenName: '',
@@ -35,10 +36,10 @@ const app = createApp({
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
 
-        // --- NEU: TOUCH EVENTS FÜRS iPAD ---
-        window.addEventListener('touchmove', this.onDrag, { passive: false }); // passive: false erlaubt e.preventDefault()
+        // --- TOUCH EVENTS FÜRS iPAD ---
+        window.addEventListener('touchmove', this.onDrag, { passive: false });
         window.addEventListener('touchend', this.stopDrag);
-        window.addEventListener('touchcancel', this.stopDrag); // Falls der Touch abgebrochen wird (z.B. Systemgeste)
+        window.addEventListener('touchcancel', this.stopDrag);
 
         document.addEventListener('fullscreenchange', this.onFullscreenChange);
 
@@ -47,6 +48,79 @@ const app = createApp({
         }, 1000);
     },
     methods: {
+        // ==========================================
+        // NEU: BOARD LADEN, SPEICHERN & WECHSELN
+        // ==========================================
+        loadBoard() {
+            const saved = localStorage.getItem('board_' + this.aktiveKlasse);
+            if (saved) {
+                this.widgets = JSON.parse(saved);
+            } else {
+                this.widgets = []; // Leeres Board, wenn die Klasse neu ist
+            }
+        },
+        saveToLocal() {
+            // Speichert jetzt immer unter dem Namen der aktuellen Klasse!
+            localStorage.setItem('board_' + this.aktiveKlasse, JSON.stringify(this.widgets));
+        },
+        wechsleKlasse(klassenName) {
+            this.aktiveKlasse = klassenName;
+            localStorage.setItem('aktiveKlasse', klassenName);
+            this.loadBoard(); // Lädt die Widgets der neuen Klasse
+            this.showSettings = false; // Schließt das Menü
+        },
+
+        // ==========================================
+        // KLASSEN & SCHÜLER VERWALTUNG
+        // ==========================================
+        addKlasse() {
+            if (!this.neuerKlassenName.trim()) return;
+            if (!this.settings.klassen) this.settings.klassen = [];
+
+            const name = this.neuerKlassenName.trim();
+            this.settings.klassen.push({ name: name, schueler: [] });
+            this.neuerKlassenName = '';
+            this.saveSettings();
+
+            if (this.settings.klassen.length === 1) {
+                this.wechsleKlasse(name);
+            }
+        },
+        removeKlasse(index) {
+            if(confirm('Möchtest du diese Klasse und ihr Board wirklich löschen?')) {
+                const klasseName = this.settings.klassen[index].name;
+                localStorage.removeItem('board_' + klasseName);
+                this.settings.klassen.splice(index, 1);
+
+                if (this.aktiveKlasse === klasseName) {
+                    this.wechsleKlasse('Standard');
+                }
+                this.saveSettings();
+            }
+        },
+        addSchuelerInline(klasse, event) {
+            const name = event.target.value;
+            if (name && name.trim()) {
+                klasse.schueler.push({ name: name.trim(), absent: false });
+                event.target.value = ''; // Eingabefeld wieder leeren
+                this.saveSettings();
+            }
+        },
+        removeSchueler(klasse, sIndex) {
+            klasse.schueler.splice(sIndex, 1);
+            this.saveSettings();
+        },
+        toggleAbsent(schueler) {
+            schueler.absent = !schueler.absent;
+            this.saveSettings();
+        },
+        saveSettings() {
+            localStorage.setItem('boardSettings', JSON.stringify(this.settings));
+        },
+
+        // ==========================================
+        // WIDGET-LOGIK (Unverändert)
+        // ==========================================
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
             this.widgets.push({
@@ -65,22 +139,14 @@ const app = createApp({
             this.widgets.splice(index, 1);
             this.saveToLocal();
         },
-
-        // --- KOMBINIERTE START-DRAG FUNKTION (Maus & Touch) ---
         startDrag(e, index) {
-            // Prüfen: Wurde der Header geklickt?
             const isHeader = e.target.closest('.widget-header');
             if (!isHeader) return;
-
-            // Sicherheits-Check: Klicks auf das Schließen-X oder Buttons im Header ignorieren
-            if (e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') {
-                return;
-            }
+            if (e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') return;
 
             this.draggingIndex = index;
             const widget = this.widgets[index];
 
-            // Unterscheiden, ob es ein Maus-Klick oder ein Finger-Tipp ist
             let clientX, clientY;
             if (e.type === 'touchstart') {
                 clientX = e.touches[0].clientX;
@@ -93,18 +159,11 @@ const app = createApp({
             this.offsetX = clientX - widget.x;
             this.offsetY = clientY - widget.y;
         },
-
-        // --- KOMBINIERTE ON-DRAG FUNKTION (Maus & Touch) ---
         onDrag(e) {
             if (this.draggingIndex !== null) {
-                // Verhindert das Scrollen der ganzen Seite auf dem iPad beim Ziehen des Fensters
-                if (e.type === 'touchmove') {
-                    e.preventDefault();
-                }
+                if (e.type === 'touchmove') e.preventDefault();
 
                 const w = this.widgets[this.draggingIndex];
-
-                // Wieder unterscheiden zwischen Maus und Touch
                 let clientX, clientY;
                 if (e.type === 'touchmove') {
                     clientX = e.touches[0].clientX;
@@ -119,14 +178,11 @@ const app = createApp({
 
                 const toolbar = document.querySelector('.toolbar');
                 const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
-
                 const maxX = window.innerWidth - w.width;
                 const maxY = window.innerHeight - w.height;
 
-                // Begrenzung (Constraints)
                 if (newX < 0) newX = 0;
                 if (newX > maxX) newX = maxX;
-
                 if (newY < toolbarHeight) newY = toolbarHeight;
                 if (newY > maxY) newY = maxY;
 
@@ -134,8 +190,6 @@ const app = createApp({
                 w.y = newY;
             }
         },
-
-        // --- KOMBINIERTE STOP-DRAG FUNKTION (Maus & Touch) ---
         stopDrag() {
             if (this.draggingIndex !== null) {
                 this.draggingIndex = null;
@@ -143,7 +197,6 @@ const app = createApp({
             }
             this.updateSizes();
         },
-
         updateSizes() {
             const widgetElements = document.querySelectorAll('.widget');
             let changed = false;
@@ -159,9 +212,6 @@ const app = createApp({
                 }
             });
             if (changed) this.saveToLocal();
-        },
-        saveToLocal() {
-            localStorage.setItem('meinBoard', JSON.stringify(this.widgets));
         },
         exportBoard() {
             const dataStr = JSON.stringify(this.widgets);
@@ -199,70 +249,7 @@ const app = createApp({
         },
         onFullscreenChange() {
             this.isFullscreen = !!document.fullscreenElement;
-        },
-        addKlasse() {
-            if (!this.neuerKlassenName.trim()) return;
-            if (!this.settings.klassen) this.settings.klassen = [];
-
-            const name = this.neuerKlassenName.trim();
-            this.settings.klassen.push({ name: name, schueler: [] });
-            this.neuerKlassenName = '';
-            this.saveSettings();
-
-            // Wenn es die allererste Klasse ist, direkt dorthin wechseln
-            if (this.settings.klassen.length === 1) {
-                this.wechsleKlasse(name);
-            }
-        },
-        removeKlasse(index) {
-            if(confirm('Möchtest du diese Klasse und ihr Board wirklich löschen?')) {
-                const klasseName = this.settings.klassen[index].name;
-                localStorage.removeItem('board_' + klasseName); // Board-Daten löschen
-                this.settings.klassen.splice(index, 1);
-
-                // Falls wir die aktive Klasse gelöscht haben, auf Standard wechseln
-                if (this.aktiveKlasse === klasseName) {
-                    this.wechsleKlasse('Standard');
-                }
-                this.saveSettings();
-            }
-        },
-        addSchuelerInline(klasse, event) {
-            const name = event.target.value;
-            if (name && name.trim()) {
-                klasse.schueler.push({ name: name.trim(), absent: false });
-                event.target.value = ''; // Eingabefeld wieder leeren
-                this.saveSettings();
-            }
-        },
-        removeSchueler(klasse, sIndex) {
-            klasse.schueler.splice(sIndex, 1);
-            this.saveSettings();
-        },
-        toggleAbsent(schueler) {
-            schueler.absent = !schueler.absent;
-            this.saveSettings();
-        },
-        saveSettings() {
-            localStorage.setItem('boardSettings', JSON.stringify(this.settings));
-        },
-        loadBoard() {
-            const saved = localStorage.getItem('board_' + this.aktiveKlasse);
-            if (saved) {
-                this.widgets = JSON.parse(saved);
-            } else {
-                this.widgets = []; // Leeres Board, wenn die Klasse neu ist
-            }
-        },
-        saveToLocal() {
-            localStorage.setItem('board_' + this.aktiveKlasse, JSON.stringify(this.widgets));
-        },
-        wechsleKlasse(klassenName) {
-            this.aktiveKlasse = klassenName;
-            localStorage.setItem('aktiveKlasse', klassenName);
-            this.loadBoard();
-            this.showSettings = false;
-        },
+        }
     }
 });
 
