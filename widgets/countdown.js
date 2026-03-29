@@ -57,7 +57,7 @@ const CountdownWidget = {
         },
         barColor() {
             const fraction = this.timeLeft / this.totalTime;
-            if (fraction > 0.5) return '#10b981';
+            if (fraction > 0.5) return '#3b82f6';
             if (fraction > 0.2) return '#fbbf24';
             return '#ef4444';
         }
