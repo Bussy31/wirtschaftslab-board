@@ -52,8 +52,9 @@
                  left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
                  boxSizing: 'border-box'
              }"
-             @mousedown="startDrag($event, index)">
+             @mousedown="startDrag($event, index)"
              @touchstart="startDrag($event, index)">
+
             <div class="widget-header">
                 <div class="widget-title">
                     <span>{{ w.icon }}</span>
