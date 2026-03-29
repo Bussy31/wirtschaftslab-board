@@ -5,14 +5,8 @@ const app = createApp({
         return {
             widgets: [],
             draggingIndex: null,
-            resizingIndex: null,
             offsetX: 0,
             offsetY: 0,
-            initialWidth: 0,
-            initialHeight: 0,
-            initialX: 0,
-            initialY: 0,
-            showCloseAllPrompt: false,
             isFullscreen: false,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
         }
@@ -23,8 +17,14 @@ const app = createApp({
             this.widgets = JSON.parse(saved);
         }
 
+        // --- MAUS EVENTS ---
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
+
+        // --- NEU: TOUCH EVENTS FÜRS iPAD ---
+        window.addEventListener('touchmove', this.onDrag, { passive: false }); // passive: false erlaubt e.preventDefault()
+        window.addEventListener('touchend', this.stopDrag);
+        window.addEventListener('touchcancel', this.stopDrag); // Falls der Touch abgebrochen wird (z.B. Systemgeste)
 
         document.addEventListener('fullscreenchange', this.onFullscreenChange);
 
@@ -51,55 +51,77 @@ const app = createApp({
             this.widgets.splice(index, 1);
             this.saveToLocal();
         },
-        startDrag(e, index) {
-            // 1. Prüfen: Wurde der Header geklickt?
-            const isHeader = e.target.closest('.widget-header');
 
-            // Wenn NICHT der Header geklickt wurde -> sofort abbrechen
+        // --- KOMBINIERTE START-DRAG FUNKTION (Maus & Touch) ---
+        startDrag(e, index) {
+            // Prüfen: Wurde der Header geklickt?
+            const isHeader = e.target.closest('.widget-header');
             if (!isHeader) return;
 
-            // 2. Sicherheits-Check: Klicks auf das Schließen-X oder Buttons im Header ignorieren
+            // Sicherheits-Check: Klicks auf das Schließen-X oder Buttons im Header ignorieren
             if (e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') {
                 return;
             }
 
             this.draggingIndex = index;
             const widget = this.widgets[index];
-            this.offsetX = e.clientX - widget.x;
-            this.offsetY = e.clientY - widget.y;
+
+            // Unterscheiden, ob es ein Maus-Klick oder ein Finger-Tipp ist
+            let clientX, clientY;
+            if (e.type === 'touchstart') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            this.offsetX = clientX - widget.x;
+            this.offsetY = clientY - widget.y;
         },
+
+        // --- KOMBINIERTE ON-DRAG FUNKTION (Maus & Touch) ---
         onDrag(e) {
             if (this.draggingIndex !== null) {
+                // Verhindert das Scrollen der ganzen Seite auf dem iPad beim Ziehen des Fensters
+                if (e.type === 'touchmove') {
+                    e.preventDefault();
+                }
+
                 const w = this.widgets[this.draggingIndex];
 
-                // 1. Berechne die gewünschte neue Position
-                let newX = e.clientX - this.offsetX;
-                let newY = e.clientY - this.offsetY;
+                // Wieder unterscheiden zwischen Maus und Touch
+                let clientX, clientY;
+                if (e.type === 'touchmove') {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
 
-                // 2. Toolbar-Höhe auslesen, damit wir nicht dahinter rutschen
+                let newX = clientX - this.offsetX;
+                let newY = clientY - this.offsetY;
+
                 const toolbar = document.querySelector('.toolbar');
                 const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
 
-                // 3. Fenster-Grenzen ermitteln
                 const maxX = window.innerWidth - w.width;
                 const maxY = window.innerHeight - w.height;
 
-                // 4. Begrenzung anwenden (Constraint)
+                // Begrenzung (Constraints)
+                if (newX < 0) newX = 0;
+                if (newX > maxX) newX = maxX;
 
-                // Horizontal (Links/Rechts)
-                if (newX < 0) newX = 0; // Nicht links raus
-                if (newX > maxX) newX = maxX; // Nicht rechts raus
-
-                // Vertikal (Oben/Unten)
-                // HIER IST DIE MAGIE: Nicht kleiner als die Toolbar-Höhe!
                 if (newY < toolbarHeight) newY = toolbarHeight;
-                if (newY > maxY) newY = maxY; // Nicht unten raus
+                if (newY > maxY) newY = maxY;
 
-                // 5. Position im Widget speichern
                 w.x = newX;
                 w.y = newY;
             }
         },
+
+        // --- KOMBINIERTE STOP-DRAG FUNKTION (Maus & Touch) ---
         stopDrag() {
             if (this.draggingIndex !== null) {
                 this.draggingIndex = null;
@@ -107,6 +129,7 @@ const app = createApp({
             }
             this.updateSizes();
         },
+
         updateSizes() {
             const widgetElements = document.querySelectorAll('.widget');
             let changed = false;
@@ -166,6 +189,7 @@ const app = createApp({
     }
 });
 
+// Komponenten registrieren
 app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
 app.component('countdown-widget', CountdownWidget);
@@ -173,4 +197,5 @@ app.component('stoppuhr-widget', StoppuhrWidget);
 app.component('zufall-widget', ZufallWidget);
 app.component('qr-widget', QrWidget);
 app.component('handlungsplan-widget', HandlungsplanWidget);
+
 app.mount('#app');
