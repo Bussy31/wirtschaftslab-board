@@ -3,17 +3,11 @@ const HandlungsplanWidget = {
     template: `
         <div style="display: flex; flex-direction: column; height: 100%; width: 100%; padding: 5px; box-sizing: border-box;">
             
-            <div v-if="schritte.length > 0" style="height: 10px; min-height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
+            <div v-if="schritte.length > 0" style="height: 10px; min-height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
                 <div :style="{ width: progress + '%', background: progress === 100 ? '#10b981' : '#3b82f6', height: '100%', transition: 'width 0.4s ease, background 0.4s ease' }"></div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;" v-if="schritte.length > 0">
-                <button @click="toggleModus" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 8px; color: white; cursor: pointer; font-size: 0.8rem; transition: background 0.2s;">
-                    {{ isVisual ? '📋 Zurück zur Liste' : '🗺️ Visueller Pfad' }}
-                </button>
-            </div>
-
-            <div v-if="!isVisual" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; padding-right: 5px;">
+            <div v-if="!widgetData.isVisual" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; padding-right: 5px;">
                 <div v-for="(schritt, index) in schritte" :key="index" 
                      style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 8px; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.05);">
                     
@@ -32,12 +26,13 @@ const HandlungsplanWidget = {
                 </div>
             </div>
 
-            <div v-if="isVisual" style="flex-grow: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-wrap: wrap; align-items: center; align-content: flex-start; gap: 10px; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 8px;">
+            <div v-if="widgetData.isVisual" style="flex-grow: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 8px;">
                 
                 <template v-for="(schritt, index) in schritte" :key="'vis_'+index">
                     
                     <div @click="toggleSchritt(index)" 
                          :style="{
+                            width: '90%',
                             background: schritt.done ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.2)',
                             border: schritt.done ? '2px solid rgba(16, 185, 129, 0.4)' : '2px solid rgba(59, 130, 246, 0.6)',
                             color: schritt.done ? 'rgba(255,255,255,0.3)' : 'white',
@@ -56,11 +51,13 @@ const HandlungsplanWidget = {
                     <div v-if="index < schritte.length - 1" 
                          :style="{
                             color: schritt.done ? '#10b981' : 'rgba(255,255,255,0.3)',
-                            fontSize: '1.2rem',
+                            fontSize: '1.5rem',
                             fontWeight: 'bold',
-                            transition: 'color 0.3s'
+                            transition: 'color 0.3s',
+                            marginTop: '-4px',
+                            marginBottom: '-4px'
                          }">
-                        ➔
+                        ⬇
                     </div>
 
                 </template>
@@ -78,8 +75,7 @@ const HandlungsplanWidget = {
     data() {
         return {
             schritte: this.widgetData.schritte || [],
-            neuerSchritt: '',
-            isVisual: this.widgetData.isVisual || false
+            neuerSchritt: ''
         }
     },
     computed: {
@@ -103,18 +99,15 @@ const HandlungsplanWidget = {
         removeSchritt(index) {
             if(confirm('Diesen Schritt wirklich löschen?')) {
                 this.schritte.splice(index, 1);
-                // Wenn wir alle löschen, schalten wir sicherheitshalber die visuelle Ansicht aus
-                if(this.schritte.length === 0) this.isVisual = false;
+                // Ansicht zurücksetzen, wenn alles gelöscht wird
+                if(this.schritte.length === 0) {
+                    this.widgetData.isVisual = false;
+                }
                 this.saveState();
             }
         },
-        toggleModus() {
-            this.isVisual = !this.isVisual;
-            this.saveState();
-        },
         saveState() {
             this.widgetData.schritte = this.schritte;
-            this.widgetData.isVisual = this.isVisual;
             this.$emit('save');
         }
     }
