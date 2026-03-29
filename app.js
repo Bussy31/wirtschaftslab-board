@@ -118,6 +118,9 @@ const app = createApp({
                         .map(s => s.name);
 
                     startListe = anwesendeSchueler.join('\n');
+                }
+            }
+
             this.widgets.push({
                 id: Date.now(),
                 type: type,
