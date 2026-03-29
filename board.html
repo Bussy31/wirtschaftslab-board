@@ -25,31 +25,78 @@
 <body>
 
 <div id="app">
-    <div class="toolbar">
-        <div class="brand">🎓 wirtschaftslab-board</div>
+    <div :class="['toolbar', { 'hidden': isFullscreen }]">
+        <div class="brand">🎓 wirtschaftslab-board <span class="active-profile-badge">{{ aktiveKlasse }}</span></div>
 
         <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
         <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button>
         <button class="btn-primary" @click="addWidget('stoppuhr', '⏲️')">⏲️ Stoppuhr</button>
         <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
+        <button class="btn-primary" @click="addWidget('zufall', '🎲')">🎲 Zufall</button>
+        <button class="btn-primary" @click="addWidget('qr', '📱')">📱 QR-Code</button>
+        <button class="btn-primary" @click="addWidget('handlungsplan', '📋')">📋 Handlungsplan</button>
 
         <div style="flex-grow: 1;"></div>
 
-        <button @click="$refs.bgInput.click()" class="btn-import">🖼️ Hintergrund</button>
-        <input type="file" ref="bgInput" @change="onBgSelected" style="display: none" accept="image/*">
+        <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️ Einstellungen</button>
+        <button @click="exportBoard" class="btn-export btn-small">💾 Export</button>
+        <button @click="$refs.fileInput.click()" class="btn-import btn-small">📂 Import</button>
+        <button @click="toggleFullscreen" class="btn-primary" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
 
-        <button @click="exportBoard" class="btn-export">💾 Export</button>
-        <button @click="$refs.fileInput.click()" class="btn-import">📂 Import</button>
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
-    <div class="board" :style="{
-            backgroundImage: backgroundImage ? 'url(\'' + backgroundImage + '\')' : 'none',
-            backgroundSize: bgMode === 'tile' ? 'auto' : bgMode,
-            backgroundRepeat: bgMode === 'tile' ? 'repeat' : 'no-repeat',
-            backgroundPosition: 'center'
-        }">
+    <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>⚙️ Einstellungen & Klassen</h2>
+                <span @click="showSettings = false" class="close-btn" style="font-size: 1.5rem;">✖</span>
+            </div>
+            <div class="modal-body">
 
+                <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                    Aktives Board: <strong>{{ aktiveKlasse }}</strong>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" v-model="neuerKlassenName" placeholder="Neue Klasse (z.B. 9b)" @keyup.enter="addKlasse">
+                    <button @click="addKlasse" class="btn-primary">Hinzufügen</button>
+                </div>
+
+                <div class="klassen-liste">
+                    <div v-for="(klasse, index) in settings.klassen" :key="index" class="klasse-item">
+                        <div class="klasse-header">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
+
+                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
+                                <span v-else class="active-badge">Aktuell geladen</span>
+                            </div>
+
+                            <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
+                        </div>
+
+                        <div class="schueler-tags">
+                            <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
+                                  :class="['schueler-tag', { 'is-absent': s.absent }]"
+                                  @click="toggleAbsent(s)"
+                                  title="Klicken, um anwesend/krank zu wechseln">
+                                {{ s.name }}
+                                <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)">×</span>
+                            </span>
+
+                            <input type="text" class="inline-s-input" placeholder="Schüler + Enter..." @keyup.enter="addSchuelerInline(klasse, $event)">
+                        </div>
+                    </div>
+                    <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">
+                        Noch keine Klassen angelegt.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="board">
         <div v-for="(w, index) in widgets"
              :key="w.id"
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
@@ -57,7 +104,8 @@
                  left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
                  boxSizing: 'border-box'
              }"
-             @mousedown="startDrag($event, index)">
+             @mousedown="startDrag($event, index)"
+             @touchstart="startDrag($event, index)">
 
             <div class="widget-header">
                 <div class="widget-title">
@@ -66,6 +114,18 @@
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 8px;">
+
+                    <button v-if="w.type === 'countdown' && w.timeLeft > 0" @click.stop="w.isRunning = !w.isRunning; saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
+                            title="Pause / Weiter">
+                        {{ w.isRunning ? '⏸' : '▶' }}
+                    </button>
+                    <button v-if="w.type === 'countdown' && w.timeLeft > 0" @click.stop="w.resetTrigger = Date.now(); saveToLocal()"
+                            style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: #fca5a5; cursor: pointer; height: 24px;"
+                            title="Stopp">
+                        ⏹
+                    </button>
+
                     <button @click.stop="w.isTransparent = !w.isTransparent; saveToLocal()"
                             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;">
                         {{ w.isTransparent ? '👁️' : '👻' }}
@@ -74,6 +134,12 @@
                     <button v-if="w.type === 'uhr'" @click.stop="w.isAnalog = !w.isAnalog; saveToLocal()"
                             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;">
                         {{ w.isAnalog ? aktuelleZeit : '⌚' }}
+                    </button>
+
+                    <button v-if="w.type === 'handlungsplan'" @click.stop="w.isVisual = !w.isVisual; saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
+                            title="Ansicht wechseln">
+                        {{ w.isVisual ? '📋' : '🗺️' }}
                     </button>
 
                     <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
@@ -85,43 +151,17 @@
             </div>
         </div>
     </div>
-
-    <div v-if="bgPreviewUrl" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-        <div style="background: #2a2a2a; padding: 25px; border-radius: 12px; width: 90vw; max-width: 600px; display: flex; flex-direction: column; gap: 15px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            <h3 style="margin: 0; font-family: sans-serif;">🖼️ Hintergrund anpassen</h3>
-
-            <div style="width: 100%; height: 300px; border: 2px dashed #555; border-radius: 8px; overflow: hidden; background: #000;">
-                <div style="width: 100%; height: 100%;"
-                     :style="{
-                         backgroundImage: 'url(\'' + bgPreviewUrl + '\')',
-                         backgroundSize: bgMode === 'tile' ? 'auto' : bgMode,
-                         backgroundRepeat: bgMode === 'tile' ? 'repeat' : 'no-repeat',
-                         backgroundPosition: 'center'
-                     }">
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 10px; align-items: center; font-family: sans-serif;">
-                <label>Darstellung:</label>
-                <select v-model="bgMode" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 6px; flex-grow: 1;">
-                    <option value="cover">Vollbild (ohne Ränder, evtl. beschnitten)</option>
-                    <option value="contain">Einpassen (Ganzes Bild, evtl. mit Rändern)</option>
-                    <option value="tile">Kacheln (Muster wiederholen)</option>
-                </select>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-                <button @click="cancelBackground" style="padding: 10px 16px; background: transparent; color: white; border: 1px solid #555; border-radius: 6px; cursor: pointer;">Abbrechen</button>
-                <button @click="applyBackground" style="padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">✅ Anwenden</button>
-            </div>
-        </div>
-    </div>
+    <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn" title="Vollbild beenden">🗗 Beenden</button>
+    <div class="copyright">© 2026 Philipp Bußmann</div>
 </div>
 
 <script src="widgets/uhr.js"></script>
 <script src="widgets/notiz.js"></script>
 <script src="widgets/countdown.js"></script>
 <script src="widgets/stoppuhr.js"></script>
+<script src="widgets/zufall.js"></script>
+<script src="widgets/qr.js"></script>
+<script src="widgets/handlungsplan.js"></script>
 <script src="app.js"></script>
 
 </body>

@@ -18,6 +18,33 @@ body {
     width: 100vw;
 }
 
+.board {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+
+    /* 👇 HIER TRÄGST DU DEN NAMEN DEINES BILDES EIN: 👇 */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('GenoKolleg.jpg');
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
 /* --- Moderne Toolbar im Milchglas-Look --- */
 .toolbar {
     background: rgba(15, 23, 42, 0.6);
@@ -33,12 +60,54 @@ body {
     z-index: 1000;
 }
 
+.toolbar.hidden {
+    display: none !important;
+}
+
+.toolbar-right-group .btn-primary[title="Export"],
+.toolbar-right-group .btn-primary[title="Import"] {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    min-width: unset;
+    text-shadow: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-right-group .btn-primary[title="Export"]:hover,
+.toolbar-right-group .btn-primary[title="Import"]:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .brand {
     font-weight: 600;
     font-size: 1.2rem;
     color: #e2e8f0;
     margin-right: 20px;
     letter-spacing: 0.5px;
+}
+
+/* Der kleine, schwebende Button, um den Vollbildmodus zu beenden */
+.floating-exit-btn {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent */
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    z-index: 2000; /* Immer im Vordergrund */
+    backdrop-filter: blur(5px);
+    transition: all 0.2s ease;
+}
+
+.floating-exit-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    transform: scale(1.05);
 }
 
 /* --- Schicke Buttons mit Hover-Animation --- */
@@ -70,6 +139,13 @@ button:hover {
 .btn-import { background: rgba(139, 92, 246, 0.2); border-color: rgba(139, 92, 246, 0.4); color: #a78bfa; }
 .btn-import:hover { background: rgba(139, 92, 246, 0.3); }
 
+.btn-small {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
 /* --- Widgets --- */
 /* --- Widgets --- */
 .widget {
@@ -82,14 +158,15 @@ button:hover {
     border: 1px solid var(--widget-border);
     transition: box-shadow 0.2s ease;
 
-    /* NEU: Erlaubt das Verändern der Größe */
+    /* ÄNDERUNG: Standard-Mauszeiger für das normale Fenster */
+    cursor: default;
+
     resize: both;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    /* Mindestgrößen, damit es nicht zu klein wird */
-    min-width: 200px;
-    min-height: 100px;
+    min-width: 120px;
+    min-height: 80px;
 }
 
 .widget:hover {
@@ -99,10 +176,11 @@ button:hover {
 /* ... Header bleibt wie er ist. ... */
 
 .widget-content {
-    padding: 20px;
+    padding: 5px;
     flex-grow: 1; /* NEU: Inhalt füllt immer den neu gewonnenen Platz aus */
     display: flex;
     flex-direction: column;
+    cursor: default;
 }
 
 /* --- Widget Header --- */
@@ -128,6 +206,12 @@ button:hover {
     gap: 6px;
 }
 
+.widget-content textarea,
+.widget-content input {
+    user-select: text;
+    cursor: text;
+}
+
 .close-btn {
     color: #ef4444;
     cursor: pointer;
@@ -137,4 +221,135 @@ button:hover {
 }
 .close-btn:hover { opacity: 1; }
 
-.widget-content { padding: 20px; }
+/* --- Settings Modal & Klassenverwaltung --- */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center; z-index: 3000;
+}
+
+.settings-modal {
+    background: rgba(15, 23, 42, 0.95); width: 550px; max-width: 90vw; max-height: 85vh;
+    border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);
+    display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.modal-header h2 { margin: 0; font-size: 1.3rem; color: #e2e8f0; }
+
+.modal-body { padding: 20px; overflow-y: auto; }
+
+.input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+.input-group input {
+    flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.2); color: white; outline: none; font-size: 1rem;
+}
+.input-group input:focus { border-color: var(--accent); }
+
+.klasse-item {
+    background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;
+    margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
+}
+
+.klasse-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+.schueler-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Normaler Schüler (Anwesend) */
+.schueler-tag {
+    background: var(--accent); color: white; padding: 4px 10px; border-radius: 6px;
+    font-size: 0.9rem; display: flex; align-items: center; gap: 6px; cursor: pointer;
+    transition: all 0.2s; user-select: none; border: 1px solid transparent;
+}
+.schueler-tag:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* Kranker Schüler (Abwesend) */
+.schueler-tag.is-absent {
+    background: rgba(239, 68, 68, 0.15);
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: line-through;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.schueler-tag.is-absent:hover { background: rgba(239, 68, 68, 0.25); }
+
+/* Das X zum Löschen eines Schülers */
+.remove-s {
+    background: rgba(0,0,0,0.2); border-radius: 50%; width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+    transition: all 0.2s;
+}
+.remove-s:hover { background: #ef4444; color: white; }
+
+/* Button um neuen Schüler hinzuzufügen */
+.add-s-btn {
+    background: transparent; border: 1px dashed rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.add-s-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: white; }
+
+/* Badge oben links in der Toolbar */
+.active-profile-badge {
+    background: var(--accent);
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 10px;
+    vertical-align: middle;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Badge für die aktive Klasse im Modal */
+.active-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* Button zum Profil wechseln im Modal */
+.switch-btn {
+    background: var(--accent) !important;
+    color: white !important;
+    border: none !important;
+}
+.switch-btn:hover {
+    background: var(--accent-hover) !important;
+}
+
+/* Das neue Eingabefeld für Schüler */
+.inline-s-input {
+    background: rgba(0,0,0,0.3);
+    border: 1px dashed rgba(255,255,255,0.3);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    outline: none;
+    width: 130px;
+    transition: all 0.2s;
+}
+.inline-s-input:focus {
+    border-color: var(--accent);
+    background: rgba(0,0,0,0.5);
+    width: 160px;
+}
+
+/* --- Copyright Style --- */
+.copyright {
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4); /* Sehr dezent */
+    pointer-events: none; /* Klicks gehen "hindurch" */
+    z-index: 1000;
+    font-family: inherit;
+}

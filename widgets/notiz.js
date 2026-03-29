@@ -37,14 +37,16 @@ const NotizWidget = {
                 
                 <div style="flex-grow: 1;"></div>
                 
-                <button @mousedown.prevent="format('removeFormat')" title="Formatierung löschen" style="padding: 4px 10px; min-width: unset; background: rgba(239, 68, 68, 0.2); color: #fca5a5;">🧹</button>
+                <button @mousedown.prevent="format('removeFormat')" title="Formatierung löschen" style="padding: 4px 10px; min-width: unset; background: rgba(255, 255, 255, 0.1);">🧹</button>
+
+                <button @mousedown.prevent="clearAll" title="Alles löschen" style="padding: 4px 10px; min-width: unset; background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3);">🗑️</button>
             </div>
 
             <div ref="editor" 
                  contenteditable="true" 
                  @input="onInput"
                  @blur="onInput"
-                 style="flex-grow: 1; outline: none; overflow-y: auto; padding: 5px; background: transparent; color: inherit; font-family: inherit; font-size: 1rem; line-height: 1.5; word-wrap: break-word;">
+                 style="flex-grow: 1; outline: none; overflow-y: auto; padding: 5px; background: transparent; color: inherit; font-family: inherit; font-size: 1rem; line-height: 1.5; word-wrap: break-word; cursor: text;">
             </div>
         </div>
     `,
@@ -57,11 +59,9 @@ const NotizWidget = {
     },
     methods: {
         format(command, value = null) {
-            // Manche Browser nennen den Textmarker 'backColor' statt 'hiliteColor'. Das fangen wir hier sicherheitshalber ab.
             if (command === 'hiliteColor' && !document.queryCommandSupported('hiliteColor')) {
                 command = 'backColor';
             }
-            
             document.execCommand(command, false, value);
             this.$refs.editor.focus();
             this.onInput();
@@ -71,6 +71,13 @@ const NotizWidget = {
             if (this.widgetData.data !== html) {
                 this.widgetData.data = html;
                 this.$emit('save');
+            }
+        },
+        clearAll() {
+            if (confirm("Möchtest du wirklich den gesamten Text dieser Notiz löschen?")) {
+                this.$refs.editor.innerHTML = '';
+                this.onInput();
+                this.$refs.editor.focus();
             }
         }
     }

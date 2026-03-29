@@ -3,31 +3,27 @@ const CountdownWidget = {
     template: `
         <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             
-            <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 10px; align-items: center; z-index: 10;">
-                <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 70px; font-size: 1.5rem; padding: 4px; text-align: center; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-                <span style="font-size: 1.2rem;">min</span>
-                <button @click="startTimer" style="background: #10b981; border: none; padding: 8px 16px; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: 1.1rem;">Start</button>
+            <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 3cqw; align-items: center; z-index: 10;">
+                <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 25cqw; min-width: 60px; font-size: clamp(1.2rem, 8cqw, 3.5rem); padding: 1cqw; text-align: center; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+                <span style="font-size: clamp(1.2rem, 6cqw, 2.5rem); color: rgba(255,255,255,0.7);">min</span>
+                <button @click="startTimer" style="background: #3b82f6; border: none; padding: 1.5cqw 3cqw; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: clamp(1rem, 6cqw, 2.5rem);">Start</button>
             </div>
 
-            <div v-else style="position: relative; width: 65cqmin; height: 65cqmin; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 100 100" style="position: absolute; width: 100%; height: 100%; transform: rotate(-90deg);">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8" />
-                    <circle cx="50" cy="50" r="45" fill="none" :stroke="ringColor" stroke-width="8" stroke-linecap="round"
-                            :stroke-dasharray="283" :stroke-dashoffset="dashOffset" 
-                            style="transition: stroke-dashoffset 1s linear, stroke 0.5s;" />
-                </svg>
-                <div style="font-size: clamp(2rem, 15cqw, 4.5rem); font-weight: bold; font-variant-numeric: tabular-nums; z-index: 10;">
+            <div v-else style="width: 90cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5cqh;">
+                
+                <div style="font-size: clamp(2rem, 14cqw, 9rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 4px 10px rgba(0,0,0,0.6); line-height: 1.1; color: white;">
                     {{ formatTime(timeLeft) }}
                 </div>
-            </div>
-
-            <div v-if="timeLeft > 0" style="margin-top: 15px; display: flex; gap: 10px; z-index: 10;">
-                <button @click="togglePause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 12px; color: white; cursor: pointer;">
-                    {{ isRunning ? '⏸ Pause' : '▶ Weiter' }}
-                </button>
-                <button @click="resetTimer" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 4px 12px; color: #fca5a5; cursor: pointer;">
-                    ⏹ Stopp
-                </button>
+                
+                <div style="width: 100%; height: clamp(24px, 14cqh, 80px); background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; box-shadow: inset 0 4px 10px rgba(0,0,0,0.7);">
+                    <div :style="{ 
+                        width: barWidth + '%', 
+                        backgroundColor: barColor, 
+                        height: '100%', 
+                        transition: 'width 1s linear, background-color 0.5s ease',
+                        boxShadow: '0 0 4cqw ' + barColor 
+                    }"></div>
+                </div>
             </div>
         </div>
     `,
@@ -40,14 +36,28 @@ const CountdownWidget = {
             timerInterval: null
         }
     },
-    computed: {
-        dashOffset() {
-            if (this.totalTime === 0) return 0;
-            return 283 - ((this.timeLeft / this.totalTime) * 283);
+    // NEU: Hier lauscht das Widget auf Klicks aus der Kopfzeile
+    watch: {
+        'widgetData.isRunning'(newVal) {
+            this.isRunning = newVal;
+            if (newVal) {
+                this.tick();
+            } else {
+                clearInterval(this.timerInterval);
+            }
         },
-        ringColor() {
+        'widgetData.resetTrigger'() {
+            this.resetTimer();
+        }
+    },
+    computed: {
+        barWidth() {
+            if (this.totalTime === 0) return 0;
+            return (this.timeLeft / this.totalTime) * 100;
+        },
+        barColor() {
             const fraction = this.timeLeft / this.totalTime;
-            if (fraction > 0.5) return '#34d399';
+            if (fraction > 0.5) return '#3b82f6';
             if (fraction > 0.2) return '#fbbf24';
             return '#ef4444';
         }
@@ -62,12 +72,6 @@ const CountdownWidget = {
             this.isRunning = true;
             this.saveState();
             this.tick();
-        },
-        togglePause() {
-            this.isRunning = !this.isRunning;
-            this.saveState();
-            if (this.isRunning) this.tick();
-            else clearInterval(this.timerInterval);
         },
         resetTimer() {
             clearInterval(this.timerInterval);

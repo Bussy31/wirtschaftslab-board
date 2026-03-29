@@ -7,36 +7,120 @@ const app = createApp({
             draggingIndex: null,
             offsetX: 0,
             offsetY: 0,
+            isFullscreen: false,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-
-            backgroundImage: null,
-            bgMode: 'cover',
-            bgPreviewUrl: null,
-            bgBase64ToSave: null // NEU: Speichert den Text-Code heimlich im Hintergrund
+            showSettings: false,
+            settings: { klassen: [] },
+            neuerKlassenName: '',
+            aktiveKlasse: 'Standard'
         }
     },
     mounted() {
-        const saved = localStorage.getItem('meinBoard');
-        if (saved) {
-            this.widgets = JSON.parse(saved);
+        const savedSettings = localStorage.getItem('boardSettings');
+        if (savedSettings) {
+            this.settings = JSON.parse(savedSettings);
         }
 
-        const savedBg = localStorage.getItem('meinBoard_bg');
-        if (savedBg) this.backgroundImage = savedBg;
+        const lastActive = localStorage.getItem('aktiveKlasse');
+        if (lastActive) {
+            this.aktiveKlasse = lastActive;
+        }
 
-        const savedBgMode = localStorage.getItem('meinBoard_bgMode');
-        if (savedBgMode) this.bgMode = savedBgMode;
+        this.loadBoard();
 
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
+
+        window.addEventListener('touchmove', this.onDrag, { passive: false });
+        window.addEventListener('touchend', this.stopDrag);
+        window.addEventListener('touchcancel', this.stopDrag);
+
+        document.addEventListener('fullscreenchange', this.onFullscreenChange);
 
         setInterval(() => {
             this.aktuelleZeit = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         }, 1000);
     },
     methods: {
+        // --- BOARD LADEN, SPEICHERN & WECHSELN ---
+        loadBoard() {
+            const saved = localStorage.getItem('board_' + this.aktiveKlasse);
+            if (saved) {
+                this.widgets = JSON.parse(saved);
+            } else {
+                this.widgets = [];
+            }
+        },
+        saveToLocal() {
+            localStorage.setItem('board_' + this.aktiveKlasse, JSON.stringify(this.widgets));
+        },
+        wechsleKlasse(klassenName) {
+            this.aktiveKlasse = klassenName;
+            localStorage.setItem('aktiveKlasse', klassenName);
+            this.loadBoard();
+            this.showSettings = false;
+        },
+
+        // --- KLASSEN & SCHÜLER VERWALTUNG ---
+        addKlasse() {
+            if (!this.neuerKlassenName.trim()) return;
+            if (!this.settings.klassen) this.settings.klassen = [];
+
+            const name = this.neuerKlassenName.trim();
+            this.settings.klassen.push({ name: name, schueler: [] });
+            this.neuerKlassenName = '';
+            this.saveSettings();
+
+            if (this.settings.klassen.length === 1) {
+                this.wechsleKlasse(name);
+            }
+        },
+        removeKlasse(index) {
+            if(confirm('Möchtest du diese Klasse und ihr Board wirklich löschen?')) {
+                const klasseName = this.settings.klassen[index].name;
+                localStorage.removeItem('board_' + klasseName);
+                this.settings.klassen.splice(index, 1);
+
+                if (this.aktiveKlasse === klasseName) {
+                    this.wechsleKlasse('Standard');
+                }
+                this.saveSettings();
+            }
+        },
+        addSchuelerInline(klasse, event) {
+            const name = event.target.value;
+            if (name && name.trim()) {
+                klasse.schueler.push({ name: name.trim(), absent: false });
+                event.target.value = '';
+                this.saveSettings();
+            }
+        },
+        removeSchueler(klasse, sIndex) {
+            klasse.schueler.splice(sIndex, 1);
+            this.saveSettings();
+        },
+        toggleAbsent(schueler) {
+            schueler.absent = !schueler.absent;
+            this.saveSettings();
+        },
+        saveSettings() {
+            localStorage.setItem('boardSettings', JSON.stringify(this.settings));
+        },
+
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
+            let startListe = '';
+            if (type === 'zufall') {
+                const aktuelleKlasseObj = this.settings.klassen.find(k => k.name === this.aktiveKlasse);
+                if (aktuelleKlasseObj && aktuelleKlasseObj.schueler) {
+                    const anwesendeSchueler = aktuelleKlasseObj.schueler
+                        .filter(s => !s.absent)
+                        .map(s => s.name);
+
+                    startListe = anwesendeSchueler.join('\n');
+                }
+            }
+
             this.widgets.push({
                 id: Date.now(),
                 type: type,
@@ -54,17 +138,54 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
-            if (!e.target.closest('.widget-header')) return;
+            const isHeader = e.target.closest('.widget-header');
+            if (!isHeader) return;
+            if (e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') return;
+
             this.draggingIndex = index;
             const widget = this.widgets[index];
-            this.offsetX = e.clientX - widget.x;
-            this.offsetY = e.clientY - widget.y;
+
+            let clientX, clientY;
+            if (e.type === 'touchstart') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            this.offsetX = clientX - widget.x;
+            this.offsetY = clientY - widget.y;
         },
         onDrag(e) {
             if (this.draggingIndex !== null) {
+                if (e.type === 'touchmove') e.preventDefault();
+
                 const w = this.widgets[this.draggingIndex];
-                w.x = e.clientX - this.offsetX;
-                w.y = e.clientY - this.offsetY;
+                let clientX, clientY;
+                if (e.type === 'touchmove') {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                let newX = clientX - this.offsetX;
+                let newY = clientY - this.offsetY;
+
+                const toolbar = document.querySelector('.toolbar');
+                const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
+                const maxX = window.innerWidth - w.width;
+                const maxY = window.innerHeight - w.height;
+
+                if (newX < 0) newX = 0;
+                if (newX > maxX) newX = maxX;
+                if (newY < toolbarHeight) newY = toolbarHeight;
+                if (newY > maxY) newY = maxY;
+
+                w.x = newX;
+                w.y = newY;
             }
         },
         stopDrag() {
@@ -90,65 +211,106 @@ const app = createApp({
             });
             if (changed) this.saveToLocal();
         },
-        saveToLocal() {
-            localStorage.setItem('meinBoard', JSON.stringify(this.widgets));
-        },
+
+        // ==========================================
+        // NEU: KOMPLETT-BACKUP (EXPORT & IMPORT)
+        // ==========================================
         exportBoard() {
-            const dataStr = JSON.stringify(this.widgets);
+            // Wir erstellen ein großes Paket mit Settings und allen Boards
+            const backupData = {
+                settings: this.settings,
+                boards: {}
+            };
+
+            // Wir sammeln die Boards von allen Klassen ein
+            if (this.settings.klassen) {
+                this.settings.klassen.forEach(klasse => {
+                    const boardData = localStorage.getItem('board_' + klasse.name);
+                    if (boardData) {
+                        backupData.boards[klasse.name] = JSON.parse(boardData);
+                    }
+                });
+            }
+
+            // Zur Sicherheit auch das "Standard"-Board mitnehmen
+            const standardBoard = localStorage.getItem('board_Standard');
+            if (standardBoard) {
+                backupData.boards['Standard'] = JSON.parse(standardBoard);
+            }
+
+            // Paket schnüren und herunterladen
+            const dataStr = JSON.stringify(backupData);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = "mein-wirtschaftslab-board.json";
+            link.download = "wirtschaftslab-komplett-backup.json";
             link.click();
         },
         importBoard(event) {
             const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.widgets = JSON.parse(e.target.result);
-                this.saveToLocal();
+                try {
+                    const importedData = JSON.parse(e.target.result);
+
+                    // Prüfen: Ist es ein neues Komplett-Backup?
+                    if (importedData.settings && importedData.boards) {
+
+                        // 1. Settings (Klassen & Schüler) überschreiben
+                        this.settings = importedData.settings;
+                        this.saveSettings();
+
+                        // 2. Alle Boards in den Speicher des Browsers schreiben
+                        for (const [klasseName, widgets] of Object.entries(importedData.boards)) {
+                            localStorage.setItem('board_' + klasseName, JSON.stringify(widgets));
+                        }
+
+                        // 3. Auf die erste importierte Klasse wechseln
+                        if (this.settings.klassen && this.settings.klassen.length > 0) {
+                            this.wechsleKlasse(this.settings.klassen[0].name);
+                        } else {
+                            this.wechsleKlasse('Standard');
+                        }
+
+                        alert("✅ Komplett-Backup erfolgreich geladen! Alle Klassen und Boards sind da.");
+
+                    } else {
+                        // Abwärtskompatibilität: Falls jemand ein altes Backup hochlädt
+                        this.widgets = importedData;
+                        this.saveToLocal();
+                        alert("ℹ️ Einzelnes Board in die aktuelle Klasse importiert.");
+                    }
+                } catch (err) {
+                    alert("❌ Fehler beim Importieren. Ist das die richtige Datei?");
+                    console.error(err);
+                }
+
+                // Input-Feld leeren, damit man dieselbe Datei bei Bedarf nochmal wählen kann
+                event.target.value = '';
             };
             reader.readAsText(file);
         },
 
-        // --- DIE NEUE HINTERGRUND-LOGIK ---
-
-        onBgSelected(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // 1. Erzeugt einen blitzschnellen, internen Link für die sofortige Anzeige
-            this.bgPreviewUrl = URL.createObjectURL(file);
-
-            // 2. Liest das Bild heimlich im Hintergrund ein, um es später zu speichern
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.bgBase64ToSave = e.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            event.target.value = '';
-        },
-        applyBackground() {
-            // Setzt das Bild sofort für das Board (nutzt den schnellen Link)
-            this.backgroundImage = this.bgPreviewUrl;
-
-            // Speichert die echten Daten für den nächsten Neustart
-            try {
-                if (this.bgBase64ToSave) {
-                    localStorage.setItem('meinBoard_bg', this.bgBase64ToSave);
+        async toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                try {
+                    await document.documentElement.requestFullscreen();
+                    this.isFullscreen = true;
+                } catch (err) {
+                    console.error("Vollbild Fehler:", err);
                 }
-                localStorage.setItem('meinBoard_bgMode', this.bgMode);
-            } catch (error) {
-                console.warn("Hinweis: Bild ist zu groß für den Langzeit-Speicher.");
+            } else {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                    this.isFullscreen = false;
+                }
             }
-
-            this.bgPreviewUrl = null;
         },
-        cancelBackground() {
-            this.bgPreviewUrl = null;
+        onFullscreenChange() {
+            this.isFullscreen = !!document.fullscreenElement;
         }
     }
 });
@@ -157,4 +319,8 @@ app.component('uhr-widget', UhrWidget);
 app.component('notiz-widget', NotizWidget);
 app.component('countdown-widget', CountdownWidget);
 app.component('stoppuhr-widget', StoppuhrWidget);
+app.component('zufall-widget', ZufallWidget);
+app.component('qr-widget', QrWidget);
+app.component('handlungsplan-widget', HandlungsplanWidget);
+
 app.mount('#app');
