@@ -3,12 +3,17 @@ const HandlungsplanWidget = {
     template: `
         <div style="display: flex; flex-direction: column; height: 100%; width: 100%; padding: 5px; box-sizing: border-box;">
             
-            <div style="height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
+            <div v-if="schritte.length > 0" style="height: 10px; min-height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
                 <div :style="{ width: progress + '%', background: progress === 100 ? '#10b981' : '#3b82f6', height: '100%', transition: 'width 0.4s ease, background 0.4s ease' }"></div>
             </div>
 
-            <div style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; padding-right: 5px;">
-                
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;" v-if="schritte.length > 0">
+                <button @click="toggleModus" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 8px; color: white; cursor: pointer; font-size: 0.8rem; transition: background 0.2s;">
+                    {{ isVisual ? '📋 Zurück zur Liste' : '🗺️ Visueller Pfad' }}
+                </button>
+            </div>
+
+            <div v-if="!isVisual" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; padding-right: 5px;">
                 <div v-for="(schritt, index) in schritte" :key="index" 
                      style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 8px; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.05);">
                     
@@ -19,7 +24,7 @@ const HandlungsplanWidget = {
                         {{ schritt.text }}
                     </span>
 
-                    <button @click="removeSchritt(index)" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem; opacity: 0.6; padding: 0;" title="Schritt löschen">✖</button>
+                    <button @click.stop="removeSchritt(index)" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem; opacity: 0.6; padding: 0;" title="Schritt löschen">✖</button>
                 </div>
                 
                 <div v-if="schritte.length === 0" style="text-align: center; color: rgba(255,255,255,0.4); margin-top: 20px; font-style: italic;">
@@ -27,7 +32,41 @@ const HandlungsplanWidget = {
                 </div>
             </div>
 
-            <div style="display: flex; gap: 8px;">
+            <div v-if="isVisual" style="flex-grow: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-wrap: wrap; align-items: center; align-content: flex-start; gap: 10px; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 8px;">
+                
+                <template v-for="(schritt, index) in schritte" :key="'vis_'+index">
+                    
+                    <div @click="toggleSchritt(index)" 
+                         :style="{
+                            background: schritt.done ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.2)',
+                            border: schritt.done ? '2px solid rgba(16, 185, 129, 0.4)' : '2px solid rgba(59, 130, 246, 0.6)',
+                            color: schritt.done ? 'rgba(255,255,255,0.3)' : 'white',
+                            textDecoration: schritt.done ? 'line-through' : 'none',
+                            padding: '10px 15px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            transition: 'all 0.3s',
+                            boxShadow: schritt.done ? 'none' : '0 4px 6px rgba(0,0,0,0.3)'
+                         }">
+                        {{ index + 1 }}. {{ schritt.text }}
+                    </div>
+
+                    <div v-if="index < schritte.length - 1" 
+                         :style="{
+                            color: schritt.done ? '#10b981' : 'rgba(255,255,255,0.3)',
+                            fontSize: '1.2rem',
+                            fontWeight: 'bold',
+                            transition: 'color 0.3s'
+                         }">
+                        ➔
+                    </div>
+
+                </template>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-shrink: 0;">
                 <input type="text" v-model="neuerSchritt" @keyup.enter="addSchritt" placeholder="Neuer Schritt..." 
                        style="flex-grow: 1; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; font-size: 1rem; outline: none;">
                 <button @click="addSchritt" style="background: #3b82f6; border: none; padding: 0 15px; border-radius: 8px; color: white; cursor: pointer; font-size: 1.2rem; transition: background 0.2s;" title="Hinzufügen">
@@ -39,7 +78,8 @@ const HandlungsplanWidget = {
     data() {
         return {
             schritte: this.widgetData.schritte || [],
-            neuerSchritt: ''
+            neuerSchritt: '',
+            isVisual: this.widgetData.isVisual || false
         }
     },
     computed: {
@@ -63,11 +103,18 @@ const HandlungsplanWidget = {
         removeSchritt(index) {
             if(confirm('Diesen Schritt wirklich löschen?')) {
                 this.schritte.splice(index, 1);
+                // Wenn wir alle löschen, schalten wir sicherheitshalber die visuelle Ansicht aus
+                if(this.schritte.length === 0) this.isVisual = false;
                 this.saveState();
             }
         },
+        toggleModus() {
+            this.isVisual = !this.isVisual;
+            this.saveState();
+        },
         saveState() {
             this.widgetData.schritte = this.schritte;
+            this.widgetData.isVisual = this.isVisual;
             this.$emit('save');
         }
     }
