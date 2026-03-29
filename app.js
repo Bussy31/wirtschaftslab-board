@@ -107,7 +107,6 @@ const app = createApp({
             localStorage.setItem('boardSettings', JSON.stringify(this.settings));
         },
 
-        // --- WIDGET-LOGIK ---
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
             let startListe = '';
