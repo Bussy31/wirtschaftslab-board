@@ -395,19 +395,25 @@ const app = createApp({
     computed: {
         // Berechnet den passenden Style für den Hintergrund
         boardStyle() {
-            const bg = this.settings.hintergrund;
-            if (!bg) return {}; // Falls noch nichts gewählt ist
+            // SICHERHEITSNETZ: Falls kein Hintergrund da ist, nimm einen leeren String
+            const bg = this.settings.hintergrund || '';
+
+            if (!bg) return {};
 
             // Wenn der Wert mit einem "#" anfängt, ist es ein Farbcode!
             if (bg.startsWith('#')) {
-                return { background: bg };
+                return {
+                    backgroundColor: bg,
+                    backgroundImage: 'none'
+                };
             }
 
             // Ansonsten ist es ein normales Bild (mit deiner dunklen Überlagerung)
             return {
                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${bg})`,
                 backgroundSize: 'cover',
-                backgroundPosition: 'center'
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed'
             };
         }
     }
