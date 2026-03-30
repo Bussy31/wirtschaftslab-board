@@ -413,5 +413,6 @@ app.component('handlungsplan-widget', HandlungsplanWidget);
 app.component('gruppen-widget', GruppenWidget);
 app.component('arbeitsphase-widget', ArbeitsphaseWidget);
 app.component('medien-widget', MedienWidget);
+app.component('ampel-widget', AmpelWidget);
 
 app.mount('#app');
