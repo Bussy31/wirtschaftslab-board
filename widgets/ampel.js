@@ -39,7 +39,6 @@ const AmpelWidget = {
                         style="width: 100%; padding: 5px; background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                     <div style="background: #ef4444; color: white; border: 2px solid white; border-radius: 10px; width: 60px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; line-height: 1.1; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
                         <span style="font-size: 0.8rem; letter-spacing: 0.5px;">STOP</span>
-                        <span style="font-size: 1.8rem; font-weight: 900;">P</span>
                     </div>
                 </button>
 
