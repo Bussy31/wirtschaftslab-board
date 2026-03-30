@@ -44,6 +44,8 @@ const NotizWidget = {
 
             <div ref="editor" 
                  contenteditable="true" 
+                 @mousedown.stop 
+                 @touchstart.stop
                  @input="onInput"
                  @blur="onInput"
                  style="flex-grow: 1; outline: none; overflow-y: auto; padding: 5px; background: transparent; color: inherit; font-family: inherit; font-size: 1rem; line-height: 1.5; word-wrap: break-word; cursor: text;">
