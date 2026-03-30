@@ -1,67 +1,48 @@
 const StoppuhrWidget = {
     props: ['widgetData'],
     template: `
-        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; container-type: size; position: relative;">
+        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             
-            <div v-show="!widgetData.isTransparent" 
-                 style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; z-index: 10;">
-                
-                <button @click="reset" @mousedown.stop @touchstart.stop
-                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem;">
-                    ⏹️ Reset
+            <div style="font-size: clamp(2rem, 15cqw, 5rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-bottom: 20px;">
+                {{ formatTime(elapsed) }}
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button v-if="!isRunning" @click="start" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 6px; padding: 6px 16px; color: #34d399; cursor: pointer; font-size: 1.1rem;">
+                    ▶ Start
                 </button>
-
-                <button @click="toggle" @mousedown.stop @touchstart.stop
-                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem;">
-                    {{ isRunning ? '⏸️ Pause' : '▶️ Start' }}
+                <button v-else @click="pause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 16px; color: white; cursor: pointer; font-size: 1.1rem;">
+                    ⏸ Pause
+                </button>
+                <button @click="reset" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 6px 16px; color: #fca5a5; cursor: pointer; font-size: 1.1rem;">
+                    ⏹ Reset
                 </button>
             </div>
 
-            <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
-                <div :style="{ 
-                        fontSize: '20cqw', 
-                        fontWeight: 'bold', 
-                        fontFamily: 'monospace',
-                        color: isRunning ? '#60a5fa' : '#ffffff',
-                        textShadow: widgetData.isTransparent ? '2px 2px 10px rgba(0,0,0,0.8)' : 'none'
-                     }">
-                    {{ formatTime(elapsed) }}
-                </div>
-            </div>
         </div>
     `,
     data() {
         return {
-            isRunning: false,
-            elapsed: 0,
+            isRunning: this.widgetData.isRunning || false,
+            elapsed: this.widgetData.elapsed || 0,
             frame: null
         }
     },
     mounted() {
-        // Lade gespeicherten Zustand
-        if (this.widgetData.isRunning) {
-            this.isRunning = true;
+        // Wenn die Stoppuhr lief und wir einen Start-Zeitstempel haben, berechne die exakte Zeit!
+        if (this.isRunning && this.widgetData.startTimestamp) {
+            this.elapsed = Date.now() - this.widgetData.startTimestamp;
             this.startLoop();
-        } else if (this.widgetData.elapsed) {
-            this.elapsed = this.widgetData.elapsed;
         }
     },
+    unmounted() {
+        cancelAnimationFrame(this.frame);
+    },
     methods: {
-        toggle() {
-            if (this.isRunning) {
-                this.pause();
-            } else {
-                this.start();
-            }
-        },
         start() {
             this.isRunning = true;
-            // Falls neu gestartet wird, initialisiere den Zeitstempel
-            if (!this.widgetData.startTimestamp) {
-                this.widgetData.startTimestamp = Date.now() - this.elapsed;
-            } else {
-                this.widgetData.startTimestamp = Date.now() - this.elapsed;
-            }
+            // Wir merken uns den exakten Start-Moment in der Zeit (abzüglich der Zeit, die schon lief)
+            this.widgetData.startTimestamp = Date.now() - this.elapsed;
             this.startLoop();
             this.save();
         },
@@ -80,6 +61,7 @@ const StoppuhrWidget = {
         startLoop() {
             const step = () => {
                 if (!this.isRunning) return;
+                // Wir berechnen die Zeit immer relativ zum Start-Zeitstempel -> Perfekte Genauigkeit auch bei Refresh!
                 this.elapsed = Date.now() - this.widgetData.startTimestamp;
                 this.frame = requestAnimationFrame(step);
             };
