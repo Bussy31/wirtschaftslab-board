@@ -4,26 +4,28 @@ const StundenzielWidget = {
         <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; container-type: size; position: relative; overflow: hidden;">
             
             <div v-show="!widgetData.isTransparent" 
-                 style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px;">
+                 style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 8px; flex-shrink: 0; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.05); padding: 6px 10px; border-radius: 8px;">
                 
                 <button @click="importFromHandlungsplan" 
                         @mousedown.stop @touchstart.stop
-                        style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.65rem; font-weight: 700;">
-                    📋 IMPORT HP
+                        style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                    📋 Import HP
                 </button>
 
-                <div style="display: flex; align-items: center; gap: 2px; border-left: 1px solid rgba(255,255,255,0.2); border-right: 1px solid rgba(255,255,255,0.2); padding: 0 8px;">
+                <div style="display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 2px 6px;">
                     <button @click="changeFontSize(-5)" @mousedown.stop @touchstart.stop
-                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 15px; height: 15px; cursor: pointer; font-weight: bold;">-</button>
-                    <span style="color: #94a3b8; font-size: 0.65rem; min-width: 30px; text-align: center;">TEXT</span>
+                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;" title="Schrift verkleinern">-</button>
+                    
+                    <span style="color: #cbd5e1; font-size: 0.75rem; min-width: 22px; text-align: center; font-weight: 600; letter-spacing: 0.5px;">Aa</span>
+                    
                     <button @click="changeFontSize(5)" @mousedown.stop @touchstart.stop
-                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-weight: bold;">+</button>
+                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;" title="Schrift vergrößern">+</button>
                 </div>
                 
                 <button @click="isEditing = !isEditing" 
                         @mousedown.stop @touchstart.stop
-                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.65rem; font-weight: 700;">
-                    {{ isEditing ? '✅ OK' : '✏️ EDIT' }}
+                        style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #e2e8f0; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                    {{ isEditing ? '✅ OK' : '✏️ Edit' }}
                 </button>
             </div>
 
