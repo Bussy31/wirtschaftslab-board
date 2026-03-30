@@ -27,7 +27,7 @@ body {
     z-index: 1;
 
     /* 👇 HIER TRÄGST DU DEN NAMEN DEINES BILDES EIN: 👇 */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('GenoKolleg.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('Hintergruende/bild7.jpg');
 
     background-size: cover;
     background-position: center;

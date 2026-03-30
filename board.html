@@ -32,14 +32,14 @@
         <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button>
         <button class="btn-primary" @click="addWidget('stoppuhr', '⏲️')">⏲️ Stoppuhr</button>
         <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
-        <button class="btn-primary" @click="addWidget('gruppen', '👥')">👥 Gruppen</button>
         <button class="btn-primary" @click="addWidget('zufall', '🎲')">🎲 Zufall</button>
         <button class="btn-primary" @click="addWidget('qr', '📱')">📱 QR-Code</button>
         <button class="btn-primary" @click="addWidget('handlungsplan', '📋')">📋 Handlungsplan</button>
+        <button class="btn-primary" @click="addWidget('gruppen', '👥')">👥 Gruppen</button>
 
         <div style="flex-grow: 1;"></div>
 
-        <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️</button>
+        <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️ Einstellungen</button>
         <button @click="exportBoard" class="btn-export btn-small">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import btn-small">📂 Import</button>
         <button @click="toggleFullscreen" class="btn-primary" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
@@ -49,55 +49,93 @@
 
     <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false">
         <div class="modal-content settings-modal">
+
             <div class="modal-header">
-                <h2>⚙️ Einstellungen & Klassen</h2>
+                <h2>⚙️ Einstellungen</h2>
                 <span @click="showSettings = false" class="close-btn" style="font-size: 1.5rem;">✖</span>
             </div>
+
             <div class="modal-body">
 
-                <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
-                    Aktives Board: <strong>{{ aktiveKlasse }}</strong>
+                <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                    <button @click="activeSettingsTab = 'klassen'"
+                            :style="{ background: activeSettingsTab === 'klassen' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                        🏫 Klassen
+                    </button>
+                    <button @click="activeSettingsTab = 'hintergrund'"
+                            :style="{ background: activeSettingsTab === 'hintergrund' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                        🖼️ Hintergrund
+                    </button>
                 </div>
 
-                <div class="input-group">
-                    <input type="text" v-model="neuerKlassenName" placeholder="Neue Klasse (z.B. 9b)" @keyup.enter="addKlasse">
-                    <button @click="addKlasse" class="btn-primary">Hinzufügen</button>
-                </div>
+                <div v-if="activeSettingsTab === 'klassen'">
+                    <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                        Aktives Board: <strong>{{ aktiveKlasse }}</strong>
+                    </div>
 
-                <div class="klassen-liste">
-                    <div v-for="(klasse, index) in settings.klassen" :key="index" class="klasse-item">
-                        <div class="klasse-header">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
+                    <div class="input-group">
+                        <input type="text" v-model="neuerKlassenName" placeholder="Neue Klasse (z.B. 9b)" @keyup.enter="addKlasse">
+                        <button @click="addKlasse" class="btn-primary">Hinzufügen</button>
+                    </div>
 
-                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
-                                <span v-else class="active-badge">Aktuell geladen</span>
+                    <div class="klassen-liste">
+                        <div v-for="(klasse, index) in settings.klassen" :key="index" class="klasse-item">
+                            <div class="klasse-header">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
+                                    <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
+                                    <span v-else class="active-badge">Aktuell geladen</span>
+                                </div>
+                                <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
                             </div>
 
-                            <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
+                            <div class="schueler-tags">
+                                <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
+                                      :class="['schueler-tag', { 'is-absent': s.absent }]"
+                                      @click="toggleAbsent(s)"
+                                      title="Klicken, um anwesend/krank zu wechseln">
+                                    {{ s.name }}
+                                    <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)">×</span>
+                                </span>
+                                <input type="text" class="inline-s-input" placeholder="Schüler + Enter..." @keyup.enter="addSchuelerInline(klasse, $event)">
+                            </div>
                         </div>
-
-                        <div class="schueler-tags">
-                            <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
-                                  :class="['schueler-tag', { 'is-absent': s.absent }]"
-                                  @click="toggleAbsent(s)"
-                                  title="Klicken, um anwesend/krank zu wechseln">
-                                {{ s.name }}
-                                <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)">×</span>
-                            </span>
-
-                            <input type="text" class="inline-s-input" placeholder="Schüler + Enter..." @keyup.enter="addSchuelerInline(klasse, $event)">
+                        <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">
+                            Noch keine Klassen angelegt.
                         </div>
-                    </div>
-                    <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">
-                        Noch keine Klassen angelegt.
                     </div>
                 </div>
+
+                <div v-if="activeSettingsTab === 'hintergrund'">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;">
+                        <div v-for="bg in availableBackgrounds" :key="bg"
+                             @click="setHintergrund(bg)"
+                             :style="{
+                                 backgroundImage: 'url(' + bg + ')',
+                                 backgroundSize: 'cover',
+                                 backgroundPosition: 'center',
+                                 height: '90px',
+                                 borderRadius: '8px',
+                                 cursor: 'pointer',
+                                 border: settings.hintergrund === bg ? '3px solid #10b981' : '3px solid transparent',
+                                 boxShadow: settings.hintergrund === bg ? '0 0 10px rgba(16, 185, 129, 0.8)' : 'none',
+                                 transition: 'all 0.2s ease'
+                             }">
+                        </div>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 15px; font-style: italic;">
+                        Info: Du kannst jederzeit eigene Bilder in den Ordner "hintergruende" packen und die Dateinamen in der app.js eintragen.
+                    </p>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <div class="board">
+    <div class="board" :style="{ backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(' + settings.hintergrund + ')' }">
+
         <div v-for="(w, index) in widgets"
              :key="w.id"
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
