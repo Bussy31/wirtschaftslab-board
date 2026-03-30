@@ -65,6 +65,13 @@ const app = createApp({
         }, 1000);
     },
     methods: {
+        resetAll() {
+            if (confirm("⚠️ ACHTUNG: Möchtest du wirklich ALLES löschen? Alle Klassen, Schüler und Einstellungen gehen unwiderruflich verloren!")) {
+                localStorage.clear();
+                alert("Das Board wurde auf Werkseinstellungen zurückgesetzt.");
+                window.location.reload(); // Seite neu laden, um alles zu säubern
+            }
+        },
         setHintergrund(bg) {
             this.settings.hintergrund = bg;
             localStorage.setItem('hintergrund_' + this.aktiveKlasse, bg);

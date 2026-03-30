@@ -64,7 +64,6 @@
             </div>
 
             <div class="modal-body">
-
                 <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
                     <button @click="activeSettingsTab = 'klassen'"
                             :style="{ background: activeSettingsTab === 'klassen' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
@@ -76,6 +75,7 @@
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         🖼️ Hintergrund
                     </button>
+                    <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'" style="color: #ef4444; border-bottom-color: #ef4444;">⚠️ Reset</button>
                 </div>
 
                 <div v-if="activeSettingsTab === 'klassen'">
@@ -136,7 +136,16 @@
                     <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 15px; font-style: italic;">
                     </p>
                 </div>
-
+                <div v-if="activeSettingsTab === 'reset'" class="tab-content" style="text-align: center; padding: 30px 20px;">
+                    <h3 style="color: #ef4444; margin-top: 0;">Werkseinstellungen</h3>
+                    <p style="color: #94a3b8; max-width: 400px; margin: 0 auto 20px auto;">
+                        Möchtest du alle gespeicherten Daten (Klassen, Schüler und Widgets) löschen?
+                        Das Board wird danach komplett leer neu geladen.
+                    </p>
+                    <button @click="resetAll" class="btn-primary" style="background: #ef4444; padding: 15px 25px; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold;">
+                        🔥 Jetzt alles unwiderruflich löschen
+                    </button>
+                </div>
             </div>
         </div>
     </div>
