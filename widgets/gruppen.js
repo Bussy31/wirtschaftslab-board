@@ -172,11 +172,10 @@ const GruppenWidget = {
                      style="background:rgba(245, 158, 11, 0.1); border:1px dashed rgba(245, 158, 11, 0.4); border-radius:6px; flex-shrink:0; padding:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:45px; align-items:center;">
                     <div v-if="unassigned.length === 0" style="color:rgba(251, 191, 36, 0.5); font-size:0.8rem; width:100%; text-align:center;">Alle Schüler sind eingeteilt! 🎉</div>
                     <span v-for="name in unassigned" :key="name"
-                          class="draggable-name"
-                          draggable="true" 
-                          @dragstart="dragStart($event, name, -1)"
-                          style="background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); color:#fcd34d; padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; cursor:grab; box-shadow:0 2px 2px rgba(0,0,0,0.1);">
-                          {{ name }}
+                      class="draggable-name"
+                      draggable="true" 
+                      @dragstart="dragStart($event, name, -1)"
+                      style="background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); color:#fcd34d; padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; cursor:grab; box-shadow:0 2px 2px rgba(0,0,0,0.1); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;"                          {{ name }}
                     </span>
                 </div>
             </template>
@@ -227,11 +226,7 @@ const GruppenWidget = {
                                :draggable="!widgetData.isTransparent && modus === 'manuell'"
                                @dragstart="dragStart($event, name, index)"
                                style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px; font-size:0.85rem;"
-                               :style="{
-                                   // Drag-Cursor nur im Manuell-Modus (wenn nicht transparent)
-                                   cursor: (!widgetData.isTransparent && modus === 'manuell') ? 'grab' : 'default',
-                                   color: 'white',
-                                   border: '1px solid rgba(255,255,255,0.05)'
+                               style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px; font-size:0.85rem; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;"
                                }">
                              {{ name }}
                          </span>
