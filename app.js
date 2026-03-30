@@ -12,6 +12,7 @@ const app = createApp({
             resizingIndex: null,
             startWidth: 0,
             startHeight: 0,
+            customColor: '#1e293b',
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
 
             showSettings: false,
@@ -63,6 +64,25 @@ const app = createApp({
         setInterval(() => {
             this.aktuelleZeit = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         }, 1000);
+    },
+    computed: {
+        // Berechnet den passenden Style für den Hintergrund
+        boardStyle() {
+            const bg = this.settings.hintergrund;
+            if (!bg) return {}; // Falls noch nichts gewählt ist
+
+            // Wenn der Wert mit einem "#" anfängt, ist es ein Farbcode!
+            if (bg.startsWith('#')) {
+                return { background: bg };
+            }
+
+            // Ansonsten ist es ein normales Bild (mit deiner dunklen Überlagerung)
+            return {
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${bg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            };
+        }
     },
     methods: {
         resetAll() {
