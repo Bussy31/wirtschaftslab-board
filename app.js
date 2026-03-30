@@ -27,7 +27,7 @@ const app = createApp({
                 'hintergruende/bild7.jpg'],
 
             settings: {
-                klassen: [],
+                klassen: ['Standard'],
                 hintergrund: '1e293b'
             },
             neuerKlassenName: '',
@@ -38,6 +38,11 @@ const app = createApp({
         const savedSettings = localStorage.getItem('boardSettings');
         if (savedSettings) {
             this.settings = JSON.parse(savedSettings);
+        }
+
+        if (!this.settings.klassen || this.settings.klassen.length === 0) {
+            this.settings.klassen = ['Standard'];
+            localStorage.setItem('boardSettings', JSON.stringify(this.settings));
         }
 
         if (!this.settings.hintergrund) {
