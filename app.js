@@ -4,6 +4,15 @@ const app = createApp({
     data() {
         return {
             widgets: [],
+            selectedWidgets: [],
+            isSelecting: false,
+            selectionBox: { x: 0, y: 0, w: 0, h: 0 },
+            selectionStartX: 0,
+            selectionStartY: 0,
+            draggingIds: [],
+            dragStartX: 0,
+            dragStartY: 0,
+            dragInitialPositions: [],
             draggingIndex: null,
             offsetX: 0,
             offsetY: 0,
@@ -190,13 +199,35 @@ const app = createApp({
             this.widgets.splice(index, 1);
             this.saveToLocal();
         },
+        startSelection(e) {
+            // Nur bei linker Maustaste oder Touch starten
+            if (e.type === 'mousedown' && e.button !== 0) return;
+
+            this.isSelecting = true;
+            this.selectedWidgets = []; // Auswahl aufheben, wenn man neu klickt
+
+            let clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            let clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
+            this.selectionStartX = clientX;
+            this.selectionStartY = clientY;
+            this.selectionBox = { x: clientX, y: clientY, w: 0, h: 0 };
+        },
         startDrag(e, index) {
             const isHeader = e.target.closest('.widget-header');
             if (!isHeader) return;
             if (e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') return;
 
-            this.draggingIndex = index;
             const widget = this.widgets[index];
+
+            // Wenn das angeklickte Widget noch NICHT markiert ist,
+            // heben wir die alte Auswahl auf und markieren NUR dieses eine.
+            if (!this.selectedWidgets.includes(widget.id)) {
+                this.selectedWidgets = [widget.id];
+            }
+
+            // Wir merken uns alle aktuell markierten Widgets zum Ziehen
+            this.draggingIds = [...this.selectedWidgets];
 
             let clientX, clientY;
             if (e.type === 'touchstart') {
@@ -207,28 +238,17 @@ const app = createApp({
                 clientY = e.clientY;
             }
 
-            this.offsetX = clientX - widget.x;
-            this.offsetY = clientY - widget.y;
-        },
-        startResize(e, index) {
-            this.resizingIndex = index;
-            const widget = this.widgets[index];
-            let clientX, clientY;
-            if (e.type === 'touchstart') {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            this.startWidth = widget.width;
-            this.startHeight = widget.height;
-            this.offsetX = clientX;
-            this.offsetY = clientY;
+            this.dragStartX = clientX;
+            this.dragStartY = clientY;
+
+            // Startpositionen aller ausgewählten Widgets abspeichern
+            this.dragInitialPositions = this.widgets
+                .filter(w => this.draggingIds.includes(w.id))
+                .map(w => ({ id: w.id, x: w.x, y: w.y }));
         },
         onDrag(e) {
-            // Wenn wir ziehen ODER vergrößern, das Scrollen auf dem iPad blockieren
-            if (e.type === 'touchmove' && (this.draggingIndex !== null || this.resizingIndex !== null)) {
+            // Verhindert das Scrollen beim Ziehen
+            if (e.type === 'touchmove' && (this.draggingIds.length > 0 || this.resizingIndex !== null || this.isSelecting)) {
                 e.preventDefault();
             }
 
@@ -241,25 +261,64 @@ const app = createApp({
                 clientY = e.clientY;
             }
 
-            // 1. Fall: Wir verschieben das Widget
-            if (this.draggingIndex !== null) {
-                const w = this.widgets[this.draggingIndex];
-                let newX = clientX - this.offsetX;
-                let newY = clientY - this.offsetY;
+            // 1. FALL: Wir ziehen ein AUSWAHL-RECHTECK
+            if (this.isSelecting) {
+                let x = Math.min(clientX, this.selectionStartX);
+                let y = Math.min(clientY, this.selectionStartY);
+                let w = Math.abs(clientX - this.selectionStartX);
+                let h = Math.abs(clientY - this.selectionStartY);
+
+                this.selectionBox = { x, y, w, h };
+
+                // 50% Überschneidungs-Check (Mathe-Magie)
+                this.selectedWidgets = this.widgets.filter(widget => {
+                    let wX = widget.x;
+                    let wY = widget.y;
+                    let wW = widget.width;
+                    let wH = widget.height;
+                    let widgetArea = wW * wH;
+
+                    // Bereich ermitteln, der sich überlappt
+                    let overX = Math.max(x, wX);
+                    let overY = Math.max(y, wY);
+                    let overW = Math.max(0, Math.min(x + w, wX + wW) - overX);
+                    let overH = Math.max(0, Math.min(y + h, wY + wH) - overY);
+                    let overlapArea = overW * overH;
+
+                    // Mindestens 50% der Widget-Fläche muss im Rechteck liegen
+                    return overlapArea >= (widgetArea * 0.5);
+                }).map(w => w.id);
+            }
+            // 2. FALL: Wir VERSCHIEBEN WIDGETS
+            else if (this.draggingIds.length > 0) {
+                // Wie weit hat sich die Maus seit dem Klick bewegt?
+                let deltaX = clientX - this.dragStartX;
+                let deltaY = clientY - this.dragStartY;
 
                 const toolbarHeight = 60;
-                const maxX = window.innerWidth - w.width;
-                const maxY = window.innerHeight - w.height;
 
-                if (newX < 0) newX = 0;
-                if (newX > maxX) newX = maxX;
-                if (newY < toolbarHeight) newY = toolbarHeight;
-                if (newY > maxY) newY = maxY;
+                // Wende diese Bewegung auf ALLE markierten Widgets an
+                this.dragInitialPositions.forEach(initPos => {
+                    const w = this.widgets.find(widget => widget.id === initPos.id);
+                    if (w) {
+                        let newX = initPos.x + deltaX;
+                        let newY = initPos.y + deltaY;
 
-                w.x = newX;
-                w.y = newY;
+                        const maxX = window.innerWidth - w.width;
+                        const maxY = window.innerHeight - w.height;
+
+                        // Grenzen einhalten
+                        if (newX < 0) newX = 0;
+                        if (newX > maxX) newX = maxX;
+                        if (newY < toolbarHeight) newY = toolbarHeight;
+                        if (newY > maxY) newY = maxY;
+
+                        w.x = newX;
+                        w.y = newY;
+                    }
+                });
             }
-            // 2. Fall: Wir machen das Widget größer/kleiner (iPad Fix)
+            // 3. FALL: Wir VERGRÖßERN (RESIZE) EIN WIDGET
             else if (this.resizingIndex !== null) {
                 const w = this.widgets[this.resizingIndex];
                 let diffX = clientX - this.offsetX;
@@ -268,7 +327,6 @@ const app = createApp({
                 let newWidth = this.startWidth + diffX;
                 let newHeight = this.startHeight + diffY;
 
-                // Mindestgröße, damit es nicht komplett verschwindet
                 if (newWidth < 200) newWidth = 200;
                 if (newHeight < 150) newHeight = 150;
 
@@ -277,10 +335,14 @@ const app = createApp({
             }
         },
         stopDrag() {
-            if (this.draggingIndex !== null || this.resizingIndex !== null) {
-                this.draggingIndex = null;
+            // Aufräumen, wenn wir die Maustaste / den Finger loslassen
+            if (this.draggingIds.length > 0 || this.resizingIndex !== null) {
+                this.draggingIds = [];
                 this.resizingIndex = null;
                 this.saveToLocal();
+            }
+            if (this.isSelecting) {
+                this.isSelecting = false;
             }
         },
         /*updateSizes() {
