@@ -49,22 +49,7 @@
                 <button @click="addWidget('stundenziel','🎯'); showWidgetMenu = false">🎯 Stundenziel</button>
             </div>
         </div>
-        <div class="dropdown">
-            <button class="btn-primary" @click="showWidgetMenu = !showWidgetMenu">➕ Widgets</button>
-            </div>
 
-        <div style="display: flex; gap: 8px; margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 15px; align-items: center; overflow-x: auto; flex-grow: 1;">
-            <template v-for="(w, index) in widgets">
-                <button v-if="w.isMinimized"
-                        :key="'min-'+w.id"
-                        class="btn-primary"
-                        @click="restoreWidget(index)"
-                        :title="w.type + ' wiederherstellen'"
-                        style="background: rgba(59, 130, 246, 0.4); border: 1px dashed #93c5fd; box-shadow: none;">
-                    ⬆️ {{ w.type.charAt(0).toUpperCase() + w.type.slice(1) }}
-                </button>
-            </template>
-        </div>
 
         <div style="flex-grow: 1;"></div>
 
