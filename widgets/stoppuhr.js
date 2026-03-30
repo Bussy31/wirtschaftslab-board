@@ -4,68 +4,98 @@ const StoppuhrWidget = {
         <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; container-type: size; position: relative;">
             
             <div v-show="!widgetData.isTransparent" 
-                 style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px;">
+                 style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; z-index: 10;">
                 
                 <button @click="reset" @mousedown.stop @touchstart.stop
-                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; width: 30px; height: 24px; cursor: pointer; font-size: 0.8rem;">⏹️</button>
+                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem;">
+                    ⏹️ Reset
+                </button>
 
-                <button v-if="!isRunning" @click="start" @mousedown.stop @touchstart.stop
-                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; width: 40px; height: 24px; cursor: pointer; font-size: 0.8rem;">▶️</button>
-                <button v-else @click="stop" @mousedown.stop @touchstart.stop
-                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; width: 40px; height: 24px; cursor: pointer; font-size: 0.8rem;">⏸️</button>
-
-                <div style="width: 1px; height: 15px; background: rgba(255,255,255,0.2); margin: 0 4px;"></div>
-
-                <button @click="$emit('toggle-transparency')" @mousedown.stop @touchstart.stop
-                        style="background: transparent; border: none; cursor: pointer; font-size: 1rem;" title="Transparenz">👻</button>
-                <button @click="$emit('edit')" @mousedown.stop @touchstart.stop
-                        style="background: transparent; border: none; cursor: pointer; font-size: 1rem;" title="Einstellungen">⚙️</button>
+                <button @click="toggle" @mousedown.stop @touchstart.stop
+                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem;">
+                    {{ isRunning ? '⏸️ Pause' : '▶️ Start' }}
+                </button>
             </div>
 
             <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
                 <div :style="{ 
-                        fontSize: '25cqw', 
-                        fontWeight: '800', 
+                        fontSize: '20cqw', 
+                        fontWeight: 'bold', 
                         fontFamily: 'monospace',
                         color: isRunning ? '#60a5fa' : '#ffffff',
                         textShadow: widgetData.isTransparent ? '2px 2px 10px rgba(0,0,0,0.8)' : 'none'
                      }">
-                    {{ formatTime(time) }}
+                    {{ formatTime(elapsed) }}
                 </div>
             </div>
         </div>
     `,
     data() {
         return {
-            time: 0,
-            timer: null,
-            isRunning: false
+            isRunning: false,
+            elapsed: 0,
+            frame: null
+        }
+    },
+    mounted() {
+        // Lade gespeicherten Zustand
+        if (this.widgetData.isRunning) {
+            this.isRunning = true;
+            this.startLoop();
+        } else if (this.widgetData.elapsed) {
+            this.elapsed = this.widgetData.elapsed;
         }
     },
     methods: {
-        formatTime(ms) {
-            const totalSeconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            const centiseconds = Math.floor((ms % 1000) / 10);
-            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')},${centiseconds.toString().padStart(2, '0')}`;
-        },
-        start() {
-            if (!this.isRunning) {
-                this.isRunning = true;
-                const startTime = Date.now() - this.time;
-                this.timer = setInterval(() => {
-                    this.time = Date.now() - startTime;
-                }, 10);
+        toggle() {
+            if (this.isRunning) {
+                this.pause();
+            } else {
+                this.start();
             }
         },
-        stop() {
+        start() {
+            this.isRunning = true;
+            // Falls neu gestartet wird, initialisiere den Zeitstempel
+            if (!this.widgetData.startTimestamp) {
+                this.widgetData.startTimestamp = Date.now() - this.elapsed;
+            } else {
+                this.widgetData.startTimestamp = Date.now() - this.elapsed;
+            }
+            this.startLoop();
+            this.save();
+        },
+        pause() {
             this.isRunning = false;
-            clearInterval(this.timer);
+            cancelAnimationFrame(this.frame);
+            this.save();
         },
         reset() {
-            this.stop();
-            this.time = 0;
+            this.isRunning = false;
+            cancelAnimationFrame(this.frame);
+            this.elapsed = 0;
+            this.widgetData.startTimestamp = null;
+            this.save();
+        },
+        startLoop() {
+            const step = () => {
+                if (!this.isRunning) return;
+                this.elapsed = Date.now() - this.widgetData.startTimestamp;
+                this.frame = requestAnimationFrame(step);
+            };
+            this.frame = requestAnimationFrame(step);
+        },
+        formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+            const centiseconds = Math.floor((ms % 1000) / 10).toString().padStart(2, '0');
+            return `${minutes}:${seconds}.${centiseconds}`;
+        },
+        save() {
+            this.widgetData.isRunning = this.isRunning;
+            this.widgetData.elapsed = this.elapsed;
+            this.$emit('save');
         }
     }
 };

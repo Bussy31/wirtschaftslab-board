@@ -1,82 +1,86 @@
 const CountdownWidget = {
     props: ['widgetData'],
     template: `
-        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; container-type: size; position: relative;">
             
-            <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 3cqw; align-items: center; z-index: 10;">
-                <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 25cqw; min-width: 60px; font-size: clamp(1.2rem, 8cqw, 3.5rem); padding: 1cqw; text-align: center; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
-                <span style="font-size: clamp(1.2rem, 6cqw, 2.5rem); color: rgba(255,255,255,0.7);">min</span>
-                <button @click="startTimer" style="background: #3b82f6; border: none; padding: 1.5cqw 3cqw; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: clamp(1rem, 6cqw, 2.5rem);">Start</button>
+            <div v-show="!widgetData.isTransparent" 
+                 style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; z-index: 10;">
+                
+                <button @click="resetTimer" @mousedown.stop @touchstart.stop
+                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem;">
+                    ⏹️ Reset
+                </button>
+
+                <button @click="toggleTimer" @mousedown.stop @touchstart.stop
+                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.9rem;">
+                    {{ isRunning ? '⏸️ Pause' : '▶️ Start' }}
+                </button>
             </div>
 
-            <div v-else style="width: 90cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5cqh;">
+            <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
                 
-                <div style="font-size: clamp(2rem, 14cqw, 9rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 4px 10px rgba(0,0,0,0.6); line-height: 1.1; color: white;">
-                    {{ formatTime(timeLeft) }}
+                <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 10px; align-items: center;">
+                    <input type="number" v-model.number="eingabeMinuten" min="1" max="99" 
+                           @mousedown.stop @touchstart.stop
+                           style="width: 80px; font-size: 2.5rem; padding: 5px; text-align: center; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+                    <span style="font-size: 1.5rem; color: rgba(255,255,255,0.7);">min</span>
                 </div>
-                
-                <div style="width: 100%; height: clamp(24px, 14cqh, 80px); background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; box-shadow: inset 0 4px 10px rgba(0,0,0,0.7);">
-                    <div :style="{ 
-                        width: barWidth + '%', 
-                        backgroundColor: barColor, 
-                        height: '100%', 
-                        transition: 'width 1s linear, background-color 0.5s ease',
-                        boxShadow: '0 0 4cqw ' + barColor 
-                    }"></div>
+
+                <div v-else :style="{ 
+                        fontSize: '25cqw', 
+                        fontWeight: 'bold', 
+                        fontFamily: 'monospace',
+                        color: timeLeft <= 10 ? '#ef4444' : '#ffffff',
+                        textShadow: widgetData.isTransparent ? '2px 2px 10px rgba(0,0,0,0.8)' : 'none'
+                     }">
+                    {{ formatTime(timeLeft) }}
                 </div>
             </div>
         </div>
     `,
     data() {
         return {
-            eingabeMinuten: 5,
+            eingabeMinuten: this.widgetData.eingabeMinuten || 5,
             timeLeft: this.widgetData.timeLeft || 0,
-            totalTime: this.widgetData.totalTime || 1,
+            totalTime: this.widgetData.totalTime || 0,
             isRunning: this.widgetData.isRunning || false,
             timerInterval: null
         }
     },
-    // NEU: Hier lauscht das Widget auf Klicks aus der Kopfzeile
     watch: {
-        'widgetData.isRunning'(newVal) {
-            this.isRunning = newVal;
-            if (newVal) {
-                this.tick();
-            } else {
-                clearInterval(this.timerInterval);
-            }
-        },
-        'widgetData.resetTrigger'() {
-            this.resetTimer();
+        eingabeMinuten(val) {
+            this.widgetData.eingabeMinuten = val;
+            this.$emit('save');
         }
     },
-    computed: {
-        barWidth() {
-            if (this.totalTime === 0) return 0;
-            return (this.timeLeft / this.totalTime) * 100;
-        },
-        barColor() {
-            const fraction = this.timeLeft / this.totalTime;
-            if (fraction > 0.5) return '#3b82f6';
-            if (fraction > 0.2) return '#fbbf24';
-            return '#ef4444';
-        }
-    },
-    mounted() { if (this.isRunning) this.tick(); },
-    unmounted() { clearInterval(this.timerInterval); },
-    methods: {
-        startTimer() {
-            if (this.eingabeMinuten <= 0) return;
-            this.totalTime = this.eingabeMinuten * 60;
-            this.timeLeft = this.totalTime;
-            this.isRunning = true;
-            this.saveState();
+    mounted() {
+        if (this.isRunning) {
             this.tick();
+        }
+    },
+    methods: {
+        toggleTimer() {
+            if (this.isRunning) {
+                // Pause
+                this.isRunning = false;
+                clearInterval(this.timerInterval);
+                this.saveState();
+            } else {
+                // Start / Weiterlaufen
+                if (this.timeLeft === 0) {
+                    if (this.eingabeMinuten <= 0) return;
+                    this.totalTime = this.eingabeMinuten * 60;
+                    this.timeLeft = this.totalTime;
+                }
+                this.isRunning = true;
+                this.saveState();
+                this.tick();
+            }
         },
         resetTimer() {
             clearInterval(this.timerInterval);
             this.isRunning = false;
-            this.timeLeft = 0;
+            this.timeLeft = 0; // Setzt auf 0, damit das Eingabefeld wieder erscheint
             this.saveState();
         },
         tick() {
