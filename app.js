@@ -42,7 +42,6 @@ const app = createApp({
         }, 1000);
     },
     methods: {
-        // --- BOARD LADEN, SPEICHERN & WECHSELN ---
         loadBoard() {
             const saved = localStorage.getItem('board_' + this.aktiveKlasse);
             if (saved) {
