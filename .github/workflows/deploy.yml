@@ -20,5 +20,5 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "." # Nimmt alle Dateien aus diesem Repository
-          target: "/var/www/html/board" # WICHTIG: Ändere dies zu deinem Ordner auf dem Server!
+          target: "/var/www/html/wirtschaftslab-board" # WICHTIG: Ändere dies zu deinem Ordner auf dem Server!
           rm: true # Löscht alte Dateien auf dem Server vor dem Kopieren (optional, hält es sauber)
