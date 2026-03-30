@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    <div class="board" :style="{ backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(' + settings.hintergrund + ')' }">
+    <div class="board" :style="(settings.hintergrund || '').startsWith('#') ? { background: settings.hintergrund } : { backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(' + settings.hintergrund + ')' }">
 
         <div v-for="(w, index) in widgets"
              :key="w.id"

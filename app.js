@@ -28,7 +28,7 @@ const app = createApp({
 
             settings: {
                 klassen: [],
-                hintergrund: ''
+                hintergrund: '1e293b'
             },
             neuerKlassenName: '',
             aktiveKlasse: 'Standard'
