@@ -14,7 +14,7 @@ const StundenzielWidget = {
 
                 <div style="display: flex; align-items: center; gap: 2px; border-left: 1px solid rgba(255,255,255,0.2); border-right: 1px solid rgba(255,255,255,0.2); padding: 0 8px;">
                     <button @click="changeFontSize(-5)" @mousedown.stop @touchstart.stop
-                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-weight: bold;">-</button>
+                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 15px; height: 15px; cursor: pointer; font-weight: bold;">-</button>
                     <span style="color: #94a3b8; font-size: 0.65rem; min-width: 30px; text-align: center;">TEXT</span>
                     <button @click="changeFontSize(5)" @mousedown.stop @touchstart.stop
                             style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-weight: bold;">+</button>
