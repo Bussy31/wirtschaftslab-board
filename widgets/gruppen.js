@@ -102,11 +102,13 @@ const GruppenWidget = {
                 return;
             }
 
-            // 1. Aus alter Box entfernen
+            // 1. Aus alter Box entfernen (FIX: Nur genau EINEN Eintrag löschen!)
             if (this.selectedSource === -1) {
-                this.unassigned = this.unassigned.filter(n => n !== this.selectedStudent);
+                const idx = this.unassigned.indexOf(this.selectedStudent);
+                if (idx !== -1) this.unassigned.splice(idx, 1);
             } else {
-                this.gruppen[this.selectedSource] = this.gruppen[this.selectedSource].filter(n => n !== this.selectedStudent);
+                const idx = this.gruppen[this.selectedSource].indexOf(this.selectedStudent);
+                if (idx !== -1) this.gruppen[this.selectedSource].splice(idx, 1);
             }
 
             // 2. In neue Box einfügen
