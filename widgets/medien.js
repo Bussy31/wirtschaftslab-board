@@ -3,7 +3,9 @@ const MedienWidget = {
     template: `
         <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; overflow: hidden; position: relative; container-type: size;">
             
-            <div v-if="showList" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">        
+            <div v-if="showList" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+                <div style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; flex-shrink: 0;">Medien wählen:</div>
+                
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; overflow-y: auto; flex-grow: 1; padding: 2px;" class="custom-scrollbar">
                     <div v-for="medium in medien" :key="medium.id" 
                          @click="toggleMedium(medium.id)"
@@ -23,7 +25,7 @@ const MedienWidget = {
                 <button @click="showList = false" 
                         @mousedown.stop @touchstart.stop
                         style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; flex-shrink: 0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <span>übernehmen</span> 
+                    <span>👁️</span> Ansicht übernehmen
                 </button>
             </div>
 
@@ -61,7 +63,9 @@ const MedienWidget = {
             showList: false,
             medien: [
                 { id: 'verbot', icon: '📵', label: 'Geräte wegpacken', color: '#ef4444' },
-                { id: 'analog', icon: '📚', label: 'Analoges Arbeiten', color: '#f59e0b' },
+                { id: 'analog', icon: '📚', label: 'Schulbuch', color: '#f59e0b' },
+                { id: 'heft', icon: '📝', label: 'Heftaufschrieb', color: '#fb923c' },
+                { id: 'rechner', icon: '🧮', label: 'Taschenrechner', color: '#a855f7' },
                 { id: 'tablet', icon: '📱', label: 'Tablets / iPads', color: '#3b82f6' },
                 { id: 'laptop', icon: '💻', label: 'Laptops nutzen', color: '#8b5cf6' },
                 { id: 'kopfhoerer', icon: '🎧', label: 'Kopfhörer erlaubt', color: '#10b981' },
@@ -81,9 +85,22 @@ const MedienWidget = {
         }
     },
     created() {
+        // HIER GEÄNDERT: Array startet komplett leer!
         if (!this.widgetData.activeMedia && !this.widgetData.activeMedium) {
-            this.widgetData.activeMedia = ['verbot'];
+            this.widgetData.activeMedia = [];
             this.showList = true;
+        }
+    },
+    mounted() {
+        // HIER GEÄNDERT: Macht das Widget beim ersten Erstellen automatisch etwas größer
+        if (!this.widgetData.hasResizedMedien) {
+            const widgetElement = this.$el.closest('.widget');
+            if (widgetElement) {
+                widgetElement.style.width = '360px';
+                widgetElement.style.height = '380px';
+            }
+            this.widgetData.hasResizedMedien = true;
+            this.$emit('save');
         }
     },
     methods: {
