@@ -76,6 +76,43 @@ const app = createApp({
     },
 
     methods: {
+        aktualisiereWidgets() {
+            const aktuelleKlasse = this.settings.klassen.find(k => k.name === this.aktiveKlasse);
+
+            if (aktuelleKlasse && aktuelleKlasse.schueler && aktuelleKlasse.schueler.length > 0) {
+                const anwesendeSchueler = aktuelleKlasse.schueler
+                    .filter(s => !s.absent)
+                    .map(s => s.name)
+                    .join('\n');
+
+                if (!anwesendeSchueler) {
+                    alert("Es sind momentan keine anwesenden Schüler in dieser Klasse eingetragen.");
+                    return;
+                }
+
+                let hatAktualisiert = false;
+
+                this.widgets.forEach(w => {
+                    if (w.type === 'gruppen' || w.type === 'zufall') {
+                        w.schuelerListe = anwesendeSchueler;
+                        if (w.type === 'gruppen') {
+                            w.gruppen = [];
+                            w.unassigned = anwesendeSchueler.split('\n');
+                        }
+                        hatAktualisiert = true;
+                    }
+                });
+
+                if (hatAktualisiert) {
+                    this.saveToLocal();
+                    window.location.reload();
+                } else {
+                    alert("Keine Widgets offen, die eine Schülerliste verwenden.");
+                }
+            } else {
+                alert("Keine aktive Klasse gefunden oder die Klasse ist leer.");
+            }
+        },
         resetAll() {
             if (confirm("⚠️ ACHTUNG: Möchtest du wirklich ALLES löschen? Alle Klassen, Schüler und Einstellungen gehen unwiderruflich verloren!")) {
                 localStorage.clear();
