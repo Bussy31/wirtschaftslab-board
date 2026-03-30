@@ -191,10 +191,20 @@ const app = createApp({
             this.saveToLocal();
         },
         startDrag(e, index) {
-            const isHeader = e.target.closest('.widget-header');
-            if (!isHeader) return;
-            if (e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') return;
+            // 1. Prüfen, ob auf ein interaktives Element geklickt wurde
+            const tagName = e.target.tagName.toUpperCase();
 
+            // Wenn man in ein Textfeld, auf einen Button oder ein Dropdown klickt, NICHT ziehen!
+            if (tagName === 'BUTTON' || tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+                return;
+            }
+
+            // Auch abbrechen, wenn ein Element IN einem Button geklickt wurde (z.B. ein Icon)
+            if (e.target.closest('button') || e.target.closest('.close-btn')) {
+                return;
+            }
+
+            // 2. Wenn alles okay ist, starte das Ziehen der Kachel
             this.draggingIndex = index;
             const widget = this.widgets[index];
 
