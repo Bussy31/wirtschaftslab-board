@@ -40,6 +40,11 @@ const app = createApp({
             this.settings = JSON.parse(savedSettings);
         }
 
+        if (!this.settings.klassen || this.settings.klassen.length === 0) {
+            this.showSettings = true;
+            this.activeSettingsTab = 'klassen';
+        }
+
         if (!this.settings.hintergrund) {
             this.settings.hintergrund = '#1e293b';
             this.saveToLocal();
