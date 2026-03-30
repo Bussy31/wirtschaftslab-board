@@ -1,7 +1,7 @@
 const AmpelWidget = {
     props: ['widgetData'],
     template: `
-        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; container-type: size; position: relative;">
+        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; container-type: size; position: relative; overflow: hidden;">
             
             <div style="background: #1e293b; border-radius: 40px; padding: 15px; display: flex; flex-direction: column; gap: 15px; border: 2px solid #334155; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 8px 16px rgba(0,0,0,0.3); z-index: 2;">
                 
@@ -27,16 +27,20 @@ const AmpelWidget = {
                      style="width: clamp(30px, 15cqmin, 80px); height: clamp(30px, 15cqmin, 80px); border-radius: 50%; transition: all 0.2s ease;"></div>
             </div>
 
-            <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 80%; max-width: 200px; background: rgba(30,41,59,0.8); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+            <div v-show="!widgetData.isTransparent"
+                 style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 80%; max-width: 200px; background: rgba(30,41,59,0.8); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center;">
                 
                 <button v-if="!isListening" @click="startListening" @mousedown.stop @touchstart.stop
-                        style="width: 100%; padding: 8px; background: #22c55e; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
-                    🎤 Mikrofon Start
+                        style="width: 100%; padding: 10px; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    🎤 Mikrofon START
                 </button>
                 
                 <button v-else @click="stopListening" @mousedown.stop @touchstart.stop
-                        style="width: 100%; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
-                    🛑 Stopp
+                        style="width: 100%; padding: 5px; background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: #ef4444; color: white; border: 2px solid white; border-radius: 10px; width: 60px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; line-height: 1.1; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                        <span style="font-size: 0.8rem; letter-spacing: 0.5px;">STOP</span>
+                        <span style="font-size: 1.8rem; font-weight: 900;">P</span>
+                    </div>
                 </button>
 
                 <div v-if="isListening" style="width: 100%; text-align: center;">
@@ -62,7 +66,6 @@ const AmpelWidget = {
             analyser: null,
             microphone: null,
             animationFrame: null,
-            // Speichere Empfindlichkeit, lade Standard 2.0 wenn leer
             sensitivity: this.widgetData.sensitivity || 2.0
         }
     },
@@ -71,9 +74,8 @@ const AmpelWidget = {
             return this.volume * this.sensitivity;
         },
         activeColor() {
-            if (!this.isListening) return 'none'; // Alles aus, wenn nicht aktiv
+            if (!this.isListening) return 'none';
 
-            // Schwellenwerte für die Ampel
             if (this.adjustedVolume > 75) return 'red';
             if (this.adjustedVolume > 40) return 'yellow';
             return 'green';
@@ -82,12 +84,11 @@ const AmpelWidget = {
     methods: {
         async startListening() {
             try {
-                // Erlaubnis für das Mikrofon anfragen
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 
                 this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 this.analyser = this.audioContext.createAnalyser();
-                this.analyser.smoothingTimeConstant = 0.8; // Macht die Bewegung flüssiger (0-1)
+                this.analyser.smoothingTimeConstant = 0.8;
                 this.analyser.fftSize = 256;
 
                 this.microphone = this.audioContext.createMediaStreamSource(stream);
@@ -97,8 +98,8 @@ const AmpelWidget = {
                 this.measureVolume();
 
             } catch (err) {
-                console.error("Mikrofon-Zugriff verweigert oder Fehler:", err);
-                alert("Konnte nicht auf das Mikrofon zugreifen. Bitte erlaube den Zugriff im Browser.");
+                console.error("Mikrofon-Zugriff verweigert:", err);
+                alert("Konnte nicht auf das Mikrofon zugreifen.");
             }
         },
         measureVolume() {
@@ -107,15 +108,12 @@ const AmpelWidget = {
             const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
             this.analyser.getByteFrequencyData(dataArray);
 
-            // Durchschnittliche Lautstärke berechnen
             let sum = 0;
             for (let i = 0; i < dataArray.length; i++) {
                 sum += dataArray[i];
             }
-            // Wert glätten und in die Variable schreiben (max Wert wäre 255, wir skalieren es etwas runter)
             this.volume = (sum / dataArray.length);
 
-            // Loop starten
             this.animationFrame = requestAnimationFrame(this.measureVolume);
         },
         stopListening() {
@@ -132,7 +130,6 @@ const AmpelWidget = {
             this.$emit('save');
         }
     },
-    // Wenn das Widget gelöscht wird, Mikrofon freigeben!
     unmounted() {
         this.stopListening();
     }
