@@ -165,6 +165,8 @@ const GruppenWidget = {
                 </div>
 
                 <div v-if="modus === 'manuell'" 
+                     @mousedown.stop
+                     @touchstart.stop
                      @dragover.prevent 
                      @drop="drop($event, -1)"
                      style="background:rgba(245, 158, 11, 0.1); border:1px dashed rgba(245, 158, 11, 0.4); border-radius:6px; flex-shrink:0; padding:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:45px; align-items:center;">
@@ -183,6 +185,8 @@ const GruppenWidget = {
                  :style="{ paddingRight: widgetData.isTransparent ? '0' : '5px' }" class="custom-scrollbar">
                 
                 <div v-for="(gruppe, index) in gruppen" :key="index"
+                     @mousedown.stop
+                     @touchstart.stop
                      @dragover.prevent
                      @drop="drop($event, index)"
                      :style="{
