@@ -31,14 +31,18 @@ const AmpelWidget = {
                  style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 80%; max-width: 200px; background: rgba(30,41,59,0.8); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center;">
                 
                 <button v-if="!isListening" @click="startListening" @mousedown.stop @touchstart.stop
-                        style="width: 100%; padding: 10px; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    🎤 Mikrofon START
+                        style="width: 100%; padding: 5px; background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: #22c55e; color: white; border: 2px solid white; border-radius: 10px; width: 60px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; line-height: 1.1; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                        <span style="font-size: 0.8rem; letter-spacing: 0.5px;">START</span>
+                        <span style="font-size: 1.8rem; font-weight: 900;">P</span>
+                    </div>
                 </button>
                 
                 <button v-else @click="stopListening" @mousedown.stop @touchstart.stop
                         style="width: 100%; padding: 5px; background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                        style="width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <div style="background: #ef4444; color: white; border: 2px solid white; border-radius: 10px; width: 60px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; line-height: 1.1; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
                         <span style="font-size: 0.8rem; letter-spacing: 0.5px;">STOP</span>
+                        <span style="font-size: 1.8rem; font-weight: 900;">P</span>
                     </div>
                 </button>
 
