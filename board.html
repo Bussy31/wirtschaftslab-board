@@ -122,14 +122,24 @@
                 <div v-if="activeSettingsTab === 'hintergrund'">
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;">
 
-                        <div style="position: relative; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2); background: linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6);">
+                        <div :style="{
+                                 position: 'relative',
+                                 height: '90px',
+                                 borderRadius: '8px',
+                                 overflow: 'hidden',
+                                 cursor: 'pointer',
+                                 background: 'linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6)',
+                                 border: (settings.hintergrund && settings.hintergrund.startsWith('#')) ? '3px solid #10b981' : '3px solid transparent',
+                                 boxShadow: (settings.hintergrund && settings.hintergrund.startsWith('#')) ? '0 0 10px rgba(16, 185, 129, 0.8)' : 'none'
+                             }">
 
                             <input type="color"
-                                   v-model="customColor"
-                                   @input="settings.hintergrund = customColor; saveSettings()"
+                                   :value="settings.hintergrund && settings.hintergrund.startsWith('#') ? settings.hintergrund : '#3b82f6'"
+                                   @input="settings.hintergrund = $event.target.value; saveToLocal()"
                                    style="position: absolute; top: -10px; left: -10px; width: 200%; height: 200%; opacity: 0; cursor: pointer; z-index: 2;">
+
                             <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 1;">
-                                <span style="background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                                <span style="background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
                                     🎨 Farbe
                                 </span>
                             </div>
@@ -137,19 +147,15 @@
 
                         <div v-for="bg in availableBackgrounds" :key="bg"
                              @click="setHintergrund(bg)"
+                             class="bg-preview"
                              :style="{
                                  backgroundImage: 'url(' + bg + ')',
-                                 backgroundSize: 'cover',
-                                 backgroundPosition: 'center',
-                                 height: '90px',
-                                 borderRadius: '8px',
-                                 cursor: 'pointer',
                                  border: settings.hintergrund === bg ? '3px solid #10b981' : '3px solid transparent',
-                                 boxShadow: settings.hintergrund === bg ? '0 0 10px rgba(16, 185, 129, 0.8)' : 'none',
-                                 transition: 'all 0.2s ease'
+                                 boxShadow: settings.hintergrund === bg ? '0 0 10px rgba(16, 185, 129, 0.8)' : 'none'
                              }">
                         </div>
                     </div>
+                </div>
                     <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 15px; font-style: italic;">
                     </p>
                 </div>

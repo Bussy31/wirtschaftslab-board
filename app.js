@@ -65,25 +65,7 @@ const app = createApp({
             this.aktuelleZeit = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         }, 1000);
     },
-    computed: {
-        // Berechnet den passenden Style für den Hintergrund
-        boardStyle() {
-            const bg = this.settings.hintergrund;
-            if (!bg) return {}; // Falls noch nichts gewählt ist
 
-            // Wenn der Wert mit einem "#" anfängt, ist es ein Farbcode!
-            if (bg.startsWith('#')) {
-                return { background: bg };
-            }
-
-            // Ansonsten ist es ein normales Bild (mit deiner dunklen Überlagerung)
-            return {
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${bg})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-            };
-        }
-    },
     methods: {
         resetAll() {
             if (confirm("⚠️ ACHTUNG: Möchtest du wirklich ALLES löschen? Alle Klassen, Schüler und Einstellungen gehen unwiderruflich verloren!")) {
@@ -408,6 +390,25 @@ const app = createApp({
         },
         onFullscreenChange() {
             this.isFullscreen = !!document.fullscreenElement;
+        }
+    },
+    computed: {
+        // Berechnet den passenden Style für den Hintergrund
+        boardStyle() {
+            const bg = this.settings.hintergrund;
+            if (!bg) return {}; // Falls noch nichts gewählt ist
+
+            // Wenn der Wert mit einem "#" anfängt, ist es ein Farbcode!
+            if (bg.startsWith('#')) {
+                return { background: bg };
+            }
+
+            // Ansonsten ist es ein normales Bild (mit deiner dunklen Überlagerung)
+            return {
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${bg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            };
         }
     }
 });
