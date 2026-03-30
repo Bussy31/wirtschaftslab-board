@@ -146,8 +146,7 @@ button:hover {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* --- Widgets --- */
-/* --- Widgets --- */
+
 .widget {
     position: absolute;
     background: var(--widget-bg);
@@ -231,6 +230,33 @@ button:hover {
 .widget-header, .btn-primary, .schueler-tag {
     -webkit-user-select: none;
     user-select: none;
+}
+
+/* Versteckt das Handle im Transparent-Modus */
+.widget.ghost-mode .custom-resize-handle {
+    opacity: 0;
+    pointer-events: none; /* Verhindert, dass man es aus Versehen greift */
+    transition: opacity 0.3s ease;
+}
+
+/* Zeigt das Handle nur, wenn man die Kachel berührt/darüberfährt */
+.widget.ghost-mode:hover .custom-resize-handle,
+.widget.ghost-mode:active .custom-resize-handle {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Optional: Damit man im Transparent-Modus auch den Header
+   wieder sieht, wenn man ihn anfassen will (hast du ja schon ähnlich drin) */
+.widget.ghost-mode:hover .widget-header {
+    opacity: 1;
+}
+
+.draggable-name {
+    -webkit-user-select: none;   /* Verhindert Textmarkierung */
+    -webkit-touch-callout: none; /* Verhindert das Kontextmenü (Suche) bei langem Drücken */
+    user-select: none;
+    touch-action: none;          /* Hilft dem iPad zu verstehen, dass wir hier selbst ziehen */
 }
 
 .close-btn {

@@ -97,19 +97,22 @@ const GruppenWidget = {
             if (!name || isNaN(fromIndex)) return;
             if (fromIndex === toIndex) return; // Nichts zu tun
 
-            // 1. Aus der alten Quelle entfernen
+            // 1. Aus der alten Quelle entfernen (WICHTIG: nur EINEN Eintrag löschen!)
             if (fromIndex === -1) {
-                this.unassigned = this.unassigned.filter(n => n !== name);
+                const idx = this.unassigned.indexOf(name);
+                if (idx !== -1) this.unassigned.splice(idx, 1); // Löscht exakt 1 Element an dieser Position
             } else {
-                this.gruppen[fromIndex] = this.gruppen[fromIndex].filter(n => n !== name);
+                const idx = this.gruppen[fromIndex].indexOf(name);
+                if (idx !== -1) this.gruppen[fromIndex].splice(idx, 1);
             }
 
-            // 2. Ins neue Ziel einfügen
+            // 2. Ins neue Ziel einfügen (Einfach pushen, Duplikate sind jetzt erlaubt)
             if (toIndex === -1) {
-                if (!this.unassigned.includes(name)) this.unassigned.push(name);
+                this.unassigned.push(name);
             } else {
-                if (!this.gruppen[toIndex].includes(name)) this.gruppen[toIndex].push(name);
+                this.gruppen[toIndex].push(name);
             }
+
             this.saveState();
         }
     },
@@ -143,6 +146,7 @@ const GruppenWidget = {
                      style="background:rgba(245, 158, 11, 0.1); border:1px dashed rgba(245, 158, 11, 0.4); border-radius:6px; flex-shrink:0; padding:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:45px; align-items:center;">
                     <div v-if="unassigned.length === 0" style="color:rgba(251, 191, 36, 0.5); font-size:0.8rem; width:100%; text-align:center;">Alle Schüler sind eingeteilt! 🎉</div>
                     <span v-for="name in unassigned" :key="name"
+                          class="draggable-name"
                           draggable="true" 
                           @dragstart="dragStart($event, name, -1)"
                           style="background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); color:#fcd34d; padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; cursor:grab; box-shadow:0 2px 2px rgba(0,0,0,0.1);">
@@ -191,6 +195,7 @@ const GruppenWidget = {
                      
                      <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
                          <span v-for="name in gruppe" :key="name"
+                               class="draggable-name"
                                :draggable="!widgetData.isTransparent && modus === 'manuell'"
                                @dragstart="dragStart($event, name, index)"
                                style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px; font-size:0.85rem;"
