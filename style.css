@@ -212,6 +212,27 @@ button:hover {
     cursor: text;
 }
 
+/* --- APPLE & SAFARI OPTIMIERUNG FÜR DAS RESIZE-FELD --- */
+.widget::-webkit-resizer {
+    background-color: var(--accent);
+    /* Macht ein schickes, geriffeltes Muster unten rechts */
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 3px,
+        rgba(255, 255, 255, 0.5) 3px,
+        rgba(255, 255, 255, 0.5) 6px
+    );
+    border-top-left-radius: 8px; /* Leicht abgerundet nach innen */
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Verhindert, dass Text auf dem iPad beim versehentlichen Doppeltippen markiert wird */
+.widget-header, .btn-primary, .schueler-tag {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 .close-btn {
     color: #ef4444;
     cursor: pointer;
