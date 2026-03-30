@@ -82,7 +82,7 @@ const MedienWidget = {
     },
     created() {
         if (!this.widgetData.activeMedia && !this.widgetData.activeMedium) {
-            this.widgetData.activeMedia = ['verbot'];
+            this.widgetData.activeMedia = [];
             this.showList = true;
         }
     },
