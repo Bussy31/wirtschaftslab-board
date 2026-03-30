@@ -113,6 +113,17 @@ const app = createApp({
                 }
             }
         },
+        minimizeWidget(index) {
+            // Setzt den Status auf "minimiert" und speichert
+            this.widgets[index].isMinimized = true;
+            this.saveToLocal();
+        },
+
+        restoreWidget(index) {
+            // Holt das Widget zurück
+            this.widgets[index].isMinimized = false;
+            this.saveToLocal();
+        },
         resetAll() {
             if (confirm("⚠️ ACHTUNG: Möchtest du wirklich ALLES löschen? Alle Klassen, Schüler und Einstellungen gehen unwiderruflich verloren!")) {
                 localStorage.clear();

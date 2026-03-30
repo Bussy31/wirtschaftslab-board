@@ -47,9 +47,23 @@
                 <button @click="addWidget('medien','📱'); showWidgetMenu = false">📱 Mediennutzung</button>
                 <button @click="addWidget('ampel','🚦'); showWidgetMenu = false">🚦 Lärmampel</button>
                 <button @click="addWidget('stundenziel','🎯'); showWidgetMenu = false">🎯 Stundenziel</button>
-
-
             </div>
+        </div>
+        <div class="dropdown">
+            <button class="btn-primary" @click="showWidgetMenu = !showWidgetMenu">➕ Widgets</button>
+            </div>
+
+        <div style="display: flex; gap: 8px; margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 15px; align-items: center; overflow-x: auto; flex-grow: 1;">
+            <template v-for="(w, index) in widgets">
+                <button v-if="w.isMinimized"
+                        :key="'min-'+w.id"
+                        class="btn-primary"
+                        @click="restoreWidget(index)"
+                        :title="w.type + ' wiederherstellen'"
+                        style="background: rgba(59, 130, 246, 0.4); border: 1px dashed #93c5fd; box-shadow: none;">
+                    ⬆️ {{ w.type.charAt(0).toUpperCase() + w.type.slice(1) }}
+                </button>
+            </template>
         </div>
 
         <div style="flex-grow: 1;"></div>
@@ -172,6 +186,7 @@
         <div v-for="(w, index) in widgets"
              :key="w.id"
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
+             v-show="!w.isMinimized"
              :style="{
                  left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
                  boxSizing: 'border-box'
@@ -228,7 +243,7 @@
                     </button>
 
 
-
+                    <span style="cursor: pointer; margin-right: 12px; font-weight: bold; font-size: 1.1rem; padding-bottom: 5px; line-height: 1;" @click.stop="minimizeWidget(index)" title="Minimieren">_</span>
                     <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
                 </div>
             </div>
