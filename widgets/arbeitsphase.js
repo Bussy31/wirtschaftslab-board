@@ -17,10 +17,8 @@ const ArbeitsphaseWidget = {
 
             <div v-else 
                  @click="showList = true"
-                 :style="{ backgroundColor: activePhaseData.color + '15', borderColor: activePhaseData.color, boxShadow: '0 8px 24px ' + activePhaseData.color + '20' }"
-                 style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; border: 2px solid; cursor: pointer; transition: all 0.3s ease; text-align: center; position: relative;">
-                 
-                 <div style="position: absolute; top: 8px; right: 8px; color: #94a3b8; font-size: 0.7rem; opacity: 0.6;">🔄 Ändern</div>
+                 :style="displayModeStyle"
+                 style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; text-align: center; position: relative;">
                  
                  <span style="font-size: clamp(3rem, 35cqmin, 8rem); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); line-height: 1.2;">{{ activePhaseData.icon }}</span>
                  
@@ -48,6 +46,16 @@ const ArbeitsphaseWidget = {
         activePhaseData() {
             // Findet die Daten zur aktuell gespeicherten Phase
             return this.phasen.find(p => p.id === this.widgetData.activePhase) || this.phasen[0];
+        },
+        // NEU: Steuert Hintergrund & Schatten dynamisch basierend auf dem Ghost-Mode
+        displayModeStyle() {
+            const phase = this.activePhaseData;
+            const isGhost = this.widgetData.isTransparent; // Holt sich den Ghost-Status vom Board
+
+            return {
+                backgroundColor: isGhost ? 'transparent' : phase.color + '15', // Transparent im Ghost-Mode
+                boxShadow: isGhost ? 'none' : '0 8px 24px ' + phase.color + '20'   // Kein Schatten im Ghost-Mode
+            };
         }
     },
     created() {
