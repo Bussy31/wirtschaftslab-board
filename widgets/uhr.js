@@ -1,33 +1,56 @@
-const UhrWidget = {
-    props: ['widgetData'],
+// uhr.js
+app.component('uhr-widget', {
     template: `
-        <div style="position: relative; container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
-            
-            <div v-if="!widgetData.isAnalog" style="font-size: clamp(1.5rem, 18cqw, 6rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">
-                {{ zeit }}
-            </div>
-            
-            <svg v-else viewBox="0 0 100 100" style="width: 80cqmin; height: 80cqmin; max-width: 100%; max-height: 100%; filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.4));">
-                <circle cx="50" cy="50" r="48" fill="rgba(30, 41, 59, 0.8)" stroke="#3b82f6" stroke-width="2"/>
-                <line v-for="n in 12" :key="n" x1="50" y1="6" x2="50" y2="12" stroke="#94a3b8" stroke-width="2" :transform="'rotate(' + (n * 30) + ' 50 50)'" />
-                <line x1="50" y1="50" x2="50" y2="25" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" :transform="'rotate(' + stundenWinkel + ' 50 50)'" />
-                <line x1="50" y1="50" x2="50" y2="12" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + minutenWinkel + ' 50 50)'" />
-                <line x1="50" y1="50" x2="50" y2="10" stroke="#ef4444" stroke-width="1" stroke-linecap="round" :transform="'rotate(' + sekundenWinkel + ' 50 50)'" />
-                <circle cx="50" cy="50" r="2.5" fill="#ef4444"/>
-            </svg>
+        <div class="uhr-container" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; position: relative;">
+            <svg viewBox="0 0 200 200" style="width: 100%; height: 100%; display: block; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));">
+                
+                <circle cx="100" cy="100" r="96" stroke="rgba(255,255,255,0.1)" fill="none" stroke-width="1.5"/>
 
+                <line x1="100" y1="8" x2="100" y2="24" stroke="#fafafa" stroke-width="4" stroke-linecap="round"/> <line x1="192" y1="100" x2="176" y2="100" stroke="#fafafa" stroke-width="4" stroke-linecap="round"/> <line x1="100" y1="192" x2="100" y2="176" stroke="#fafafa" stroke-width="4" stroke-linecap="round"/> <line x1="8" y1="100" x2="24" y2="100" stroke="#fafafa" stroke-width="4" stroke-linecap="round"/> <line class="hour-hand" x1="100" y1="100" x2="100" y2="58" 
+                      stroke="#fafafa" stroke-width="7" stroke-linecap="round" 
+                      :transform="\'rotate(\' + time.hourRotation + \' 100 100)\'"/>
+
+                <line class="minute-hand" x1="100" y1="100" x2="100" y2="28" 
+                      stroke="#fafafa" stroke-width="5" stroke-linecap="round" 
+                      :transform="\'rotate(\' + time.minuteRotation + \' 100 100)\'"/>
+
+                <line class="second-hand" x1="100" y1="115" x2="100" y2="18" 
+                      stroke="#f97316" stroke-width="2" stroke-linecap="round" 
+                      :transform="\'rotate(\' + time.secondRotation + \' 100 100)\'"/>
+
+                <circle cx="100" cy="100" r="7" fill="#fafafa"/>
+                <circle cx="100" cy="100" r="3" fill="#ea580c"/> 
+            </svg>
         </div>
     `,
-    data() { return { jetzt: new Date() } },
-    computed: {
-        zeit() { return this.jetzt.toLocaleTimeString('de-DE'); },
-        stundenWinkel() { return ((this.jetzt.getHours() % 12) * 30) + (this.jetzt.getMinutes() * 0.5); },
-        minutenWinkel() { return (this.jetzt.getMinutes() * 6) + (this.jetzt.getSeconds() * 0.1); },
-        sekundenWinkel() { return this.jetzt.getSeconds() * 6; }
+    props: ['widgetData'],
+    data() {
+        return {
+            time: {
+                hourRotation: 0,
+                minuteRotation: 0,
+                secondRotation: 0
+            },
+            interval: null
+        };
     },
     mounted() {
-        if (this.widgetData.isAnalog === undefined) this.widgetData.isAnalog = false;
-        this.timer = setInterval(() => { this.jetzt = new Date(); }, 1000);
+        this.updateClock(); // Sofort einmal setzen
+        this.interval = setInterval(this.updateClock, 1000);
     },
-    unmounted() { clearInterval(this.timer); }
-};
+    unmounted() {
+        clearInterval(this.interval);
+    },
+    methods: {
+        updateClock() {
+            const now = new Date();
+            const sec = now.getSeconds();
+            const min = now.getMinutes();
+            const hour = now.getHours();
+
+            this.time.secondRotation = (sec * 6); // 360 / 60
+            this.time.minuteRotation = (min * 6) + (sec * 0.1); // 360 / 60
+            this.time.hourRotation = (hour * 30) + (min * 0.5); // 360 / 12
+        }
+    }
+});
