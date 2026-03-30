@@ -33,16 +33,10 @@ const app = createApp({
         }
     },
     mounted() {
-        // 1. Einstellungen (Klassen & Hintergrund) laden
+        // 1. Einstellungen (Klassen) laden
         const savedSettings = localStorage.getItem('boardSettings');
         if (savedSettings) {
             this.settings = JSON.parse(savedSettings);
-            // Fallback: Wenn noch kein Hintergrund gespeichert war, nimm das erste Bild
-            if (!this.settings.hintergrund) {
-                this.settings.hintergrund = this.availableBackgrounds[0];
-            }
-        } else {
-            this.settings.hintergrund = this.availableBackgrounds[0];
         }
 
         // 2. Zuletzt aktives Profil laden
@@ -67,17 +61,26 @@ const app = createApp({
     methods: {
         // --- NEU: HINTERGRUND SETZEN ---
         setHintergrund(bg) {
-            this.settings.hintergrund = bg;
-            this.saveSettings();
+            this.settings.hintergrund = bg; // Ändert das Bild sofort im Browser
+            localStorage.setItem('hintergrund_' + this.aktiveKlasse, bg); // Speichert es nur für diese Klasse
         },
 
         // --- BOARD LADEN, SPEICHERN & WECHSELN ---
         loadBoard() {
+            // 1. Widgets der Klasse laden
             const saved = localStorage.getItem('board_' + this.aktiveKlasse);
             if (saved) {
                 this.widgets = JSON.parse(saved);
             } else {
                 this.widgets = [];
+            }
+
+            // 2. Hintergrund für diese spezielle Klasse laden
+            const savedBg = localStorage.getItem('hintergrund_' + this.aktiveKlasse);
+            if (savedBg) {
+                this.settings.hintergrund = savedBg;
+            } else {
+                this.settings.hintergrund = this.availableBackgrounds[0]; // Standardbild
             }
         },
         saveToLocal() {
