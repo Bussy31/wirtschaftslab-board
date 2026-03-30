@@ -110,11 +110,7 @@ const app = createApp({
                 if (hatAktualisiert) {
                     this.saveToLocal();
                     window.location.reload();
-                } else {
-                    alert("Keine Widgets offen, die eine Schülerliste verwenden.");
                 }
-            } else {
-                alert("Keine aktive Klasse gefunden oder die Klasse ist leer.");
             }
         },
         resetAll() {
