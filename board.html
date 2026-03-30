@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
     <title>wirtschaftslab-board</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -22,6 +23,12 @@
         .widget.ghost-mode:hover .widget-header {
             opacity: 1;
         }
+        .draggable-name {
+            -webkit-touch-callout: none !important; /* Blockiert Link-Vorschau */
+            -webkit-user-select: none !important;    /* Blockiert Textmarkierung */
+            user-select: none !important;
+            touch-action: none !important;           /* Verhindert Scrollen beim Ziehen */
+}
     </style>
 </head>
 <body>
