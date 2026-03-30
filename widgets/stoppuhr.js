@@ -3,22 +3,17 @@ const StoppuhrWidget = {
     template: `
         <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             
-            <div style="font-size: clamp(2rem, 15cqw, 5rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-bottom: 20px;">
+            <div :style="{ 
+                fontSize: 'clamp(2rem, 18cqw, 8rem)', 
+                fontWeight: 'bold', 
+                fontVariantNumeric: 'tabular-nums', 
+                textShadow: '0 4px 10px rgba(0,0,0,0.5)',
+                color: isRunning ? '#60a5fa' : 'white',
+                transition: 'color 0.3s ease'
+            }">
                 {{ formatTime(elapsed) }}
             </div>
             
-            <div style="display: flex; gap: 10px;">
-                <button v-if="!isRunning" @click="start" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 6px; padding: 6px 16px; color: #34d399; cursor: pointer; font-size: 1.1rem;">
-                    ▶ Start
-                </button>
-                <button v-else @click="pause" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 16px; color: white; cursor: pointer; font-size: 1.1rem;">
-                    ⏸ Pause
-                </button>
-                <button @click="reset" style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 6px 16px; color: #fca5a5; cursor: pointer; font-size: 1.1rem;">
-                    ⏹ Reset
-                </button>
-            </div>
-
         </div>
     `,
     data() {
@@ -28,10 +23,26 @@ const StoppuhrWidget = {
             frame: null
         }
     },
+    watch: {
+        // Reagiert auf Start/Pause von oben
+        'widgetData.isRunning'(newVal) {
+            this.isRunning = newVal;
+            if (newVal) {
+                // Zeitstempel berechnen (Aktuelle Zeit minus bereits vergangene Zeit)
+                this.widgetData.startTimestamp = Date.now() - this.elapsed;
+                this.startLoop();
+            } else {
+                cancelAnimationFrame(this.frame);
+                this.save();
+            }
+        },
+        // Reagiert auf Stopp/Reset von oben
+        'widgetData.resetTrigger'() {
+            this.reset();
+        }
+    },
     mounted() {
-        // Wenn die Stoppuhr lief und wir einen Start-Zeitstempel haben, berechne die exakte Zeit!
-        if (this.isRunning && this.widgetData.startTimestamp) {
-            this.elapsed = Date.now() - this.widgetData.startTimestamp;
+        if (this.isRunning) {
             this.startLoop();
         }
     },
@@ -39,33 +50,22 @@ const StoppuhrWidget = {
         cancelAnimationFrame(this.frame);
     },
     methods: {
-        start() {
-            this.isRunning = true;
-            // Wir merken uns den exakten Start-Moment in der Zeit (abzüglich der Zeit, die schon lief)
-            this.widgetData.startTimestamp = Date.now() - this.elapsed;
-            this.startLoop();
-            this.save();
-        },
-        pause() {
-            this.isRunning = false;
-            cancelAnimationFrame(this.frame);
-            this.save();
-        },
-        reset() {
-            this.isRunning = false;
-            cancelAnimationFrame(this.frame);
-            this.elapsed = 0;
-            this.widgetData.startTimestamp = null;
-            this.save();
-        },
         startLoop() {
             const step = () => {
                 if (!this.isRunning) return;
-                // Wir berechnen die Zeit immer relativ zum Start-Zeitstempel -> Perfekte Genauigkeit auch bei Refresh!
                 this.elapsed = Date.now() - this.widgetData.startTimestamp;
                 this.frame = requestAnimationFrame(step);
             };
             this.frame = requestAnimationFrame(step);
+        },
+        reset() {
+            this.isRunning = false;
+            this.widgetData.isRunning = false;
+            cancelAnimationFrame(this.frame);
+            this.elapsed = 0;
+            this.widgetData.elapsed = 0;
+            this.widgetData.startTimestamp = null;
+            this.$emit('save');
         },
         formatTime(ms) {
             const totalSeconds = Math.floor(ms / 1000);
