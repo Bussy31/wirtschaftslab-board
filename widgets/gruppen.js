@@ -175,9 +175,8 @@ const GruppenWidget = {
                           class="draggable-name"
                           draggable="true" 
                           @dragstart="dragStart($event, name, -1)"
-                          @contextmenu.prevent
-                          style="background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); color:#fcd34d; padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; cursor:grab; box-shadow:0 2px 2px rgba(0,0,0,0.1); touch-action: none;">
-                          <span style="pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;">{{ name }}</span>
+                          style="background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); color:#fcd34d; padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; cursor:grab; box-shadow:0 2px 2px rgba(0,0,0,0.1);">
+                          {{ name }}
                     </span>
                 </div>
             </template>
@@ -222,18 +221,19 @@ const GruppenWidget = {
                          <span v-if="!widgetData.isTransparent" style="font-size:0.7rem; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:10px;">{{ gruppe.length }}</span>
                      </div>
                      
-                     <span v-for="name in gruppe" :key="name"
+                     <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+                         <span v-for="name in gruppe" :key="name"
                                class="draggable-name"
                                :draggable="!widgetData.isTransparent && modus === 'manuell'"
                                @dragstart="dragStart($event, name, index)"
-                               @contextmenu.prevent
-                               style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px; font-size:0.85rem; touch-action: none;"
+                               style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px; font-size:0.85rem;"
                                :style="{
+                                   // Drag-Cursor nur im Manuell-Modus (wenn nicht transparent)
                                    cursor: (!widgetData.isTransparent && modus === 'manuell') ? 'grab' : 'default',
                                    color: 'white',
                                    border: '1px solid rgba(255,255,255,0.05)'
                                }">
-                             <span style="pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;">{{ name }}</span>
+                             {{ name }}
                          </span>
                          
                          <div v-if="gruppe.length === 0 && !widgetData.isTransparent" style="color:rgba(255,255,255,0.2); font-size:0.75rem; font-style:italic; text-align:center; margin-top:10px;">(Leer)</div>
