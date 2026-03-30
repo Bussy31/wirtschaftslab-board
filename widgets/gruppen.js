@@ -232,4 +232,4 @@ const GruppenWidget = {
 
         </div>
     `
-};owList = !showList" style="background:transparent; border:1px solid
+};
