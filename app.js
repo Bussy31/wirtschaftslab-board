@@ -190,36 +190,7 @@ const app = createApp({
             this.widgets.splice(index, 1);
             this.saveToLocal();
         },
-        startDrag(e, index) {
-            // 1. Prüfen, ob auf ein interaktives Element geklickt wurde
-            const tagName = e.target.tagName.toUpperCase();
 
-            // Wenn man in ein Textfeld, auf einen Button oder ein Dropdown klickt, NICHT ziehen!
-            if (tagName === 'BUTTON' || tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
-                return;
-            }
-
-            // Auch abbrechen, wenn ein Element IN einem Button geklickt wurde (z.B. ein Icon)
-            if (e.target.closest('button') || e.target.closest('.close-btn')) {
-                return;
-            }
-
-            // 2. Wenn alles okay ist, starte das Ziehen der Kachel
-            this.draggingIndex = index;
-            const widget = this.widgets[index];
-
-            let clientX, clientY;
-            if (e.type === 'touchstart') {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-
-            this.offsetX = clientX - widget.x;
-            this.offsetY = clientY - widget.y;
-        },
         startResize(e, index) {
             this.resizingIndex = index;
             const widget = this.widgets[index];
@@ -236,8 +207,38 @@ const app = createApp({
             this.offsetX = clientX;
             this.offsetY = clientY;
         },
+
+        startDrag(e, index) {
+            // 1. Prüfen, ob auf ein interaktives Element geklickt wurde
+            const tagName = e.target.tagName.toUpperCase();
+
+            if (tagName === 'BUTTON' || tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+                return;
+            }
+            if (e.target.closest('button') || e.target.closest('.close-btn')) {
+                return;
+            }
+
+            this.draggingIndex = index;
+            const widget = this.widgets[index];
+
+            let clientX, clientY;
+            if (e.type === 'touchstart') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            this.offsetX = clientX - widget.x;
+            this.offsetY = clientY - widget.y;
+
+            // NEU: Verhindert, dass der Browser während des Klicks Text markieren will
+            document.body.style.userSelect = 'none';
+        },
+
         onDrag(e) {
-            // Wenn wir ziehen ODER vergrößern, das Scrollen auf dem iPad blockieren
             if (e.type === 'touchmove' && (this.draggingIndex !== null || this.resizingIndex !== null)) {
                 e.preventDefault();
             }
@@ -257,17 +258,24 @@ const app = createApp({
                 let newX = clientX - this.offsetX;
                 let newY = clientY - this.offsetY;
 
-                const toolbarHeight = 60;
-                const maxX = window.innerWidth - w.width;
-                const maxY = window.innerHeight - w.height;
+                // NEU: Grenzen großzügig erweitern!
+                // Es bleiben nur noch 50 Pixel sichtbar, damit man das Fenster wieder zurückholen kann.
+                const safeZone = 50;
 
-                if (newX < 0) newX = 0;
-                if (newX > maxX) newX = maxX;
-                if (newY < toolbarHeight) newY = toolbarHeight;
-                if (newY > maxY) newY = maxY;
+                if (newX < -w.width + safeZone) newX = -w.width + safeZone;
+                if (newX > window.innerWidth - safeZone) newX = window.innerWidth - safeZone;
+
+                // Auch nach oben darf geschoben werden (60px ist die obere Toolbar)
+                if (newY < -w.height + safeZone + 60) newY = -w.height + safeZone + 60;
+                if (newY > window.innerHeight - safeZone) newY = window.innerHeight - safeZone;
 
                 w.x = newX;
                 w.y = newY;
+
+                // NEU: Löscht blaue Markierungen, falls doch irgendwo Text erwischt wurde
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                }
             }
             // 2. Fall: Wir machen das Widget größer/kleiner (iPad Fix)
             else if (this.resizingIndex !== null) {
@@ -278,7 +286,6 @@ const app = createApp({
                 let newWidth = this.startWidth + diffX;
                 let newHeight = this.startHeight + diffY;
 
-                // Mindestgröße, damit es nicht komplett verschwindet
                 if (newWidth < 200) newWidth = 200;
                 if (newHeight < 150) newHeight = 150;
 
@@ -286,29 +293,17 @@ const app = createApp({
                 w.height = newHeight;
             }
         },
+
         stopDrag() {
             if (this.draggingIndex !== null || this.resizingIndex !== null) {
                 this.draggingIndex = null;
                 this.resizingIndex = null;
                 this.saveToLocal();
+
+                // NEU: Textauswahl im Browser wieder ganz normal erlauben
+                document.body.style.userSelect = '';
             }
         },
-        /*updateSizes() {
-            const widgetElements = document.querySelectorAll('.widget');
-            let changed = false;
-            widgetElements.forEach((el, index) => {
-                if (this.widgets[index]) {
-                    const newWidth = el.offsetWidth;
-                    const newHeight = el.offsetHeight;
-                    if (this.widgets[index].width !== newWidth || this.widgets[index].height !== newHeight) {
-                        this.widgets[index].width = newWidth;
-                        this.widgets[index].height = newHeight;
-                        changed = true;
-                    }
-                }
-            });
-            if (changed) this.saveToLocal();
-        },*/
 
         exportBoard() {
             const backupData = {
