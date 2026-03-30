@@ -1,45 +1,49 @@
 const StundenzielWidget = {
     props: ['widgetData'],
     template: `
-        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; container-type: size; position: relative;">
+        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; container-type: size; position: relative; overflow: hidden;">
             
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">🎯</span>
-                    <span style="font-weight: 600; color: #94a3b8; font-size: 0.8rem; uppercase; letter-spacing: 1px;">STUNDENZIEL</span>
-                </div>
+            <div v-show="!widgetData.isTransparent" 
+                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 
-                <div style="display: flex; gap: 5px;">
+                <span style="font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">🎯</span>
+                
+                <div style="display: flex; gap: 8px;">
                     <button @click="importFromHandlungsplan" 
                             @mousedown.stop @touchstart.stop
                             title="Vom Handlungsplan übernehmen"
-                            style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #60a5fa; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
-                        <span>📋</span> Import
+                            style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all 0.2s;">
+                        <span>📋</span> IMPORT
                     </button>
                     
                     <button @click="isEditing = !isEditing" 
                             @mousedown.stop @touchstart.stop
-                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem;">
-                        {{ isEditing ? '✅ Fertig' : '✏️ Ändern' }}
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.2s;">
+                        {{ isEditing ? '✅ FERTIG' : '✏️ ÄNDERN' }}
                     </button>
                 </div>
             </div>
 
-            <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center;">
+            <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%;">
                 
                 <textarea v-if="isEditing" 
                           v-model="widgetData.zielText" 
                           @mousedown.stop @touchstart.stop
                           @input="$emit('save')"
-                          placeholder="Was ist das Ziel dieser Stunde?"
-                          style="width: 100%; height: 80%; background: rgba(0,0,0,0.2); color: white; border: 1px dashed rgba(255,255,255,0.3); border-radius: 8px; padding: 10px; font-family: inherit; font-size: 1.1rem; resize: none;"></textarea>
+                          placeholder="Stundenziel hier eingeben..."
+                          style="width: 90%; height: 80%; background: rgba(0,0,0,0.3); color: white; border: 2px dashed rgba(59, 130, 246, 0.5); border-radius: 12px; padding: 15px; font-family: inherit; font-size: 1.2rem; resize: none; text-align: center;"></textarea>
                 
                 <div v-else 
                      @click="isEditing = true"
                      @mousedown.stop @touchstart.stop
-                     :style="{ fontSize: 'clamp(1rem, 8cqmin, 2.5rem)' }"
-                     style="color: #f8fafc; font-weight: 500; line-height: 1.3; cursor: pointer; padding: 10px; width: 100%;">
-                    {{ widgetData.zielText || 'Klicke hier, um ein Ziel einzutragen...' }}
+                     :style="{ 
+                        fontSize: 'clamp(1.5rem, 12cqw, 8rem)', 
+                        lineHeight: '1.1',
+                        fontWeight: '700',
+                        textShadow: widgetData.isTransparent ? '2px 2px 10px rgba(0,0,0,0.5)' : 'none'
+                     }"
+                     style="color: #ffffff; cursor: pointer; padding: 10px; width: 100%; word-wrap: break-word;">
+                    {{ widgetData.zielText || 'Ziel eintragen...' }}
                 </div>
 
             </div>
@@ -58,25 +62,25 @@ const StundenzielWidget = {
     },
     methods: {
         importFromHandlungsplan() {
-            // Wir suchen in der Haupt-App ($root) nach dem Handlungsplan-Widget
+            // Root-Board nach dem Handlungsplan durchsuchen
             const allWidgets = this.$root.widgets;
             const hpWidget = allWidgets.find(w => w.type === 'handlungsplan');
 
             if (hpWidget && hpWidget.schritte && hpWidget.schritte.length > 0) {
-                // Suche den ersten Schritt, der noch NICHT erledigt (done) ist
+                // Den ersten nicht erledigten Schritt finden
                 const nextStep = hpWidget.schritte.find(s => !s.done);
 
                 if (nextStep) {
                     this.widgetData.zielText = nextStep.text;
-                    this.isEditing = false; // Direkt in den Anzeige-Modus wechseln
+                    this.isEditing = false;
                     this.$emit('save');
                 } else {
-                    // Falls alle erledigt sind, nimm den letzten
+                    // Falls alles fertig ist, den letzten Schritt zeigen
                     this.widgetData.zielText = hpWidget.schritte[hpWidget.schritte.length - 1].text;
                     this.$emit('save');
                 }
             } else {
-                alert("Kein aktiver Handlungsplan mit Schritten gefunden!");
+                alert("Kein aktiver Handlungsplan gefunden!");
             }
         }
     }
