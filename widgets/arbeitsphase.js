@@ -8,6 +8,8 @@ const ArbeitsphaseWidget = {
                 
                 <div v-for="phase in phasen" :key="phase.id" 
                      @click="selectPhase(phase.id)"
+                     @mousedown.stop
+                     @touchstart.stop
                      style="flex: 1; min-height: 35px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10%; gap: 15px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease; background-color: rgba(255,255,255,0.05);">
                      
                      <span style="font-size: 1.5rem;">{{ phase.icon }}</span>
@@ -17,6 +19,8 @@ const ArbeitsphaseWidget = {
 
             <div v-else 
                  @click="showList = true"
+                 @mousedown.stop
+                 @touchstart.stop
                  :style="displayModeStyle"
                  style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; text-align: center; position: relative;">
                  
@@ -37,29 +41,26 @@ const ArbeitsphaseWidget = {
                 { id: 'plenum', icon: '🗣️', label: 'Plenum', color: '#8b5cf6' },
                 { id: 'einzel', icon: '👤', label: 'Einzelarbeit', color: '#3b82f6' },
                 { id: 'partner', icon: '👥', label: 'Partnerarbeit', color: '#10b981' },
-                { id: 'gruppe', icon: '🧑‍🤝‍🧑', label: 'Gruppenarbeit', color: '#f59e0b' },
+                { id: 'gruppe', icon: '💡', label: 'Gruppenarbeit', color: '#f59e0b' }, // <-- Hier das neue Emoji!
                 { id: 'klausur', icon: '🤫', label: 'Ruhephase', color: '#ef4444' }
             ]
         }
     },
     computed: {
         activePhaseData() {
-            // Findet die Daten zur aktuell gespeicherten Phase
             return this.phasen.find(p => p.id === this.widgetData.activePhase) || this.phasen[0];
         },
-        // NEU: Steuert Hintergrund & Schatten dynamisch basierend auf dem Ghost-Mode
         displayModeStyle() {
             const phase = this.activePhaseData;
-            const isGhost = this.widgetData.isTransparent; // Holt sich den Ghost-Status vom Board
+            const isGhost = this.widgetData.isTransparent;
 
             return {
-                backgroundColor: isGhost ? 'transparent' : phase.color + '15', // Transparent im Ghost-Mode
-                boxShadow: isGhost ? 'none' : '0 8px 24px ' + phase.color + '20'   // Kein Schatten im Ghost-Mode
+                backgroundColor: isGhost ? 'transparent' : phase.color + '15',
+                boxShadow: isGhost ? 'none' : '0 8px 24px ' + phase.color + '20'
             };
         }
     },
     created() {
-        // Wenn das Widget ganz neu ist, zeige die Liste an
         if (!this.widgetData.activePhase) {
             this.widgetData.activePhase = 'plenum';
             this.showList = true;
@@ -68,8 +69,8 @@ const ArbeitsphaseWidget = {
     methods: {
         selectPhase(id) {
             this.widgetData.activePhase = id;
-            this.$emit('save'); // Speichert den Stand auf dem Board
-            this.showList = false; // Wechselt sofort in den Groß-Modus
+            this.$emit('save');
+            this.showList = false;
         }
     }
 };
