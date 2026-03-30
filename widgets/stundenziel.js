@@ -8,7 +8,7 @@ const StundenzielWidget = {
                 
                 <button @click="importFromHandlungsplan" 
                         @mousedown.stop @touchstart.stop
-                        style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                        style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #e2e8f0; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
                     📋 Import HP
                 </button>
 
