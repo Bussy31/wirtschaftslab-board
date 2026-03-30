@@ -120,8 +120,8 @@
                 </div>
 
                 <div v-if="activeSettingsTab === 'hintergrund'">
-                    <div style="margin-bottom: 20px; width: fit-content; background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <strong style="color: white; font-size: 1rem;">🎨 Farbe wählen:</strong>
+                    <div style="margin-bottom: 20px; width: fit-content; background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px;>
+                        <strong>🎨 Farbe wählen:</strong>
 
                         <input type="color" v-model="customColor" @change="setHintergrund(customColor)"
                                style="cursor: pointer; width: 40px; height: 40px; border: none; border-radius: 50%; background: transparent; padding: 0; overflow: hidden; outline: none;"
