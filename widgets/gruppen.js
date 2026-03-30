@@ -79,13 +79,39 @@ const GruppenWidget = {
             this.saveState();
         },
         // --- DRAG & DROP LOGIK ---
-        dragStart(e, name, fromIndex) {
-            // Drag & Drop nur erlauben, wenn NICHT transparent
-            if (this.widgetData.isTransparent) return;
-
+        dragStart(e, name, index) {
+            // Die Standard-Daten für den Drag-Vorgang
             e.dataTransfer.setData('text/plain', name);
-            e.dataTransfer.setData('fromIndex', fromIndex); // -1 = Sammelbecken
-            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('fromIndex', index);
+
+            // --- MAC VISUAL FIX: Wir basteln uns eine eigene, geile Vorschau ---
+            // 1. Wir kopieren das Element, das gerade angeklickt wurde
+            let dragGhost = e.target.cloneNode(true);
+
+            // 2. Wir stylen es so, dass es auf jedem Betriebssystem gut aussieht
+            dragGhost.style.position = "absolute";
+            dragGhost.style.top = "-1000px"; // Weit weg vom sichtbaren Bereich
+            dragGhost.style.background = "#2563eb"; // Ein kräftiges, solides Blau
+            dragGhost.style.color = "white";
+            dragGhost.style.padding = "8px 16px";
+            dragGhost.style.borderRadius = "8px";
+            dragGhost.style.boxShadow = "0 5px 15px rgba(0,0,0,0.4)";
+            dragGhost.style.fontWeight = "bold";
+            dragGhost.style.fontSize = "1rem";
+            dragGhost.style.zIndex = "9999";
+
+            // 3. Kurz ins Dokument einfügen, damit der Browser es rendern kann
+            document.body.appendChild(dragGhost);
+
+            // 4. Dem Browser sagen: "Nimm genau DAS als Drag-Bild!" (15, 15 ist der Maus-Offset)
+            e.dataTransfer.setDragImage(dragGhost, 15, 15);
+
+            // 5. Direkt wieder aufräumen, der Browser hat seinen "Screenshot" jetzt im Speicher
+            setTimeout(() => {
+                if (document.body.contains(dragGhost)) {
+                    document.body.removeChild(dragGhost);
+                }
+            }, 50);
         },
         drop(e, toIndex) {
             // Drop nur erlauben, wenn NICHT transparent
