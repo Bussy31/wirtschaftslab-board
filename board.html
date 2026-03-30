@@ -49,9 +49,6 @@
                 <button @click="addWidget('stundenziel','🎯'); showWidgetMenu = false">🎯 Stundenziel</button>
             </div>
         </div>
-        <div class="dropdown">
-            <button class="btn-primary" @click="showWidgetMenu = !showWidgetMenu">➕ Widgets</button>
-            </div>
 
         <div style="display: flex; gap: 8px; margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 15px; align-items: center; overflow-x: auto; flex-grow: 1;">
             <template v-for="(w, index) in widgets">
@@ -66,9 +63,10 @@
             </template>
         </div>
 
+
         <div style="flex-grow: 1;"></div>
 
-        <button class="btn-primary" @click="aktualisiereWidgets" title="Namen aktualisieren" style="background-color: #3b82f6; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-right: 5px;">🔄</button>
+        <button @click="aktualisiereWidgets" class="btn-primary" title="Namen aktualisieren" style="background-color: #3b82f6; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-right: 5px;">🔄</button>
         <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️</button>
         <button @click="exportBoard" class="btn-export btn-small">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import btn-small">📂 Import</button>
