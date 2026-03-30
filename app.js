@@ -40,11 +40,6 @@ const app = createApp({
             this.settings = JSON.parse(savedSettings);
         }
 
-        if (!this.settings.hintergrund) {
-            this.settings.hintergrund = '#1e293b';
-            this.saveToLocal();
-        }
-
         const lastActive = localStorage.getItem('aktiveKlasse');
         if (lastActive) {
             this.aktiveKlasse = lastActive;
@@ -396,27 +391,6 @@ const app = createApp({
             this.isFullscreen = !!document.fullscreenElement;
         }
     },
-
-    computed: {
-        boardStyle() {
-            const bg = this.settings.hintergrund || '#1e293b';
-
-            if (bg.startsWith('#')) {
-                // Es ist eine Farbe
-                return {
-                    backgroundColor: bg,
-                    backgroundImage: 'none'
-                };
-            }
-
-            return {
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${bg})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'fixed'
-            };
-        }
-    }
 });
 
 app.component('uhr-widget', UhrWidget);
