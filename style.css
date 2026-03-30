@@ -400,15 +400,21 @@ button:hover {
     background: var(--widget-bg);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    min-width: 180px;
+
+    /* NEU: Breite angepasst für zwei Spalten */
+    min-width: 380px;
+
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
     border: 1px solid var(--widget-border);
     border-radius: 8px;
     z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
+    padding: 12px;
     margin-top: 10px;
+
+    /* NEU: Grid-Layout für zwei Spalten */
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Zwei gleich große Spalten nebeneinander */
+    gap: 6px; /* Abstand zwischen den Buttons */
 }
 
 .dropdown-content button {
