@@ -238,7 +238,6 @@ const GruppenWidget = {
             <div v-if="gruppen.length === 0 && widgetData.isTransparent" style="text-align: center; color: rgba(255,255,255,0.4); margin-top: 20px; font-style: italic;">
                 Noch keine Gruppen ausgelost...
             </div>
-
         </div>
     `
 };
