@@ -12,7 +12,6 @@ const app = createApp({
             resizingIndex: null,
             startWidth: 0,
             startHeight: 0,
-            customColor: '#1e293b',
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
 
             showSettings: false,
