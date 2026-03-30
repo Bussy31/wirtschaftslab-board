@@ -95,7 +95,7 @@ const app = createApp({
             if (savedBg) {
                 this.settings.hintergrund = savedBg;
             } else {
-                this.settings.hintergrund = this.availableBackgrounds[0];
+                this.settings.hintergrund = '#1e293b';
             }
         },
         saveToLocal() {
