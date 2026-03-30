@@ -75,7 +75,9 @@
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         🖼️ Hintergrund
                     </button>
-                    <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'" style="color: #ffffff; border-bottom-color: #ffffff;">⚠️ Reset</button>
+                    <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'"
+                            :style="{ background: activeSettingsTab === 'Reset' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">⚠️ Reset</button>
                 </div>
 
                 <div v-if="activeSettingsTab === 'klassen'">
