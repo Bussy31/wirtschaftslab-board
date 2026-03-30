@@ -175,13 +175,13 @@ const GruppenWidget = {
                           class="draggable-name"
                           :draggable="!widgetData.isTransparent && modus === 'manuell'"
                           @dragstart="dragStart($event, name, index)"
-                          style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px; font-size:0.85rem; display: inline-flex; align-items: center; gap: 5px;"
+                          style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px; font-size:0.85rem; display: inline-flex; align-items: center; gap: 5px; margin: 2px;"
                           :style="{
                               cursor: (!widgetData.isTransparent && modus === 'manuell') ? 'grab' : 'default',
                               color: 'white',
                               border: '1px solid rgba(255,255,255,0.05)'
                           }">
-                        <span style="opacity: 0.5;">⠿</span> {{ name }}
+                        <span style="opacity: 0.5; pointer-events: none;">⠿</span> {{ name }}
                     </span>
                 </div>
             </template>
