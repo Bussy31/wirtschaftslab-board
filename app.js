@@ -11,10 +11,8 @@ const app = createApp({
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
 
             showSettings: false,
-            // NEU: Welcher Reiter in den Einstellungen ist offen?
             activeSettingsTab: 'klassen',
 
-            // NEU: Trage hier die Namen deiner Bilder ein!
             availableBackgrounds: [
                 'hintergruende/bild1.jpg',
                 'hintergruende/bild2.jpg',
@@ -26,20 +24,18 @@ const app = createApp({
 
             settings: {
                 klassen: [],
-                hintergrund: '' // Speichert das aktuell gewählte Bild
+                hintergrund: ''
             },
             neuerKlassenName: '',
             aktiveKlasse: 'Standard'
         }
     },
     mounted() {
-        // 1. Einstellungen (Klassen) laden
         const savedSettings = localStorage.getItem('boardSettings');
         if (savedSettings) {
             this.settings = JSON.parse(savedSettings);
         }
 
-        // 2. Zuletzt aktives Profil laden
         const lastActive = localStorage.getItem('aktiveKlasse');
         if (lastActive) {
             this.aktiveKlasse = lastActive;
@@ -59,15 +55,12 @@ const app = createApp({
         }, 1000);
     },
     methods: {
-        // --- NEU: HINTERGRUND SETZEN ---
         setHintergrund(bg) {
-            this.settings.hintergrund = bg; // Ändert das Bild sofort im Browser
-            localStorage.setItem('hintergrund_' + this.aktiveKlasse, bg); // Speichert es nur für diese Klasse
+            this.settings.hintergrund = bg;
+            localStorage.setItem('hintergrund_' + this.aktiveKlasse, bg);
         },
 
-        // --- BOARD LADEN, SPEICHERN & WECHSELN ---
         loadBoard() {
-            // 1. Widgets der Klasse laden
             const saved = localStorage.getItem('board_' + this.aktiveKlasse);
             if (saved) {
                 this.widgets = JSON.parse(saved);
@@ -75,12 +68,11 @@ const app = createApp({
                 this.widgets = [];
             }
 
-            // 2. Hintergrund für diese spezielle Klasse laden
             const savedBg = localStorage.getItem('hintergrund_' + this.aktiveKlasse);
             if (savedBg) {
                 this.settings.hintergrund = savedBg;
             } else {
-                this.settings.hintergrund = this.availableBackgrounds[0]; // Standardbild
+                this.settings.hintergrund = this.availableBackgrounds[0];
             }
         },
         saveToLocal() {
@@ -93,7 +85,6 @@ const app = createApp({
             this.showSettings = false;
         },
 
-        // --- KLASSEN & SCHÜLER VERWALTUNG ---
         addKlasse() {
             if (!this.neuerKlassenName.trim()) return;
             if (!this.settings.klassen) this.settings.klassen = [];
@@ -111,6 +102,7 @@ const app = createApp({
             if(confirm('Möchtest du diese Klasse und ihr Board wirklich löschen?')) {
                 const klasseName = this.settings.klassen[index].name;
                 localStorage.removeItem('board_' + klasseName);
+                localStorage.removeItem('hintergrund_' + klasseName);
                 this.settings.klassen.splice(index, 1);
 
                 if (this.aktiveKlasse === klasseName) {
@@ -139,7 +131,6 @@ const app = createApp({
             localStorage.setItem('boardSettings', JSON.stringify(this.settings));
         },
 
-        // --- WIDGET-LOGIK ---
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
             const isGruppen = type === 'gruppen';
@@ -251,30 +242,25 @@ const app = createApp({
             const backupData = {
                 settings: this.settings,
                 boards: {},
-                backgrounds: {} // <-- NEU: Hier sammeln wir die Hintergründe
+                backgrounds: {}
             };
 
-            // 1. Alle angelegten Klassen durchgehen
             if (this.settings.klassen) {
                 this.settings.klassen.forEach(klasse => {
-                    // Widgets exportieren
                     const boardData = localStorage.getItem('board_' + klasse.name);
                     if (boardData) backupData.boards[klasse.name] = JSON.parse(boardData);
 
-                    // Hintergrund exportieren
                     const bgData = localStorage.getItem('hintergrund_' + klasse.name);
                     if (bgData) backupData.backgrounds[klasse.name] = bgData;
                 });
             }
 
-            // 2. Das Standard-Board auch mitnehmen
             const standardBoard = localStorage.getItem('board_Standard');
             if (standardBoard) backupData.boards['Standard'] = JSON.parse(standardBoard);
 
             const standardBg = localStorage.getItem('hintergrund_Standard');
             if (standardBg) backupData.backgrounds['Standard'] = standardBg;
 
-            // Datei generieren und herunterladen
             const dataStr = JSON.stringify(backupData);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
@@ -293,26 +279,21 @@ const app = createApp({
                 try {
                     const importedData = JSON.parse(e.target.result);
 
-                    // Check, ob es ein Komplett-Backup ist
                     if (importedData.settings && importedData.boards) {
 
-                        // 1. Einstellungen laden
                         this.settings = importedData.settings;
                         this.saveSettings();
 
-                        // 2. Widgets wiederherstellen
                         for (const [klasseName, widgets] of Object.entries(importedData.boards)) {
                             localStorage.setItem('board_' + klasseName, JSON.stringify(widgets));
                         }
 
-                        // 3. NEU: Hintergründe wiederherstellen (falls im Backup vorhanden)
                         if (importedData.backgrounds) {
                             for (const [klasseName, bg] of Object.entries(importedData.backgrounds)) {
                                 localStorage.setItem('hintergrund_' + klasseName, bg);
                             }
                         }
 
-                        // 4. Erste Klasse oder Standardklasse laden
                         if (this.settings.klassen && this.settings.klassen.length > 0) {
                             this.wechsleKlasse(this.settings.klassen[0].name);
                         } else {
@@ -320,45 +301,6 @@ const app = createApp({
                         }
 
                         alert("✅ Komplett-Backup inkl. Hintergründe erfolgreich geladen!");
-                    } else {
-                        // Fallback für alte, einzelne Board-Backups
-                        this.widgets = importedData;
-                        this.saveToLocal();
-                        alert("ℹ️ Einzelnes Board in die aktuelle Klasse importiert.");
-                    }
-                } catch (err) {
-                    alert("❌ Fehler beim Importieren. Ist das die richtige Datei?");
-                    console.error(err);
-                }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        },
-        importBoard(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-
-                    if (importedData.settings && importedData.boards) {
-                        this.settings = importedData.settings;
-                        if (!this.settings.hintergrund) this.settings.hintergrund = this.availableBackgrounds[0];
-                        this.saveSettings();
-
-                        for (const [klasseName, widgets] of Object.entries(importedData.boards)) {
-                            localStorage.setItem('board_' + klasseName, JSON.stringify(widgets));
-                        }
-
-                        if (this.settings.klassen && this.settings.klassen.length > 0) {
-                            this.wechsleKlasse(this.settings.klassen[0].name);
-                        } else {
-                            this.wechsleKlasse('Standard');
-                        }
-
-                        alert("✅ Komplett-Backup erfolgreich geladen!");
                     } else {
                         this.widgets = importedData;
                         this.saveToLocal();
