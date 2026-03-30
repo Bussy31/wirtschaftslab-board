@@ -4,28 +4,28 @@ const MedienWidget = {
         <div style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; overflow: hidden; position: relative; container-type: size;">
             
             <div v-if="showList" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
-                <div style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; flex-shrink: 0;">Medienfreigabe (Mehrfachauswahl):</div>
+                <div style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; flex-shrink: 0;">Medien wählen:</div>
                 
-                <div style="display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; padding-bottom: 5px;" class="custom-scrollbar">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; overflow-y: auto; flex-grow: 1; padding: 2px;" class="custom-scrollbar">
                     <div v-for="medium in medien" :key="medium.id" 
                          @click="toggleMedium(medium.id)"
                          @mousedown.stop
                          @touchstart.stop
                          :style="{ 
                             backgroundColor: isSelected(medium.id) ? medium.color + '30' : 'rgba(255,255,255,0.05)',
-                            borderColor: isSelected(medium.id) ? medium.color : 'transparent'
+                            borderColor: isSelected(medium.id) ? medium.color : 'rgba(255,255,255,0.1)'
                          }"
-                         style="min-height: 35px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10%; gap: 15px; border-radius: 8px; border: 1px solid; cursor: pointer; transition: all 0.2s ease;">
+                         style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 5px; border-radius: 8px; border: 2px solid; cursor: pointer; transition: all 0.2s ease; text-align: center;">
                          
-                         <span style="font-size: 1.5rem;">{{ medium.icon }}</span>
-                         <span style="font-size: 1rem; font-weight: 600; color: #e2e8f0;">{{ medium.label }}</span>
+                         <span style="font-size: 2rem; margin-bottom: 4px;">{{ medium.icon }}</span>
+                         <span style="font-size: 0.8rem; font-weight: 600; color: #e2e8f0; line-height: 1.1;">{{ medium.label }}</span>
                     </div>
                 </div>
 
                 <button @click="showList = false" 
                         @mousedown.stop @touchstart.stop
-                        style="margin-top: 8px; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; transition: background 0.2s;">
-                    Ansicht aktualisieren
+                        style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; flex-shrink: 0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>👁️</span> Ansicht übernehmen
                 </button>
             </div>
 
@@ -67,27 +67,22 @@ const MedienWidget = {
                 { id: 'tablet', icon: '📱', label: 'Tablets / iPads', color: '#3b82f6' },
                 { id: 'laptop', icon: '💻', label: 'Laptops nutzen', color: '#8b5cf6' },
                 { id: 'kopfhoerer', icon: '🎧', label: 'Kopfhörer erlaubt', color: '#10b981' },
-                { id: 'ki_ok', icon: '🤖', label: 'KI-Tools erlaubt', color: '#0ea5e9' },      // NEU: Helles Blau/Teal
-                { id: 'ki_verbot', icon: '🚫', label: 'Keine KI-Nutzung', color: '#f43f5e' }   // NEU: Pink/Rot
+                { id: 'ki_ok', icon: '🤖', label: 'KI-Tools erlaubt', color: '#0ea5e9' },
+                { id: 'ki_verbot', icon: '🚫', label: 'Keine KI-Nutzung', color: '#f43f5e' }
             ]
         }
     },
     computed: {
         selectedMediaData() {
-            // Holt sich alle Daten-Objekte zu den gespeicherten IDs
             let activeIDs = this.widgetData.activeMedia || [];
-
-            // Kompatibilitäts-Check für alte Boards (falls activeMedium noch ein einzelner String war)
             if (this.widgetData.activeMedium && activeIDs.length === 0) {
                 activeIDs = [this.widgetData.activeMedium];
                 this.widgetData.activeMedia = activeIDs;
             }
-
             return this.medien.filter(m => activeIDs.includes(m.id));
         }
     },
     created() {
-        // Falls noch gar nichts gesetzt ist (neues Widget)
         if (!this.widgetData.activeMedia && !this.widgetData.activeMedium) {
             this.widgetData.activeMedia = ['verbot'];
             this.showList = true;
@@ -102,13 +97,10 @@ const MedienWidget = {
             if (!this.widgetData.activeMedia) {
                 this.widgetData.activeMedia = [];
             }
-
             const index = this.widgetData.activeMedia.indexOf(id);
             if (index > -1) {
-                // Wenn schon drin, dann wieder entfernen (abhaken)
                 this.widgetData.activeMedia.splice(index, 1);
             } else {
-                // Wenn noch nicht drin, hinzufügen
                 this.widgetData.activeMedia.push(id);
             }
             this.$emit('save');
