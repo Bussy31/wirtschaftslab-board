@@ -8,6 +8,10 @@ const app = createApp({
             offsetX: 0,
             offsetY: 0,
             isFullscreen: false,
+            showWidgetMenu: false,
+            resizingIndex: null,
+            startWidth: 0,
+            startHeight: 0,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
 
             showSettings: false,
@@ -42,6 +46,12 @@ const app = createApp({
         }
 
         this.loadBoard();
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                this.showWidgetMenu = false;
+            }
+        });
 
         window.addEventListener('mousemove', this.onDrag);
         window.addEventListener('mouseup', this.stopDrag);
@@ -183,25 +193,44 @@ const app = createApp({
             this.offsetX = clientX - widget.x;
             this.offsetY = clientY - widget.y;
         },
+        startResize(e, index) {
+            this.resizingIndex = index;
+            const widget = this.widgets[index];
+            let clientX, clientY;
+            if (e.type === 'touchstart') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            this.startWidth = widget.width;
+            this.startHeight = widget.height;
+            this.offsetX = clientX;
+            this.offsetY = clientY;
+        },
         onDrag(e) {
+            // Wenn wir ziehen ODER vergrößern, das Scrollen auf dem iPad blockieren
+            if (e.type === 'touchmove' && (this.draggingIndex !== null || this.resizingIndex !== null)) {
+                e.preventDefault();
+            }
+
+            let clientX, clientY;
+            if (e.type === 'touchmove') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            // 1. Fall: Wir verschieben das Widget
             if (this.draggingIndex !== null) {
-                if (e.type === 'touchmove') e.preventDefault();
-
                 const w = this.widgets[this.draggingIndex];
-                let clientX, clientY;
-                if (e.type === 'touchmove') {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-
                 let newX = clientX - this.offsetX;
                 let newY = clientY - this.offsetY;
 
-                const toolbar = document.querySelector('.toolbar');
-                const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
+                const toolbarHeight = 60;
                 const maxX = window.innerWidth - w.width;
                 const maxY = window.innerHeight - w.height;
 
@@ -213,13 +242,29 @@ const app = createApp({
                 w.x = newX;
                 w.y = newY;
             }
+            // 2. Fall: Wir machen das Widget größer/kleiner (iPad Fix)
+            else if (this.resizingIndex !== null) {
+                const w = this.widgets[this.resizingIndex];
+                let diffX = clientX - this.offsetX;
+                let diffY = clientY - this.offsetY;
+
+                let newWidth = this.startWidth + diffX;
+                let newHeight = this.startHeight + diffY;
+
+                // Mindestgröße, damit es nicht komplett verschwindet
+                if (newWidth < 200) newWidth = 200;
+                if (newHeight < 150) newHeight = 150;
+
+                w.width = newWidth;
+                w.height = newHeight;
+            }
         },
         stopDrag() {
-            if (this.draggingIndex !== null) {
+            if (this.draggingIndex !== null || this.resizingIndex !== null) {
                 this.draggingIndex = null;
+                this.resizingIndex = null;
                 this.saveToLocal();
             }
-            this.updateSizes();
         },
         updateSizes() {
             const widgetElements = document.querySelectorAll('.widget');

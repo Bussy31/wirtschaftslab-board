@@ -28,14 +28,21 @@
     <div :class="['toolbar', { 'hidden': isFullscreen }]">
         <div class="brand">🎓 wirtschaftslab-board <span class="active-profile-badge">{{ aktiveKlasse }}</span></div>
 
-        <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
-        <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button>
-        <button class="btn-primary" @click="addWidget('stoppuhr', '⏲️')">⏲️ Stoppuhr</button>
-        <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
-        <button class="btn-primary" @click="addWidget('zufall', '🎲')">🎲 Zufall</button>
-        <button class="btn-primary" @click="addWidget('qr', '📱')">📱 QR-Code</button>
-        <button class="btn-primary" @click="addWidget('handlungsplan', '📋')">📋 Handlungsplan</button>
-        <button class="btn-primary" @click="addWidget('gruppen', '👥')">👥 Gruppen</button>
+        <div class="dropdown">
+            <button class="btn-primary" @click.stop="showWidgetMenu = !showWidgetMenu">
+                🧩 Widgets ▼
+            </button>
+            <div class="dropdown-content" v-if="showWidgetMenu">
+                <button @click="addWidget('uhr', '⏱️'); showWidgetMenu = false">⏱️ Uhr</button>
+                <button @click="addWidget('countdown', '⏳'); showWidgetMenu = false">⏳ Timer</button>
+                <button @click="addWidget('stoppuhr', '⏲️'); showWidgetMenu = false">⏲️ Stoppuhr</button>
+                <button @click="addWidget('notiz', '📝'); showWidgetMenu = false">📝 Notiz</button>
+                <button @click="addWidget('zufall', '🎲'); showWidgetMenu = false">🎲 Zufall</button>
+                <button @click="addWidget('gruppen', '👥'); showWidgetMenu = false">👥 Gruppen</button>
+                <button @click="addWidget('qr', '📱'); showWidgetMenu = false">📱 QR-Code</button>
+                <button @click="addWidget('handlungsplan', '📋'); showWidgetMenu = false">📋 Handlungsplan</button>
+            </div>
+        </div>
 
         <div style="flex-grow: 1;"></div>
 
@@ -187,6 +194,7 @@
             <div class="widget-content">
                 <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
             </div>
+            <div class="custom-resize-handle" @mousedown.stop="startResize($event, index)" @touchstart.stop="startResize($event, index)"></div>
         </div>
     </div>
     <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn" title="Vollbild beenden">🗗 Beenden</button>
