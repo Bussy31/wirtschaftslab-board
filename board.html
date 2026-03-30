@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
     <title>wirtschaftslab-board</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -22,18 +23,17 @@
         .widget.ghost-mode:hover .widget-header {
             opacity: 1;
         }
-        /* Verhindert iPad-Kontextmenüs und Textmarkierung beim Ziehen von Namen */
         .draggable-name {
-            -webkit-touch-callout: none !important; /* Deaktiviert das "Link-Vorschau" Menü auf iOS */
-            -webkit-user-select: none !important;    /* Verhindert, dass Text blau markiert wird */
+            -webkit-touch-callout: none !important; /* Deaktiviert das Vorschau-Fenster auf iOS */
+            -webkit-user-select: none !important;    /* Verhindert Textmarkierung */
             user-select: none !important;
-            touch-action: none;                      /* Hilft dem iPad zu verstehen, dass hier gezogen wird */
-            -webkit-tap-highlight-color: transparent; /* Entfernt das graue Flackern beim Antippen */
+            touch-action: none !important;           /* Zwingt das iPad, das Ziehen dem Script zu überlassen */
+            -webkit-tap-highlight-color: transparent;
             cursor: grab;
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div id="app" :style="boardStyle">
     <div :class="['toolbar', { 'hidden': isFullscreen }]">
