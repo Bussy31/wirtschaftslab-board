@@ -104,8 +104,12 @@ const app = createApp({
             this.neuerKlassenName = '';
             this.saveSettings();
 
+            // Wenn es die allererste Klasse ist...
             if (this.settings.klassen.length === 1) {
-                this.wechsleKlasse(name);
+                // ...wechseln wir die Klasse nur im Hintergrund, OHNE das Menü zu schließen!
+                this.aktiveKlasse = name;
+                localStorage.setItem('aktiveKlasse', name);
+                this.loadBoard();
             }
         },
         removeKlasse(index) {
@@ -266,7 +270,7 @@ const app = createApp({
                 this.saveToLocal();
             }
         },
-        updateSizes() {
+        /*updateSizes() {
             const widgetElements = document.querySelectorAll('.widget');
             let changed = false;
             widgetElements.forEach((el, index) => {
@@ -281,7 +285,7 @@ const app = createApp({
                 }
             });
             if (changed) this.saveToLocal();
-        },
+        },*/
 
         exportBoard() {
             const backupData = {
