@@ -8,20 +8,22 @@ const UhrWidget = {
             </div>
             
             <svg v-else viewBox="0 0 100 100" style="width: 80cqmin; height: 80cqmin; max-width: 100%; max-height: 100%; filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.4)); font-family: 'Inter', sans-serif;">
-                <circle cx="50" cy="50" r="48" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1.0"/>
+                <circle cx="50" cy="50" r="48" fill="rgba(30, 41, 59, 0.85)" stroke="#3b82f6" stroke-width="1.5"/>
                 
-                <text x="50" y="18" fill="#fafafa" font-size="10" font-weight="bold" text-anchor="middle" dominant-baseline="central">12</text>
-                <text x="82" y="50" fill="#fafafa" font-size="10" font-weight="bold" text-anchor="middle" dominant-baseline="central">3</text>
-                <text x="50" y="82" fill="#fafafa" font-size="10" font-weight="bold" text-anchor="middle" dominant-baseline="central">6</text>
-                <text x="18" y="50" fill="#fafafa" font-size="10" font-weight="bold" text-anchor="middle" dominant-baseline="central">9</text>
+                <line v-for="n in 12" :key="'strich-'+n" v-show="n % 3 !== 0" x1="50" y1="6" x2="50" y2="12" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + (n * 30) + ' 50 50)'" />
                 
-                <line x1="50" y1="50" x2="50" y2="28" stroke="#fafafa" stroke-width="3" stroke-linecap="round" :transform="'rotate(' + stundenWinkel + ' 50 50)'" />
+                <text x="50" y="11" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle" dominant-baseline="central">12</text>
+                <text x="89" y="50" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle" dominant-baseline="central">3</text>
+                <text x="50" y="90" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle" dominant-baseline="central">6</text>
+                <text x="11" y="50" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle" dominant-baseline="central">9</text>
                 
-                <line x1="50" y1="50" x2="50" y2="12" stroke="#fafafa" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + minutenWinkel + ' 50 50)'" />
+                <line x1="50" y1="50" x2="50" y2="28" stroke="#ffffff" stroke-width="3" stroke-linecap="round" :transform="'rotate(' + stundenWinkel + ' 50 50)'" />
+                
+                <line x1="50" y1="50" x2="50" y2="12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + minutenWinkel + ' 50 50)'" />
                 
                 <line x1="50" y1="58" x2="50" y2="10" stroke="#f97316" stroke-width="1.0" stroke-linecap="round" :transform="'rotate(' + sekundenWinkel + ' 50 50)'" />
                 
-                <circle cx="50" cy="50" r="2.5" fill="#fafafa"/>
+                <circle cx="50" cy="50" r="2.5" fill="#ffffff"/>
             </svg>
 
         </div>
