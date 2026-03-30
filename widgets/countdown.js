@@ -6,7 +6,6 @@ const CountdownWidget = {
             <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 3cqw; align-items: center; z-index: 10;">
                 <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 25cqw; min-width: 60px; font-size: clamp(1.2rem, 8cqw, 3.5rem); padding: 1cqw; text-align: center; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
                 <span style="font-size: clamp(1.2rem, 6cqw, 2.5rem); color: rgba(255,255,255,0.7);">min</span>
-                <button @click="startTimer" style="background: #3b82f6; border: none; padding: 1.5cqw 3cqw; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; font-size: clamp(1rem, 6cqw, 2.5rem);">Start</button>
             </div>
 
             <div v-else style="width: 90cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5cqh;">
@@ -36,7 +35,7 @@ const CountdownWidget = {
             timerInterval: null
         }
     },
-    // NEU: Hier lauscht das Widget auf Klicks aus der Kopfzeile
+    // Lauscht auf Signale aus der board.html
     watch: {
         'widgetData.isRunning'(newVal) {
             this.isRunning = newVal;
@@ -48,6 +47,10 @@ const CountdownWidget = {
         },
         'widgetData.resetTrigger'() {
             this.resetTimer();
+        },
+        // NEU: Hört auf den Start-Befehl von oben
+        'widgetData.startTrigger'() {
+            this.startTimer();
         }
     },
     computed: {

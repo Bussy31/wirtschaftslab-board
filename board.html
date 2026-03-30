@@ -186,14 +186,15 @@
 
                 <div style="display: flex; align-items: center; gap: 8px;">
 
-                    <button v-if="w.type === 'countdown' && w.timeLeft > 0" @click.stop="w.isRunning = !w.isRunning; saveToLocal()"
+                    <button v-if="w.type === 'countdown'" @click.stop="w.timeLeft > 0 ? (w.isRunning = !w.isRunning) : (w.startTrigger = Date.now()); saveToLocal()"
                             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
-                            title="Pause / Weiter">
+                            title="Start / Pause / Weiter">
                         {{ w.isRunning ? '⏸' : '▶' }}
                     </button>
-                    <button v-if="w.type === 'countdown' && w.timeLeft > 0" @click.stop="w.resetTrigger = Date.now(); saveToLocal()"
+
+                    <button v-if="w.type === 'countdown'" @click.stop="w.resetTrigger = Date.now(); saveToLocal()"
                             style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: #fca5a5; cursor: pointer; height: 24px;"
-                            title="Stopp">
+                            title="Stopp / Reset">
                         ⏹
                     </button>
 
