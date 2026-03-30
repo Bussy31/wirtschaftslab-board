@@ -22,11 +22,11 @@ const ArbeitsphaseWidget = {
                  @mousedown.stop
                  @touchstart.stop
                  :style="displayModeStyle"
-                 style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; text-align: center; position: relative;">
+                 style="width: 80%; height: 80%; margin: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; text-align: center; position: relative;">
                  
-                 <span style="font-size: clamp(3rem, 35cqmin, 8rem); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); line-height: 1.2;">{{ activePhaseData.icon }}</span>
+                 <span style="font-size: clamp(2.5rem, 30cqmin, 8rem); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); line-height: 1.2;">{{ activePhaseData.icon }}</span>
                  
-                 <span :style="{ color: activePhaseData.color }" style="font-size: clamp(1.2rem, 12cqmin, 3rem); font-weight: bold; margin-top: 5px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                 <span :style="{ color: activePhaseData.color }" style="font-size: clamp(1rem, 10cqmin, 3rem); font-weight: bold; margin-top: 5px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
                      {{ activePhaseData.label }}
                  </span>
                  
@@ -36,12 +36,12 @@ const ArbeitsphaseWidget = {
     `,
     data() {
         return {
-            showList: false, // Startet im Anzeige-Modus, wenn schon was gewählt ist
+            showList: false,
             phasen: [
                 { id: 'plenum', icon: '🗣️', label: 'Plenum', color: '#8b5cf6' },
                 { id: 'einzel', icon: '👤', label: 'Einzelarbeit', color: '#3b82f6' },
                 { id: 'partner', icon: '👥', label: 'Partnerarbeit', color: '#10b981' },
-                { id: 'gruppe', icon: '💡', label: 'Gruppenarbeit', color: '#f59e0b' }, // <-- Hier das neue Emoji!
+                { id: 'gruppe', icon: '💡', label: 'Gruppenarbeit', color: '#f59e0b' },
                 { id: 'klausur', icon: '🤫', label: 'Ruhephase', color: '#ef4444' }
             ]
         }
