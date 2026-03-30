@@ -5,9 +5,7 @@ const StundenzielWidget = {
             
             <div v-show="!widgetData.isTransparent" 
                  style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                
-                <span style="font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">🎯</span>
-                
+                                
                 <div style="display: flex; gap: 8px;">
                     <button @click="importFromHandlungsplan" 
                             @mousedown.stop @touchstart.stop
