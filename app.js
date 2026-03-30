@@ -392,31 +392,6 @@ const app = createApp({
             this.isFullscreen = !!document.fullscreenElement;
         }
     },
-    computed: {
-        // Berechnet den passenden Style für den Hintergrund
-        boardStyle() {
-            // SICHERHEITSNETZ: Falls kein Hintergrund da ist, nimm einen leeren String
-            const bg = this.settings.hintergrund || '';
-
-            if (!bg) return {};
-
-            // Wenn der Wert mit einem "#" anfängt, ist es ein Farbcode!
-            if (bg.startsWith('#')) {
-                return {
-                    backgroundColor: bg,
-                    backgroundImage: 'none'
-                };
-            }
-
-            // Ansonsten ist es ein normales Bild (mit deiner dunklen Überlagerung)
-            return {
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(${bg})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'fixed'
-            };
-        }
-    }
 });
 
 app.component('uhr-widget', UhrWidget);
