@@ -22,6 +22,15 @@
         .widget.ghost-mode:hover .widget-header {
             opacity: 1;
         }
+        /* Verhindert iPad-Kontextmenüs und Textmarkierung beim Ziehen von Namen */
+        .draggable-name {
+            -webkit-touch-callout: none !important; /* Deaktiviert das "Link-Vorschau" Menü auf iOS */
+            -webkit-user-select: none !important;    /* Verhindert, dass Text blau markiert wird */
+            user-select: none !important;
+            touch-action: none;                      /* Hilft dem iPad zu verstehen, dass hier gezogen wird */
+            -webkit-tap-highlight-color: transparent; /* Entfernt das graue Flackern beim Antippen */
+            cursor: grab;
+        }
     </style>
 </head>
 <body>
