@@ -8,7 +8,7 @@ const StoppuhrWidget = {
                 fontWeight: 'bold', 
                 fontVariantNumeric: 'tabular-nums', 
                 textShadow: '0 4px 10px rgba(0,0,0,0.5)',
-                color: isRunning ? '#60a5fa' : 'white',
+                color: isRunning ? '#ffffff' : 'white',
                 transition: 'color 0.3s ease'
             }">
                 {{ formatTime(elapsed) }}
