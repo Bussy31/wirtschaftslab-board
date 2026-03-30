@@ -26,7 +26,7 @@
 </head>
 <body>
 
-<div id="app">
+<div id="app" :style="boardStyle">
     <div :class="['toolbar', { 'hidden': isFullscreen }]">
         <div class="brand">🎓 wirtschaftslab-board <span class="active-profile-badge">{{ aktiveKlasse }}</span></div>
 
