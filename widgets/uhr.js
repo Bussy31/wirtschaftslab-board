@@ -8,12 +8,18 @@ const UhrWidget = {
             </div>
             
             <svg v-else viewBox="0 0 100 100" style="width: 80cqmin; height: 80cqmin; max-width: 100%; max-height: 100%; filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.4));">
-                <circle cx="50" cy="50" r="48" fill="rgba(30, 41, 59, 0.8)" stroke="#3b82f6" stroke-width="2"/>
-                <line v-for="n in 12" :key="n" x1="50" y1="6" x2="50" y2="12" stroke="#94a3b8" stroke-width="2" :transform="'rotate(' + (n * 30) + ' 50 50)'" />
-                <line x1="50" y1="50" x2="50" y2="25" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" :transform="'rotate(' + stundenWinkel + ' 50 50)'" />
-                <line x1="50" y1="50" x2="50" y2="12" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + minutenWinkel + ' 50 50)'" />
-                <line x1="50" y1="50" x2="50" y2="10" stroke="#ef4444" stroke-width="1" stroke-linecap="round" :transform="'rotate(' + sekundenWinkel + ' 50 50)'" />
-                <circle cx="50" cy="50" r="2.5" fill="#ef4444"/>
+                <circle cx="50" cy="50" r="48" fill="rgba(255, 255, 255, 0.03)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1.5"/>
+                
+                <line v-for="n in 4" :key="n" x1="50" y1="6" x2="50" y2="14" stroke="#ffffff" stroke-width="3" stroke-linecap="round" :transform="'rotate(' + (n * 90) + ' 50 50)'" />
+                
+                <line x1="50" y1="50" x2="50" y2="26" stroke="#ffffff" stroke-width="4" stroke-linecap="round" :transform="'rotate(' + stundenWinkel + ' 50 50)'" />
+                
+                <line x1="50" y1="50" x2="50" y2="12" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" :transform="'rotate(' + minutenWinkel + ' 50 50)'" />
+                
+                <line x1="50" y1="58" x2="50" y2="10" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" :transform="'rotate(' + sekundenWinkel + ' 50 50)'" />
+                
+                <circle cx="50" cy="50" r="3.5" fill="#ffffff"/>
+                <circle cx="50" cy="50" r="1.5" fill="#f97316"/>
             </svg>
 
         </div>
