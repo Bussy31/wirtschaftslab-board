@@ -8,8 +8,8 @@ const GruppenWidget = {
             unassigned: this.widgetData.unassigned || [],
             schuelerText: this.widgetData.schuelerListe || '',
             showList: false,
-            // NEU: Klick-Speicher
-            selectedStudent: null,
+            // NEU: Wir merken uns jetzt den Index (Listenplatz), nicht mehr den Namen!
+            selectedStudentIndex: null,
             selectedSource: null
         };
     },
@@ -80,46 +80,49 @@ const GruppenWidget = {
             this.saveState();
         },
 
-        // --- NEUE KLICK LOGIK (Ersetzt Drag & Drop) ---
-        selectStudent(name, sourceIndex) {
+        // --- KLICK LOGIK (Update für gleiche Namen) ---
+        selectStudent(studentIndex, sourceIndex) {
             if (this.modus !== 'manuell' || this.widgetData.isTransparent) return;
-            // Klickt man denselben nochmal an, wird er abgewählt
-            if (this.selectedStudent === name) {
-                this.selectedStudent = null;
+
+            // Klickt man exakt denselben Platz nochmal an, wird er abgewählt
+            if (this.selectedSource === sourceIndex && this.selectedStudentIndex === studentIndex) {
+                this.selectedStudentIndex = null;
                 this.selectedSource = null;
             } else {
-                this.selectedStudent = name;
+                this.selectedStudentIndex = studentIndex;
                 this.selectedSource = sourceIndex;
             }
         },
         moveToGroup(targetIndex) {
-            if (!this.selectedStudent || this.modus !== 'manuell' || this.widgetData.isTransparent) return;
+            if (this.selectedStudentIndex === null || this.modus !== 'manuell' || this.widgetData.isTransparent) return;
 
-            // Wenn man in dieselbe Box klickt, in der der Schüler schon ist -> abwählen
+            // Wenn man in dieselbe Box klickt -> abwählen
             if (this.selectedSource === targetIndex) {
-                this.selectedStudent = null;
+                this.selectedStudentIndex = null;
                 this.selectedSource = null;
                 return;
             }
 
-            // 1. Aus alter Box entfernen (FIX: Nur genau EINEN Eintrag löschen!)
+            let studentName = "";
+
+            // 1. Namen anhand des Listenplatzes (Index) holen und exakt dort löschen
             if (this.selectedSource === -1) {
-                const idx = this.unassigned.indexOf(this.selectedStudent);
-                if (idx !== -1) this.unassigned.splice(idx, 1);
+                studentName = this.unassigned[this.selectedStudentIndex];
+                this.unassigned.splice(this.selectedStudentIndex, 1);
             } else {
-                const idx = this.gruppen[this.selectedSource].indexOf(this.selectedStudent);
-                if (idx !== -1) this.gruppen[this.selectedSource].splice(idx, 1);
+                studentName = this.gruppen[this.selectedSource][this.selectedStudentIndex];
+                this.gruppen[this.selectedSource].splice(this.selectedStudentIndex, 1);
             }
 
             // 2. In neue Box einfügen
             if (targetIndex === -1) {
-                this.unassigned.push(this.selectedStudent);
+                this.unassigned.push(studentName);
             } else {
-                this.gruppen[targetIndex].push(this.selectedStudent);
+                this.gruppen[targetIndex].push(studentName);
             }
 
             // 3. Auswahl leeren und speichern
-            this.selectedStudent = null;
+            this.selectedStudentIndex = null;
             this.selectedSource = null;
             this.saveState();
         }
@@ -152,22 +155,22 @@ const GruppenWidget = {
                      @click="moveToGroup(-1)"
                      style="background:rgba(245, 158, 11, 0.1); border-radius:6px; flex-shrink:0; padding:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:45px; align-items:center; transition: all 0.2s;"
                      :style="{ 
-                         border: selectedStudent ? '2px dashed #ef4444' : '1px dashed rgba(245, 158, 11, 0.4)',
-                         cursor: selectedStudent ? 'pointer' : 'default'
+                         border: selectedStudentIndex !== null ? '2px dashed #ef4444' : '1px dashed rgba(245, 158, 11, 0.4)',
+                         cursor: selectedStudentIndex !== null ? 'pointer' : 'default'
                      }">
                     
                     <div v-if="unassigned.length === 0" style="color:rgba(251, 191, 36, 0.5); font-size:0.8rem; width:100%; text-align:center; pointer-events:none;">Alle Schüler sind eingeteilt! 🎉</div>
                     
-                    <span v-for="name in unassigned" :key="name"
-                          @click.stop="selectStudent(name, -1)"
+                    <span v-for="(name, sIndex) in unassigned" :key="'u-' + sIndex"
+                          @click.stop="selectStudent(sIndex, -1)"
                           style="padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; transition:all 0.2s;"
                           :style="{
                               cursor: 'pointer',
-                              background: selectedStudent === name ? '#ef4444' : 'rgba(245, 158, 11, 0.2)',
-                              border: selectedStudent === name ? '1px solid #dc2626' : '1px solid rgba(245, 158, 11, 0.4)',
-                              color: selectedStudent === name ? 'white' : '#fcd34d',
-                              transform: selectedStudent === name ? 'scale(1.1)' : 'scale(1)',
-                              boxShadow: selectedStudent === name ? '0 0 10px rgba(239,68,68,0.8)' : '0 2px 2px rgba(0,0,0,0.1)'
+                              background: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '#ef4444' : 'rgba(245, 158, 11, 0.2)',
+                              border: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '1px solid #dc2626' : '1px solid rgba(245, 158, 11, 0.4)',
+                              color: (selectedSource === -1 && selectedStudentIndex === sIndex) ? 'white' : '#fcd34d',
+                              transform: (selectedSource === -1 && selectedStudentIndex === sIndex) ? 'scale(1.1)' : 'scale(1)',
+                              boxShadow: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '0 0 10px rgba(239,68,68,0.8)' : '0 2px 2px rgba(0,0,0,0.1)'
                           }">
                           {{ name }}
                     </span>
@@ -180,8 +183,8 @@ const GruppenWidget = {
                 <div v-for="(gruppe, index) in gruppen" :key="index"
                      @click="moveToGroup(index)"
                      :style="{
-                        background: widgetData.isTransparent ? 'rgba(15, 23, 42, 0.9)' : (selectedStudent ? 'rgba(239, 68, 68, 0.05)' : 'rgba(59, 130, 246, 0.1)'),
-                        border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : (selectedStudent ? '2px dashed #ef4444' : '1px solid rgba(59, 130, 246, 0.3)'),
+                        background: widgetData.isTransparent ? 'rgba(15, 23, 42, 0.9)' : (selectedStudentIndex !== null ? 'rgba(239, 68, 68, 0.05)' : 'rgba(59, 130, 246, 0.1)'),
+                        border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : (selectedStudentIndex !== null ? '2px dashed #ef4444' : '1px solid rgba(59, 130, 246, 0.3)'),
                         borderRadius: '8px',
                         padding: '10px',
                         minHeight: '100px',
@@ -189,7 +192,7 @@ const GruppenWidget = {
                         flexDirection: 'column',
                         boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : 'inset 0 2px 10px rgba(0,0,0,0.1)',
                         transition: 'all 0.2s ease',
-                        cursor: (modus === 'manuell' && !widgetData.isTransparent && selectedStudent) ? 'pointer' : 'default'
+                        cursor: (modus === 'manuell' && !widgetData.isTransparent && selectedStudentIndex !== null) ? 'pointer' : 'default'
                      }">
                      
                      <div :style="{
@@ -209,16 +212,16 @@ const GruppenWidget = {
                      </div>
                      
                      <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
-                         <span v-for="name in gruppe" :key="name"
-                               @click.stop="selectStudent(name, index)"
+                         <span v-for="(name, sIndex) in gruppe" :key="'g-' + index + '-' + sIndex"
+                               @click.stop="selectStudent(sIndex, index)"
                                style="padding:4px 8px; border-radius:4px; font-size:0.85rem; transition: all 0.2s;"
                                :style="{
                                    cursor: (!widgetData.isTransparent && modus === 'manuell') ? 'pointer' : 'default',
-                                   background: selectedStudent === name ? '#ef4444' : 'rgba(255,255,255,0.08)',
+                                   background: (selectedSource === index && selectedStudentIndex === sIndex) ? '#ef4444' : 'rgba(255,255,255,0.08)',
                                    color: 'white',
-                                   border: selectedStudent === name ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.05)',
-                                   transform: selectedStudent === name ? 'scale(1.05)' : 'scale(1)',
-                                   boxShadow: selectedStudent === name ? '0 0 10px rgba(239,68,68,0.8)' : 'none'
+                                   border: (selectedSource === index && selectedStudentIndex === sIndex) ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.05)',
+                                   transform: (selectedSource === index && selectedStudentIndex === sIndex) ? 'scale(1.05)' : 'scale(1)',
+                                   boxShadow: (selectedSource === index && selectedStudentIndex === sIndex) ? '0 0 10px rgba(239,68,68,0.8)' : 'none'
                                }">
                              {{ name }}
                          </span>
