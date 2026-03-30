@@ -96,7 +96,11 @@ const app = createApp({
                     if (w.type === 'gruppen' || w.type === 'zufall') {
                         w.schuelerListe = anwesendeSchueler;
                         if (w.type === 'gruppen') {
+                            const anzahlGruppen = w.gruppen.length > 0 ? w.gruppen.length : (w.parameter || 4);
                             w.gruppen = [];
+                            for (let i = 0; i < anzahlGruppen; i++) {
+                                w.gruppen.push([]);
+                            }
                             w.unassigned = anwesendeSchueler.split('\n');
                         }
                         hatAktualisiert = true;
