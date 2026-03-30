@@ -250,19 +250,31 @@ const app = createApp({
         exportBoard() {
             const backupData = {
                 settings: this.settings,
-                boards: {}
+                boards: {},
+                backgrounds: {} // <-- NEU: Hier sammeln wir die Hintergründe
             };
 
+            // 1. Alle angelegten Klassen durchgehen
             if (this.settings.klassen) {
                 this.settings.klassen.forEach(klasse => {
+                    // Widgets exportieren
                     const boardData = localStorage.getItem('board_' + klasse.name);
                     if (boardData) backupData.boards[klasse.name] = JSON.parse(boardData);
+
+                    // Hintergrund exportieren
+                    const bgData = localStorage.getItem('hintergrund_' + klasse.name);
+                    if (bgData) backupData.backgrounds[klasse.name] = bgData;
                 });
             }
 
+            // 2. Das Standard-Board auch mitnehmen
             const standardBoard = localStorage.getItem('board_Standard');
             if (standardBoard) backupData.boards['Standard'] = JSON.parse(standardBoard);
 
+            const standardBg = localStorage.getItem('hintergrund_Standard');
+            if (standardBg) backupData.backgrounds['Standard'] = standardBg;
+
+            // Datei generieren und herunterladen
             const dataStr = JSON.stringify(backupData);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
@@ -270,6 +282,57 @@ const app = createApp({
             link.href = url;
             link.download = "wirtschaftslab-komplett-backup.json";
             link.click();
+        },
+
+        importBoard(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+
+                    // Check, ob es ein Komplett-Backup ist
+                    if (importedData.settings && importedData.boards) {
+
+                        // 1. Einstellungen laden
+                        this.settings = importedData.settings;
+                        this.saveSettings();
+
+                        // 2. Widgets wiederherstellen
+                        for (const [klasseName, widgets] of Object.entries(importedData.boards)) {
+                            localStorage.setItem('board_' + klasseName, JSON.stringify(widgets));
+                        }
+
+                        // 3. NEU: Hintergründe wiederherstellen (falls im Backup vorhanden)
+                        if (importedData.backgrounds) {
+                            for (const [klasseName, bg] of Object.entries(importedData.backgrounds)) {
+                                localStorage.setItem('hintergrund_' + klasseName, bg);
+                            }
+                        }
+
+                        // 4. Erste Klasse oder Standardklasse laden
+                        if (this.settings.klassen && this.settings.klassen.length > 0) {
+                            this.wechsleKlasse(this.settings.klassen[0].name);
+                        } else {
+                            this.wechsleKlasse('Standard');
+                        }
+
+                        alert("✅ Komplett-Backup inkl. Hintergründe erfolgreich geladen!");
+                    } else {
+                        // Fallback für alte, einzelne Board-Backups
+                        this.widgets = importedData;
+                        this.saveToLocal();
+                        alert("ℹ️ Einzelnes Board in die aktuelle Klasse importiert.");
+                    }
+                } catch (err) {
+                    alert("❌ Fehler beim Importieren. Ist das die richtige Datei?");
+                    console.error(err);
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
         },
         importBoard(event) {
             const file = event.target.files[0];
