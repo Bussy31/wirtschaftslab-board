@@ -14,7 +14,7 @@ const UhrWidget = {
                     <text @click.stop="prevTheme" x="32" y="52" :fill="currentTheme.text" 
                           style="cursor: pointer; font-size: 8px; opacity: 0.2; transition: opacity 0.2s;" 
                           onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">◀</text>
-                    <text @click.stop="nextTheme" x="60" y="52" :fill="currentTheme.text" 
+                    <text @click.stop="nextTheme" x="60" y="54" :fill="currentTheme.text" 
                           style="cursor: pointer; font-size: 8px; opacity: 0.2; transition: opacity 0.2s;" 
                           onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">▶</text>
                 </g>
