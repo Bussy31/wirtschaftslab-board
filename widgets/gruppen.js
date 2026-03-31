@@ -1,105 +1,5 @@
 const GruppenWidget = {
     props: ['widgetData'],
-    template: `
-        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; position: relative; container-type: size;">
-            
-            <div v-if="showList" style="display: flex; flex-direction: column; gap: 10px; height: 100%; overflow-y: auto;" class="custom-scrollbar">
-                
-                <div style="display: flex; gap: 5px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px;">
-                    <button @click="switchMode('anzahl')" :style="{ flex: 1, padding: '8px', fontSize: '0.9rem', background: modus === 'anzahl' ? 'var(--button-color)' : 'transparent', color: 'var(--text-color)' }">Anzahl</button>
-                    <button @click="switchMode('groesse')" :style="{ flex: 1, padding: '8px', fontSize: '0.9rem', background: modus === 'groesse' ? 'var(--button-color)' : 'transparent', color: 'var(--text-color)' }">Größe</button>
-                    <button @click="switchMode('manuell')" :style="{ flex: 1, padding: '8px', fontSize: '0.9rem', background: modus === 'manuell' ? 'var(--button-color)' : 'transparent', color: 'var(--text-color)' }">Manuell</button>
-                </div>
-
-                <div v-if="modus !== 'manuell'" style="display: flex; align-items: center; gap: 10px;">
-                    <label style="color: var(--text-color); font-size: 0.9rem;">{{ modus === 'anzahl' ? 'Anzahl der Gruppen:' : 'Personen pro Gruppe:' }}</label>
-                    <input type="number" v-model.number="parameter" min="1" max="20" style="width: 60px; padding: 5px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-color); border-radius: 4px; text-align: center;">
-                </div>
-
-                <textarea v-model="schuelerText" placeholder="Schülernamen einfügen (einer pro Zeile)..." style="flex-grow: 1; min-height: 100px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-color); padding: 10px; border-radius: 8px; resize: none; font-family: inherit; font-size: 0.9rem; line-height: 1.5; outline: none;"></textarea>
-
-                <div style="display: flex; gap: 10px;">
-                    <button v-if="modus !== 'manuell'" @click="generateGroups" style="flex: 2; padding: 10px; background: var(--button-color); color: var(--text-color); font-weight: bold;">Zufällig Einteilen</button>
-                    <button v-if="modus === 'manuell'" @click="setupManual" style="flex: 2; padding: 10px; background: var(--button-color); color: var(--text-color); font-weight: bold;">Listen vorbereiten</button>
-                    <button @click="showList = false" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.1); color: var(--text-color);">Abbrechen</button>
-                </div>
-            </div>
-
-            <div v-else @click="openSettings" @mousedown.stop @touchstart.stop style="display: flex; gap: 10px; height: 100%; overflow-x: auto; padding-bottom: 5px; align-items: stretch;" class="custom-scrollbar">
-                
-                <div v-if="modus === 'manuell' && unassigned.length > 0 && !widgetData.isTransparent" style="min-width: 150px; flex: 1; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px dashed rgba(255,255,255,0.2);">
-                    <div style="font-weight: bold; font-size: 1rem; color: #fca5a5; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px;">Ohne Gruppe</div>
-                    
-                    <div style="overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 6px;" class="custom-scrollbar">
-                        <span v-for="(name, index) in unassigned" :key="'u'+index" 
-                              @click.stop="selectStudent('unassigned', index)"
-                              :style="{
-                                  padding: '6px 10px', 
-                                  borderRadius: '6px', 
-                                  fontSize: '0.9rem', 
-                                  textAlign: 'center', 
-                                  transition: 'all 0.2s',
-                                  cursor: 'pointer',
-                                  background: (selectedSource === 'unassigned' && selectedStudentIndex === index) ? '#ef4444' : 'rgba(255,255,255,0.08)',
-                                  color: 'var(--text-color)',
-                                  border: (selectedSource === 'unassigned' && selectedStudentIndex === index) ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.05)',
-                                  transform: (selectedSource === 'unassigned' && selectedStudentIndex === index) ? 'scale(1.05)' : 'scale(1)',
-                                  boxShadow: (selectedSource === 'unassigned' && selectedStudentIndex === index) ? '0 0 10px rgba(239,68,68,0.8)' : 'none'
-                              }">
-                            {{ name }}
-                        </span>
-                    </div>
-                </div>
-
-                <div v-for="(gruppe, index) in gruppen" :key="index" 
-                     @click.stop="moveToGroup(index)"
-                     :style="{ 
-                         minWidth: '150px', 
-                         flex: 1, 
-                         background: widgetData.isTransparent ? 'transparent' : 'rgba(255,255,255,0.05)', 
-                         borderRadius: '8px', 
-                         padding: '10px', 
-                         display: 'flex', 
-                         flexDirection: 'column', 
-                         gap: '8px',
-                         border: (selectedSource !== null && modus === 'manuell') ? '1px dashed var(--button-color)' : 'none',
-                         cursor: (selectedSource !== null && modus === 'manuell') ? 'pointer' : 'default'
-                     }">
-                     
-                     <div style="font-weight: bold; font-size: 1.1rem; color: var(--button-color); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px;">
-                        Gruppe {{ index + 1 }}
-                     </div>
-                     
-                     <div style="overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 6px;" class="custom-scrollbar">
-                         <span v-for="(name, sIndex) in gruppe" :key="sIndex" 
-                               @click.stop="modus === 'manuell' ? selectStudent(index, sIndex) : null"
-                               :style="{
-                                   padding: '6px 10px', 
-                                   borderRadius: '6px', 
-                                   fontSize: '0.9rem', 
-                                   textAlign: 'center', 
-                                   transition: 'all 0.2s',
-                                   cursor: (!widgetData.isTransparent && modus === 'manuell') ? 'pointer' : 'default',
-                                   background: (selectedSource === index && selectedStudentIndex === sIndex) ? '#ef4444' : 'rgba(255,255,255,0.08)',
-                                   color: 'var(--text-color)',
-                                   border: (selectedSource === index && selectedStudentIndex === sIndex) ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.05)',
-                                   transform: (selectedSource === index && selectedStudentIndex === sIndex) ? 'scale(1.05)' : 'scale(1)',
-                                   boxShadow: (selectedSource === index && selectedStudentIndex === sIndex) ? '0 0 10px rgba(239,68,68,0.8)' : 'none'
-                               }">
-                             {{ name }}
-                         </span>
-                         
-                         <div v-if="gruppe.length === 0 && !widgetData.isTransparent" style="color: rgba(255,255,255,0.3); font-size: 0.85rem; font-style: italic; text-align: center; margin-top: 10px; pointer-events: none;">(Leer)</div>
-                     </div>
-                </div>
-            </div>
-
-            <div v-if="gruppen.length === 0 && widgetData.isTransparent && !showList" style="text-align: center; color: var(--text-color); margin-top: 20px;">
-                Klicken zum Einrichten
-            </div>
-
-        </div>
-    `,
     data() {
         return {
             modus: this.widgetData.modus || 'anzahl',
@@ -129,93 +29,211 @@ const GruppenWidget = {
             this.showList = false;
 
             if (newMode === 'manuell') {
-                this.setupManual();
+                this.gruppen = [];
+                let numGroups = parseInt(this.parameter) || 4;
+                for (let i = 0; i < numGroups; i++) this.gruppen.push([]);
+                this.unassigned = this.getNamen(); // Alle ins Sammelbecken
             } else {
-                this.showList = true;
+                this.gruppen = []; // Ansicht leeren
+                this.unassigned = [];
             }
-        },
-        openSettings() {
-            if (this.modus === 'manuell' && this.selectedSource !== null) {
-                return; // Wenn man gerade verschiebt, nicht die Einstellungen öffnen
-            }
-            this.showList = true;
-        },
-        setupManual() {
-            this.gruppen = [];
-            let numGroups = parseInt(this.parameter) || 4;
-            for (let i = 0; i < numGroups; i++) this.gruppen.push([]);
-
-            // Namen, die es schon gibt, in Unassigned packen (vermeidet Duplikate)
-            const aktuelleNamen = this.getNamen();
-            this.unassigned = [...aktuelleNamen];
-
-            this.showList = false;
-            this.selectedStudentIndex = null;
-            this.selectedSource = null;
             this.saveState();
         },
-        generateGroups() {
-            let namen = this.getNamen();
+        updateManuellGroups() {
+            if (this.modus !== 'manuell') return;
+            let numGroups = parseInt(this.parameter) || 4;
+            while (this.gruppen.length < numGroups) this.gruppen.push([]);
+            while (this.gruppen.length > numGroups) {
+                let removed = this.gruppen.pop();
+                this.unassigned.push(...removed);
+            }
+            this.saveState();
+        },
+        shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        },
+        generiereGruppen() {
+            let namen = this.shuffleArray(this.getNamen());
+            this.gruppen = [];
+            this.unassigned = [];
+
             if (namen.length === 0) return;
 
-            // Mischen (Fisher-Yates)
-            for (let i = namen.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [namen[i], namen[j]] = [namen[j], namen[i]];
-            }
-
-            this.gruppen = [];
-            let numGroups = 0;
-
             if (this.modus === 'anzahl') {
-                numGroups = parseInt(this.parameter) || 4;
+                let numGroups = parseInt(this.parameter) || 1;
                 for (let i = 0; i < numGroups; i++) this.gruppen.push([]);
-                namen.forEach((name, index) => {
-                    this.gruppen[index % numGroups].push(name);
+                namen.forEach((name, i) => {
+                    this.gruppen[i % numGroups].push(name);
                 });
             } else if (this.modus === 'groesse') {
-                let size = parseInt(this.parameter) || 4;
-                numGroups = Math.ceil(namen.length / size);
-                for (let i = 0; i < numGroups; i++) {
-                    this.gruppen.push(namen.slice(i * size, (i + 1) * size));
+                let groupSize = parseInt(this.parameter) || 2;
+                for (let i = 0; i < namen.length; i += groupSize) {
+                    this.gruppen.push(namen.slice(i, i + groupSize));
                 }
             }
-
-            this.unassigned = [];
-            this.showList = false;
             this.saveState();
         },
-        selectStudent(sourceIndex, studentIndex) {
+
+        // --- KLICK LOGIK (Update für gleiche Namen) ---
+        selectStudent(studentIndex, sourceIndex) {
+            if (this.modus !== 'manuell' || this.widgetData.isTransparent) return;
+
+            // Klickt man exakt denselben Platz nochmal an, wird er abgewählt
             if (this.selectedSource === sourceIndex && this.selectedStudentIndex === studentIndex) {
-                // Abwählen
-                this.selectedSource = null;
                 this.selectedStudentIndex = null;
+                this.selectedSource = null;
             } else {
-                // Auswählen
-                this.selectedSource = sourceIndex;
                 this.selectedStudentIndex = studentIndex;
+                this.selectedSource = sourceIndex;
             }
         },
-        moveToGroup(targetGroupIndex) {
-            if (this.selectedSource === null || this.modus !== 'manuell') return;
+        moveToGroup(targetIndex) {
+            if (this.selectedStudentIndex === null || this.modus !== 'manuell' || this.widgetData.isTransparent) return;
 
-            let studentName = '';
-
-            // Aus alter Liste entfernen
-            if (this.selectedSource === 'unassigned') {
-                studentName = this.unassigned.splice(this.selectedStudentIndex, 1)[0];
-            } else {
-                studentName = this.gruppen[this.selectedSource].splice(this.selectedStudentIndex, 1)[0];
+            // Wenn man in dieselbe Box klickt -> abwählen
+            if (this.selectedSource === targetIndex) {
+                this.selectedStudentIndex = null;
+                this.selectedSource = null;
+                return;
             }
 
-            // In neue Gruppe einfügen
-            this.gruppen[targetGroupIndex].push(studentName);
+            let studentName = "";
 
-            // Auswahl zurücksetzen
-            this.selectedSource = null;
+            // 1. Namen anhand des Listenplatzes (Index) holen und exakt dort löschen
+            if (this.selectedSource === -1) {
+                studentName = this.unassigned[this.selectedStudentIndex];
+                this.unassigned.splice(this.selectedStudentIndex, 1);
+            } else {
+                studentName = this.gruppen[this.selectedSource][this.selectedStudentIndex];
+                this.gruppen[this.selectedSource].splice(this.selectedStudentIndex, 1);
+            }
+
+            // 2. In neue Box einfügen
+            if (targetIndex === -1) {
+                this.unassigned.push(studentName);
+            } else {
+                this.gruppen[targetIndex].push(studentName);
+            }
+
+            // 3. Auswahl leeren und speichern
             this.selectedStudentIndex = null;
-
+            this.selectedSource = null;
             this.saveState();
         }
-    }
+    },
+    template: `
+        <div style="display:flex; flex-direction:column; height:100%; box-sizing: border-box; transition: padding 0.3s ease;"
+             :style="{ gap: widgetData.isTransparent ? '0' : '10px', padding: widgetData.isTransparent ? '0' : '5px' }">
+            
+            <template v-if="!widgetData.isTransparent">
+                <div style="display:flex; gap:5px; flex-shrink:0;">
+                    <button @click="switchMode('anzahl')" :style="{background: modus==='anzahl' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">🔢 Gruppenanzahl</button>
+                    <button @click="switchMode('groesse')" :style="{background: modus==='groesse' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">📏 Gruppengröße</button>
+                    <button @click="switchMode('manuell')" :style="{background: modus==='manuell' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">👆 Manuell (Klick)</button>
+                    <button @click="showList = !showList" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:4px; padding:6px; cursor:pointer;" title="Schülerliste bearbeiten">⚙️</button>
+                </div>
+
+                <textarea v-if="showList" v-model="schuelerText" @input="saveState" style="width:100%; height:80px; flex-shrink:0; background:rgba(0,0,0,0.3); color:white; border:1px solid var(--widget-border); border-radius:4px; padding:5px; resize:none; font-family:inherit; box-sizing:border-box;" placeholder="Namen (einer pro Zeile)"></textarea>
+
+                <div style="display:flex; gap:10px; flex-shrink:0; align-items:center; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">
+                    <label style="font-size:0.85rem; color:#cbd5e1;">
+                        {{ modus === 'anzahl' ? 'Wie viele Gruppen?' : (modus === 'groesse' ? 'Schüler pro Gruppe?' : 'Gruppen insgesamt:') }}
+                    </label>
+                    <input type="number" min="1" v-model="parameter" @change="updateManuellGroups" style="width:50px; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:4px; text-align:center; font-weight:bold;">
+                    
+                    <button v-if="modus !== 'manuell'" @click="generiereGruppen" style="background:#10b981; color:white; border:none; border-radius:4px; padding:4px 12px; cursor:pointer; font-weight:bold; margin-left:auto; box-shadow:0 2px 4px rgba(0,0,0,0.2);">🎲 Auslosen</button>
+                    <span v-else style="font-size:0.75rem; color:#94a3b8; margin-left:auto; font-style:italic;">(Namen antippen, dann Ziel antippen)</span>
+                </div>
+
+                <div v-if="modus === 'manuell'" 
+                     @click="moveToGroup(-1)"
+                     style="background:rgba(245, 158, 11, 0.1); border-radius:6px; flex-shrink:0; padding:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:45px; align-items:center; transition: all 0.2s;"
+                     :style="{ 
+                         border: selectedStudentIndex !== null ? '2px dashed #ef4444' : '1px dashed rgba(245, 158, 11, 0.4)',
+                         cursor: selectedStudentIndex !== null ? 'pointer' : 'default'
+                     }">
+                    
+                    <div v-if="unassigned.length === 0" style="color:rgba(251, 191, 36, 0.5); font-size:0.8rem; width:100%; text-align:center; pointer-events:none;">Alle Schüler sind eingeteilt! 🎉</div>
+                    
+                    <span v-for="(name, sIndex) in unassigned" :key="'u-' + sIndex"
+                          @click.stop="selectStudent(sIndex, -1)"
+                          style="padding:3px 10px; border-radius:12px; font-size:0.85rem; font-weight:600; transition:all 0.2s;"
+                          :style="{
+                              cursor: 'pointer',
+                              background: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '#ef4444' : 'rgba(245, 158, 11, 0.2)',
+                              border: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '1px solid #dc2626' : '1px solid rgba(245, 158, 11, 0.4)',
+                              color: (selectedSource === -1 && selectedStudentIndex === sIndex) ? 'white' : '#fcd34d',
+                              transform: (selectedSource === -1 && selectedStudentIndex === sIndex) ? 'scale(1.1)' : 'scale(1)',
+                              boxShadow: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '0 0 10px rgba(239,68,68,0.8)' : '0 2px 2px rgba(0,0,0,0.1)'
+                          }">
+                          {{ name }}
+                    </span>
+                </div>
+            </template>
+
+            <div style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; align-items:start;"
+                 :style="{ paddingRight: widgetData.isTransparent ? '0' : '5px' }" class="custom-scrollbar">
+                
+                <div v-for="(gruppe, index) in gruppen" :key="index"
+                     @click="moveToGroup(index)"
+                     :style="{
+                        background: widgetData.isTransparent ? 'rgba(15, 23, 42, 0.9)' : (selectedStudentIndex !== null ? 'rgba(239, 68, 68, 0.05)' : 'rgba(59, 130, 246, 0.1)'),
+                        border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : (selectedStudentIndex !== null ? '2px dashed #ef4444' : '1px solid rgba(59, 130, 246, 0.3)'),
+                        borderRadius: '8px',
+                        padding: '10px',
+                        minHeight: '100px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : 'inset 0 2px 10px rgba(0,0,0,0.1)',
+                        transition: 'all 0.2s ease',
+                        cursor: (modus === 'manuell' && !widgetData.isTransparent && selectedStudentIndex !== null) ? 'pointer' : 'default'
+                     }">
+                     
+                     <div :style="{
+                        fontWeight: 'bold',
+                        fontSize: widgetData.isTransparent ? '1rem' : '0.9rem',
+                        color: widgetData.isTransparent ? 'white' : '#93c5fd',
+                        marginBottom: '8px',
+                        borderBottom: '1px solid rgba(59, 130, 246, 0.2)',
+                        paddingBottom: '4px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        textShadow: widgetData.isTransparent ? '0px 1px 3px rgba(0,0,0,0.8)' : 'none',
+                        pointerEvents: 'none'
+                     }">
+                         <span>Gruppe {{ index + 1 }}</span>
+                         <span v-if="!widgetData.isTransparent" style="font-size:0.7rem; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:10px;">{{ gruppe.length }}</span>
+                     </div>
+                     
+                     <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+                         <span v-for="(name, sIndex) in gruppe" :key="'g-' + index + '-' + sIndex"
+                               @click.stop="selectStudent(sIndex, index)"
+                               style="padding:4px 8px; border-radius:4px; font-size:0.85rem; transition: all 0.2s;"
+                               :style="{
+                                   cursor: (!widgetData.isTransparent && modus === 'manuell') ? 'pointer' : 'default',
+                                   background: (selectedSource === index && selectedStudentIndex === sIndex) ? '#ef4444' : 'rgba(255,255,255,0.08)',
+                                   color: 'white',
+                                   border: (selectedSource === index && selectedStudentIndex === sIndex) ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.05)',
+                                   transform: (selectedSource === index && selectedStudentIndex === sIndex) ? 'scale(1.05)' : 'scale(1)',
+                                   boxShadow: (selectedSource === index && selectedStudentIndex === sIndex) ? '0 0 10px rgba(239,68,68,0.8)' : 'none'
+                               }">
+                             {{ name }}
+                         </span>
+                         
+                         <div v-if="gruppe.length === 0 && !widgetData.isTransparent" style="color:rgba(255,255,255,0.2); font-size:0.75rem; font-style:italic; text-align:center; margin-top:10px; pointer-events:none;">(Leer)</div>
+                     </div>
+                </div>
+            </div>
+
+            <div v-if="gruppen.length === 0 && widgetData.isTransparent" style="text-align: center; color: rgba(255,255,255,0.4); margin-top: 20px; font-style: italic;">
+                Noch keine Gruppen ausgelost...
+            </div>
+
+        </div>
+    `
 };
