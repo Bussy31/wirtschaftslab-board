@@ -1,7 +1,7 @@
 const ZufallWidget = {
     props: ['widgetData'],
     template: `
-        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 5px; gap: 10px; box-sizing: border-box;">
+        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; gap: 10px; box-sizing: border-box;">
             
             <div v-if="!showSettings && currentModus === 'text'" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                 <div v-if="anzeigeName" 
@@ -15,14 +15,12 @@ const ZufallWidget = {
                     {{ isSpinning ? '🔄 ' + anzeigeName : '🎉 ' + anzeigeName + ' 🎉' }}
                 </div>
                 <div v-else style="text-align: center; color: rgba(255,255,255,0.4); font-style: italic; font-size: clamp(1rem, 5cqw, 2rem);">
-                    Bereit für die Ziehung...
+                    Bereit...
                 </div>
             </div>
 
             <div v-if="!showSettings && currentModus === 'rad'" style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-                
-                <div style="position: relative; width: 60cqmin; height: 60cqmin; margin: 0 auto 10px auto;">
-                    
+                <div style="position: relative; width: 65cqmin; height: 65cqmin; margin-bottom: 10px;">
                     <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 10; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));"></div>
                     
                     <div :style="{
@@ -31,50 +29,48 @@ const ZufallWidget = {
                         background: wheelGradient,
                         transform: 'rotate(' + wheelRotation + 'deg)',
                         transition: isSpinning ? 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)' : 'none',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
                         border: '2px solid rgba(255,255,255,0.2)'
                     }">
                         <div v-for="(name, i) in namenList" :key="i"
                              :style="{
                                  position: 'absolute',
                                  top: '50%', left: '50%',
-                                 /* Der doppelte rotate-Befehl dreht die Scheibe UND kippt den Text um 90 Grad */
-                                 transform: 'translate(-50%, -50%) rotate(' + ((i * 360 / namenList.length) + (180 / Math.max(1, namenList.length))) + 'deg) translateY(-17cqmin) rotate(-90deg)',
+                                 transform: 'translate(-50%, -50%) rotate(' + ((i * 360 / namenList.length) + (180 / Math.max(1, namenList.length))) + 'deg) translateY(-20cqmin) rotate(-90deg)',
                                  transformOrigin: 'center center',
-                                 fontSize: 'clamp(0.6rem, 3.5cqmin, 1.2rem)',
+                                 fontSize: 'clamp(0.5rem, 3cqmin, 1.1rem)',
                                  fontWeight: 'bold',
                                  color: 'white',
-                                 textShadow: '1px 1px 2px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)',
+                                 textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
                                  whiteSpace: 'nowrap',
-                                 maxWidth: '22cqmin',
-                                 overflow: 'hidden',
-                                 textOverflow: 'ellipsis'
+                                 maxWidth: '25cqmin',
+                                 overflow: 'hidden'
                              }">
                              {{ name }}
                         </div>
                     </div>
                 </div>
-                
-                <div style="height: 2cqmin; min-height: 30px; display: flex; align-items: center; justify-content: center;">
-                    <div v-if="anzeigeName && !isSpinning" style="font-size: clamp(1rem, 5cqmin, 2rem); font-weight: bold; color: #34d399; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; animation: popIn 0.3s ease-out;">
-                        🎉 {{ anzeigeName }} 🎉
+                <div style="height: 30px; display: flex; align-items: center;">
+                    <div v-if="anzeigeName && !isSpinning" style="font-size: clamp(1rem, 5cqmin, 1.8rem); font-weight: bold; color: #34d399; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                        {{ anzeigeName }}
                     </div>
                 </div>
             </div>
 
             <div v-if="showSettings" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
-                <label style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px;">Namen (einer pro Zeile):</label>
                 <textarea v-model="schuelerListe" 
-                          style="flex: 1; width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; padding: 5px; resize: none; font-family: inherit; font-size: 0.9rem;"
-                          placeholder="Max&#10;Anna&#10;Leon..."></textarea>
+                          style="flex: 1; width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; padding: 10px; resize: none; font-family: inherit;"
+                          placeholder="Namen hier rein..."></textarea>
             </div>
 
-            <div v-if="!showSettings" style="display:flex; gap:5px; margin-top: auto; z-index: 10;">
-                <button @click="spin" class="btn-primary" style="flex:1;" :disabled="isSpinning">Zufall</button>
-                <button @click="showSettings = true" class="btn-secondary" style="width: 40px;">⚙️</button>
+            <div v-if="!showSettings" style="display:flex; gap:8px; align-items: stretch;">
+                <button @click="spin" class="btn-primary" style="flex: 1; height: 36px;" :disabled="isSpinning">Zufall</button>
+                <button @click="showSettings = true" class="btn-secondary" style="width: 40px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    ⚙️
+                </button>
             </div>
-            <div v-else style="display:flex; margin-top: auto;">
-                <button @click="closeSettings" class="btn-primary" style="flex:1;">Speichern</button>
+            <div v-else style="display:flex;">
+                <button @click="closeSettings" class="btn-primary" style="flex:1; height: 36px;">Speichern</button>
             </div>
         </div>
     `,
@@ -91,72 +87,50 @@ const ZufallWidget = {
         namenList() {
             return this.schuelerListe.split('\n').map(n => n.trim()).filter(n => n.length > 0);
         },
-        // Holt sich den Modus direkt live aus der übergeordneten WidgetData (wird vom neuen Button in board.html gesteuert)
         currentModus() {
             return this.widgetData.modus || 'rad';
         },
         wheelGradient() {
             const namen = this.namenList;
-            if (namen.length === 0) return 'conic-gradient(gray 0%, gray 100%)';
-
+            if (namen.length === 0) return 'conic-gradient(#334155 0%, #334155 100%)';
             const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef'];
-            const step = 100 / Math.max(1, namen.length);
+            const step = 100 / namen.length;
             let grad = [];
-
             for(let i = 0; i < namen.length; i++) {
-                const color = colors[i % colors.length];
-                grad.push(`${color} ${i * step}% ${(i+1) * step}%`);
+                grad.push(`${colors[i % colors.length]} ${i * step}% ${(i+1) * step}%`);
             }
             return `conic-gradient(${grad.join(', ')})`;
         }
     },
     methods: {
-        getNamen() {
-            return this.namenList;
-        },
         spin() {
-            const namen = this.getNamen();
-            if (namen.length === 0) return;
-
+            const namen = this.namenList;
+            if (namen.length === 0 || this.isSpinning) return;
             this.isSpinning = true;
+            this.anzeigeName = '';
 
             if (this.currentModus === 'text') {
-                this.anzeigeName = '';
-                let duration = 4000;
+                let duration = 3000;
                 let startTime = Date.now();
-                let currentDelay = 50;
-
                 const spinTick = () => {
-                    const now = Date.now();
-                    const elapsed = now - startTime;
+                    const elapsed = Date.now() - startTime;
                     this.anzeigeName = namen[Math.floor(Math.random() * namen.length)];
-
                     if (elapsed < duration) {
-                        let progress = elapsed / duration;
-                        currentDelay = 50 + (progress * progress * 500);
-                        setTimeout(spinTick, currentDelay);
+                        setTimeout(spinTick, 50 + (elapsed/duration * 400));
                     } else {
                         this.isSpinning = false;
-                        this.anzeigeName = namen[Math.floor(Math.random() * namen.length)];
                     }
                 };
                 spinTick();
             } else {
-                this.anzeigeName = '';
-                const num = namen.length;
-                const sliceAngle = 360 / num;
-
                 const extraSpins = 360 * 5;
                 const randomOffset = Math.floor(Math.random() * 360);
-
                 this.wheelRotation += extraSpins + randomOffset;
-
                 setTimeout(() => {
                     this.isSpinning = false;
+                    const sliceAngle = 360 / namen.length;
                     const finalAngle = (360 - (this.wheelRotation % 360)) % 360;
-                    const index = Math.floor(finalAngle / sliceAngle);
-
-                    this.anzeigeName = namen[index];
+                    this.anzeigeName = namen[Math.floor(finalAngle / sliceAngle)];
                 }, 4000);
             }
         },
