@@ -115,10 +115,10 @@ const app = createApp({
     },
 
     methods: {
+        // === METHODEN FÜR DIE GLASSCHEIBE ===
         toggleDrawingMode() {
             this.isDrawingMode = !this.isDrawingMode;
             if (this.isDrawingMode) {
-                // Warten, bis das HTML geladen ist, dann Leinwand aufbauen
                 this.$nextTick(() => {
                     this.initCanvas();
                 });
@@ -128,15 +128,32 @@ const app = createApp({
             const canvas = this.$refs.drawingCanvas;
             if (!canvas) return;
 
-            // Passt die Zeichenfläche exakt an den Monitor an
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // HIER IST DER FIX FÜRS TABLET: Exakte Elementgröße statt Fenstergröße!
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
 
             this.ctx = canvas.getContext('2d');
-            this.ctx.lineCap = 'round';   // Runde Pinselstriche
+            this.ctx.lineCap = 'round';
             this.ctx.lineJoin = 'round';
             this.ctx.lineWidth = this.brushSize;
+
+            // Falls der Radierer an war, beim Neustart richtig setzen
+            this.ctx.globalCompositeOperation = this.isEraser ? 'destination-out' : 'source-over';
         },
+
+        // NEU: Hilfsfunktion für millimetergenaue Touch- und Maus-Positionen
+        getCanvasCoords(e, isTouch) {
+            const canvas = this.$refs.drawingCanvas;
+            const rect = canvas.getBoundingClientRect();
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        },
+
         startDrawing(e) {
             this.isDrawing = true;
             this.draw(e);
@@ -147,20 +164,21 @@ const app = createApp({
         },
         draw(e) {
             if (!this.isDrawing || !this.ctx) return;
+            const pos = this.getCanvasCoords(e, false);
             this.ctx.strokeStyle = this.drawColor;
-            this.ctx.lineTo(e.clientX, e.clientY);
+            this.ctx.lineTo(pos.x, pos.y);
             this.ctx.stroke();
             this.ctx.beginPath();
-            this.ctx.moveTo(e.clientX, e.clientY);
+            this.ctx.moveTo(pos.x, pos.y);
         },
         touchDraw(e) {
             if (!this.isDrawing || !this.ctx) return;
-            const touch = e.touches[0];
+            const pos = this.getCanvasCoords(e, true);
             this.ctx.strokeStyle = this.drawColor;
-            this.ctx.lineTo(touch.clientX, touch.clientY);
+            this.ctx.lineTo(pos.x, pos.y);
             this.ctx.stroke();
             this.ctx.beginPath();
-            this.ctx.moveTo(touch.clientX, touch.clientY);
+            this.ctx.moveTo(pos.x, pos.y);
         },
         stopDrawing() {
             this.isDrawing = false;
