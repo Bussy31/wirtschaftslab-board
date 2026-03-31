@@ -79,7 +79,7 @@ const GruppenWidget = {
             this.saveState();
         },
 
-        // --- KLICK LOGIK (Update für gleiche Namen) ---
+        // --- KLICK LOGIK ---
         selectStudent(studentIndex, sourceIndex) {
             if (this.modus !== 'manuell' || this.widgetData.isTransparent) return;
 
@@ -132,29 +132,29 @@ const GruppenWidget = {
             
             <template v-if="!widgetData.isTransparent">
                 <div style="display:flex; gap:5px; flex-shrink:0;">
-                    <button @click="switchMode('anzahl')" :style="{background: modus==='anzahl' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">🔢 Gruppenanzahl</button>
-                    <button @click="switchMode('groesse')" :style="{background: modus==='groesse' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">📏 Gruppengröße</button>
-                    <button @click="switchMode('manuell')" :style="{background: modus==='manuell' ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:white; border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">👆 Manuell (Klick)</button>
-                    <button @click="showList = !showList" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:4px; padding:6px; cursor:pointer;" title="Schülerliste bearbeiten">⚙️</button>
+                    <button @click="switchMode('anzahl')" :style="{background: modus==='anzahl' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:var(--text-color); border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">🔢 Gruppenanzahl</button>
+                    <button @click="switchMode('groesse')" :style="{background: modus==='groesse' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:var(--text-color); border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">📏 Gruppengröße</button>
+                    <button @click="switchMode('manuell')" :style="{background: modus==='manuell' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)'}" style="flex:1; border:none; color:var(--text-color); border-radius:4px; padding:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">👆 Manuell (Klick)</button>
+                    <button @click="showList = !showList" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:var(--text-color); border-radius:4px; padding:6px; cursor:pointer;" title="Schülerliste bearbeiten">⚙️</button>
                 </div>
 
-                <textarea v-if="showList" v-model="schuelerText" @input="saveState" style="width:100%; height:80px; flex-shrink:0; background:rgba(0,0,0,0.3); color:white; border:1px solid var(--widget-border); border-radius:4px; padding:5px; resize:none; font-family:inherit; box-sizing:border-box;" placeholder="Namen (einer pro Zeile)"></textarea>
+                <textarea v-if="showList" v-model="schuelerText" @input="saveState" style="width:100%; height:80px; flex-shrink:0; background:rgba(0,0,0,0.3); color:var(--text-color); border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:5px; resize:none; font-family:inherit; box-sizing:border-box;" placeholder="Namen (einer pro Zeile)"></textarea>
 
                 <div style="display:flex; gap:10px; flex-shrink:0; align-items:center; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">
-                    <label style="font-size:0.85rem; color:#cbd5e1;">
+                    <label style="font-size:0.85rem; color:var(--text-color); opacity:0.8;">
                         {{ modus === 'anzahl' ? 'Wie viele Gruppen?' : (modus === 'groesse' ? 'Schüler pro Gruppe?' : 'Gruppen insgesamt:') }}
                     </label>
-                    <input type="number" min="1" v-model="parameter" @change="updateManuellGroups" style="width:50px; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:4px; text-align:center; font-weight:bold;">
+                    <input type="number" min="1" v-model="parameter" @change="updateManuellGroups" style="width:50px; background:rgba(0,0,0,0.3); color:var(--text-color); border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:4px; text-align:center; font-weight:bold;">
                     
-                    <button v-if="modus !== 'manuell'" @click="generiereGruppen" style="background:#10b981; color:white; border:none; border-radius:4px; padding:4px 12px; cursor:pointer; font-weight:bold; margin-left:auto; box-shadow:0 2px 4px rgba(0,0,0,0.2);">🎲 Auslosen</button>
-                    <span v-else style="font-size:0.75rem; color:#94a3b8; margin-left:auto; font-style:italic;">(Namen antippen, dann Ziel antippen)</span>
+                    <button v-if="modus !== 'manuell'" @click="generiereGruppen" style="background:var(--button-color); color:var(--text-color); border:none; border-radius:4px; padding:4px 12px; cursor:pointer; font-weight:bold; margin-left:auto; box-shadow:0 2px 4px rgba(0,0,0,0.2);">🎲 Auslosen</button>
+                    <span v-else style="font-size:0.75rem; color:var(--text-color); opacity:0.6; margin-left:auto; font-style:italic;">(Namen antippen, dann Ziel antippen)</span>
                 </div>
 
                 <div v-if="modus === 'manuell'" 
                      @click="moveToGroup(-1)"
                      style="background:rgba(245, 158, 11, 0.1); border-radius:6px; flex-shrink:0; padding:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:45px; align-items:center; transition: all 0.2s;"
                      :style="{ 
-                         border: selectedStudentIndex !== null ? '2px dashed #ef4444' : '1px dashed rgba(245, 158, 11, 0.4)',
+                         border: selectedStudentIndex !== null ? '2px dashed var(--button-color)' : '1px dashed rgba(245, 158, 11, 0.4)',
                          cursor: selectedStudentIndex !== null ? 'pointer' : 'default'
                      }">
                     
@@ -167,7 +167,7 @@ const GruppenWidget = {
                               cursor: 'pointer',
                               background: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '#ef4444' : 'rgba(245, 158, 11, 0.2)',
                               border: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '1px solid #dc2626' : '1px solid rgba(245, 158, 11, 0.4)',
-                              color: (selectedSource === -1 && selectedStudentIndex === sIndex) ? 'white' : '#fcd34d',
+                              color: (selectedSource === -1 && selectedStudentIndex === sIndex) ? 'var(--text-color)' : '#fcd34d',
                               transform: (selectedSource === -1 && selectedStudentIndex === sIndex) ? 'scale(1.1)' : 'scale(1)',
                               boxShadow: (selectedSource === -1 && selectedStudentIndex === sIndex) ? '0 0 10px rgba(239,68,68,0.8)' : '0 2px 2px rgba(0,0,0,0.1)'
                           }">
@@ -182,14 +182,14 @@ const GruppenWidget = {
                 <div v-for="(gruppe, index) in gruppen" :key="index"
                      @click="moveToGroup(index)"
                      :style="{
-                        background: widgetData.isTransparent ? 'rgba(15, 23, 42, 0.9)' : (selectedStudentIndex !== null ? 'rgba(239, 68, 68, 0.05)' : 'rgba(59, 130, 246, 0.1)'),
-                        border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : (selectedStudentIndex !== null ? '2px dashed #ef4444' : '1px solid rgba(59, 130, 246, 0.3)'),
+                        background: widgetData.isTransparent ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
+                        border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : (selectedStudentIndex !== null ? '2px dashed var(--button-color)' : '1px solid rgba(255, 255, 255, 0.1)'),
                         borderRadius: '8px',
                         padding: '10px',
                         minHeight: '100px',
                         display: 'flex',
                         flexDirection: 'column',
-                        boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : 'inset 0 2px 10px rgba(0,0,0,0.1)',
+                        boxShadow: widgetData.isTransparent ? 'none' : 'inset 0 2px 10px rgba(0,0,0,0.1)',
                         transition: 'all 0.2s ease',
                         cursor: (modus === 'manuell' && !widgetData.isTransparent && selectedStudentIndex !== null) ? 'pointer' : 'default'
                      }">
@@ -197,9 +197,9 @@ const GruppenWidget = {
                      <div :style="{
                         fontWeight: 'bold',
                         fontSize: widgetData.isTransparent ? '1rem' : '0.9rem',
-                        color: widgetData.isTransparent ? 'white' : '#93c5fd',
+                        color: widgetData.isTransparent ? 'var(--text-color)' : 'var(--button-color)',
                         marginBottom: '8px',
-                        borderBottom: '1px solid rgba(59, 130, 246, 0.2)',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                         paddingBottom: '4px',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -207,7 +207,7 @@ const GruppenWidget = {
                         pointerEvents: 'none'
                      }">
                          <span>Gruppe {{ index + 1 }}</span>
-                         <span v-if="!widgetData.isTransparent" style="font-size:0.7rem; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:10px;">{{ gruppe.length }}</span>
+                         <span v-if="!widgetData.isTransparent" style="font-size:0.7rem; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:10px; color:var(--text-color);">{{ gruppe.length }}</span>
                      </div>
                      
                      <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
@@ -217,7 +217,7 @@ const GruppenWidget = {
                                :style="{
                                    cursor: (!widgetData.isTransparent && modus === 'manuell') ? 'pointer' : 'default',
                                    background: (selectedSource === index && selectedStudentIndex === sIndex) ? '#ef4444' : 'rgba(255,255,255,0.08)',
-                                   color: 'white',
+                                   color: 'var(--text-color)',
                                    border: (selectedSource === index && selectedStudentIndex === sIndex) ? '1px solid #dc2626' : '1px solid rgba(255,255,255,0.05)',
                                    transform: (selectedSource === index && selectedStudentIndex === sIndex) ? 'scale(1.05)' : 'scale(1)',
                                    boxShadow: (selectedSource === index && selectedStudentIndex === sIndex) ? '0 0 10px rgba(239,68,68,0.8)' : 'none'
@@ -225,12 +225,12 @@ const GruppenWidget = {
                              {{ name }}
                          </span>
                          
-                         <div v-if="gruppe.length === 0 && !widgetData.isTransparent" style="color:rgba(255,255,255,0.2); font-size:0.75rem; font-style:italic; text-align:center; margin-top:10px; pointer-events:none;">(Leer)</div>
+                         <div v-if="gruppe.length === 0 && !widgetData.isTransparent" style="color:rgba(255,255,255,0.3); font-size:0.75rem; font-style:italic; text-align:center; margin-top:10px; pointer-events:none;">(Leer)</div>
                      </div>
                 </div>
             </div>
 
-            <div v-if="gruppen.length === 0 && widgetData.isTransparent" style="text-align: center; color: rgba(255,255,255,0.4); margin-top: 20px; font-style: italic;">
+            <div v-if="gruppen.length === 0 && widgetData.isTransparent" style="text-align: center; color: var(--text-color); opacity:0.5; margin-top: 20px; font-style: italic;">
                 Noch keine Gruppen ausgelost...
             </div>
 
