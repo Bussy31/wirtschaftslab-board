@@ -39,7 +39,7 @@ const app = createApp({
                     widgetHeader: '#0f172a',
                     widgetHeaderOpacity: 90,
                     textColor: '#ffffff',
-                    fontMain: 'Arial, sans-serif'
+                    buttonColor: '#3b82f6'
                 }
             },
             neuerKlassenName: '',
@@ -56,7 +56,8 @@ const app = createApp({
             this.settings.design = {
                 widgetBg: '#1e293b', widgetBgOpacity: 90,
                 widgetHeader: '#0f172a', widgetHeaderOpacity: 90,
-                textColor: '#ffffff', fontMain: 'Arial, sans-serif'
+                textColor: '#ffffff',
+                buttonColor: '#3b82f6'
             };
         }
         this.applyDesign();
@@ -111,7 +112,7 @@ const app = createApp({
             root.style.setProperty('--widget-bg', hexToRgba(d.widgetBg, d.widgetBgOpacity));
             root.style.setProperty('--widget-header', hexToRgba(d.widgetHeader, d.widgetHeaderOpacity));
             root.style.setProperty('--text-color', d.textColor);
-            root.style.setProperty('--font-main', d.fontMain);
+            root.style.setProperty('--button-color', d.buttonColor || '#3b82f6');
         },
         resetDesign() {
             this.settings.design = {
