@@ -636,6 +636,6 @@ app.component('arbeitsphase-widget', ArbeitsphaseWidget);
 app.component('medien-widget', MedienWidget);
 app.component('ampel-widget', AmpelWidget);
 app.component('stundenziel-widget', StundenzielWidget);
-app.component('dateimanagement-widget', DateiManagementWidget);
+app.component('dateimanagement-widget', DateimanagementWidget);
 
 app.mount('#app');
