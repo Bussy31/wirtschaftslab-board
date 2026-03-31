@@ -79,6 +79,20 @@
             accent-color: var(--button-color);
             cursor: pointer;
         }
+        input[type="color"] {
+            -webkit-appearance: none;
+            appearance: none;
+            padding: 0;
+            border: none;
+            background: transparent;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
