@@ -121,7 +121,7 @@ const app = createApp({
 
             let nearest90 = Math.round(newRotation / 90) * 90;
 
-            if (Math.abs(newRotation - nearest90) <= 8) {
+            if (Math.abs(newRotation - nearest90) <= 5) {
                 newRotation = nearest90;
             }
 
