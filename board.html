@@ -65,15 +65,20 @@
         .dropdown-content button {
             color: var(--text-color) !important;
         }
-        .switch-btn {
-            background-color: var(--button-color) !important;
-            color: var(--text-color) !important;
-            border: none !important;
-            transition: opacity 0.2s;
+        /* Dynamischer Hover für den Switch-Button (überschreibt das Standard-Blau) */
+        button.switch-btn {
+            transition: filter 0.2s ease, transform 0.2s ease !important;
         }
-        .switch-btn:hover {
-            opacity: 0.9;
-            cursor: pointer;
+
+        button.switch-btn:hover {
+            /* Zwingt den Button, seine dynamische Farbe zu behalten und blockiert das alte Blau */
+            background-color: var(--button-color) !important;
+
+            /* Macht die dynamische Farbe 15% heller (Werte über 1 = heller, unter 1 = dunkler) */
+            filter: brightness(1.15) !important;
+
+            /* Optional: minimales Vergrößern beim Drübergehen */
+            transform: scale(1.05) !important;
         }
     </style>
 </head>
@@ -245,9 +250,7 @@
                                 <button v-if="aktiveKlasse !== klasse.name"
                                         @click="wechsleKlasse(klasse.name)"
                                         class="btn-small switch-btn"
-                                        :style="{ background: 'var(--button-color)', color: 'var(--text-color)', transition: 'filter 0.2s ease, transform 0.2s ease' }"
-                                        onmouseover="this.style.filter='brightness(0.85)'; this.style.transform='scale(1.05)';"
-                                        onmouseout="this.style.filter='brightness(1)'; this.style.transform='scale(1)';">
+                                        :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">
                                     Dieses Board laden
                                 </button>
                                 <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
