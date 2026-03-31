@@ -28,7 +28,17 @@ const app = createApp({
                 'hintergruende/bild4.jpg',
                 'hintergruende/bild5.jpg',
                 'hintergruende/bild6.jpg',
-                'hintergruende/bild7.jpg'],
+                'hintergruende/bild7.jpg',
+                'hintergruende/bild8.jpg',
+                'hintergruende/bild9.jpg',
+                'hintergruende/bild10.jpg',
+                'hintergruende/bild11.jpg',
+                'hintergruende/bild12.jpg',
+                'hintergruende/bild13.jpg',
+                'hintergruende/bild14.jpg',
+                'hintergruende/bild15.jpg'
+            ],
+
 
             settings: {
                 klassen: [],
