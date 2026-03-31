@@ -32,7 +32,15 @@ const app = createApp({
 
             settings: {
                 klassen: [],
-                hintergrund: '1e293b'
+                hintergrund: '1e293b',
+                design: {
+                    widgetBg: '#1e293b',
+                    widgetBgOpacity: 90,
+                    widgetHeader: '#0f172a',
+                    widgetHeaderOpacity: 90,
+                    textColor: '#ffffff',
+                    fontMain: 'Arial, sans-serif'
+                }
             },
             neuerKlassenName: '',
             aktiveKlasse: 'Standard'
@@ -43,6 +51,15 @@ const app = createApp({
         if (savedSettings) {
             this.settings = JSON.parse(savedSettings);
         }
+
+        if (!this.settings.design) {
+            this.settings.design = {
+                widgetBg: '#1e293b', widgetBgOpacity: 90,
+                widgetHeader: '#0f172a', widgetHeaderOpacity: 90,
+                textColor: '#ffffff', fontMain: 'Arial, sans-serif'
+            };
+        }
+        this.applyDesign();
 
         if (!this.settings.klassen || this.settings.klassen.length === 0) {
             this.showSettings = true;
@@ -80,6 +97,31 @@ const app = createApp({
     },
 
     methods: {
+        applyDesign() {
+            const root = document.documentElement;
+            const d = this.settings.design;
+
+            // Hilfsfunktion: Wandelt Hex (#1e293b) und Deckkraft (90) in RGBA um
+            const hexToRgba = (hex, opacity) => {
+                let r = parseInt(hex.slice(1, 3), 16),
+                    g = parseInt(hex.slice(3, 5), 16),
+                    b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity / 100})`;
+            };
+            root.style.setProperty('--widget-bg', hexToRgba(d.widgetBg, d.widgetBgOpacity));
+            root.style.setProperty('--widget-header', hexToRgba(d.widgetHeader, d.widgetHeaderOpacity));
+            root.style.setProperty('--text-color', d.textColor);
+            root.style.setProperty('--font-main', d.fontMain);
+        },
+        resetDesign() {
+            this.settings.design = {
+                widgetBg: '#1e293b', widgetBgOpacity: 90,
+                widgetHeader: '#0f172a', widgetHeaderOpacity: 90,
+                textColor: '#ffffff', fontMain: 'Arial, sans-serif'
+            };
+            this.applyDesign();
+            this.saveSettings();
+        },
         startRotate(event, index) {
             // Verhindert, dass das iPad scrollt oder markiert
             if (event.cancelable) event.preventDefault();
@@ -515,6 +557,15 @@ const app = createApp({
             this.isFullscreen = !!document.fullscreenElement;
         }
     },
+    watch: {
+        'settings.design': {
+            deep: true,
+            handler() {
+                this.applyDesign();
+                this.saveSettings();
+            }
+        }
+    }
 });
 
 app.component('uhr-widget', UhrWidget);

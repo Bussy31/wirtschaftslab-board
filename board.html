@@ -108,9 +108,15 @@
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         🖼️ Hintergrund
                     </button>
+                    <button @click="activeSettingsTab = 'design'"
+                            :style="{ background: activeSettingsTab === 'design' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                        🎨 Design
+                    </button>
                     <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'"
                             :style="{ background: activeSettingsTab === 'Reset' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
-                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">⚠️ Reset</button>
+                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">⚠️ Reset
+                    </button>
                 </div>
 
                 <div v-if="activeSettingsTab === 'klassen'">
@@ -178,6 +184,50 @@
                     <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 15px; font-style: italic;">
                     </p>
                 </div>
+
+                <div v-if="activeSettingsTab === 'design'" style="display: flex; flex-direction: column; gap: 15px; color: white;">
+                    <h3 style="margin-top:0;">Farbpalette & Schriftart</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Widget Hintergrund</label>
+                            <input type="color" v-model="settings.design.widgetBg" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
+                                <span>Deckkraft:</span>
+                                <span>{{ settings.design.widgetBgOpacity }}%</span>
+                            </div>
+                            <input type="range" v-model="settings.design.widgetBgOpacity" min="0" max="100" style="width: 100%;">
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Kopfzeile</label>
+                            <input type="color" v-model="settings.design.widgetHeader" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
+                                <span>Deckkraft:</span>
+                                <span>{{ settings.design.widgetHeaderOpacity }}%</span>
+                            </div>
+                            <input type="range" v-model="settings.design.widgetHeaderOpacity" min="0" max="100" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Textfarbe</label>
+                            <input type="color" v-model="settings.design.textColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Schriftart</label>
+                            <select v-model="settings.design.fontMain" style="width: 100%; padding: 8px; border-radius: 4px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                                <option value="Arial, sans-serif">Standard (Arial)</option>
+                                <option value="'Comic Sans MS', cursive, sans-serif">Verspielt (Comic Sans)</option>
+                                <option value="'Courier New', Courier, monospace">Schreibmaschine</option>
+                                <option value="'Times New Roman', Times, serif">Klassisch (Serif)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button @click="resetDesign" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; cursor: pointer;">🔄 Design auf Standard zurücksetzen</button>
+                </div>
+
                 <div v-if="activeSettingsTab === 'reset'" class="tab-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
                     <h3 style="color: white; margin-top: 0; font-size: 1.5rem;">Werkseinstellungen</h3>
                     <p style="color: #94a3b8; max-width: 400px; margin: 10px auto 25px auto; line-height: 1.5;">
@@ -201,16 +251,15 @@
              :style="{
                  left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
                  boxSizing: 'border-box',
-                 transform: 'rotate(' + (w.rotation || 0) + 'deg)'
+                 transform: 'rotate(' + (w.rotation || 0) + 'deg)',
+                 background: 'var(--widget-bg)',
+                 color: 'var(--text-color)',
+                 fontFamily: 'var(--font-main)'
              }"
              @mousedown="startDrag($event, index)"
              @touchstart="startDrag($event, index)">
 
-            <div class="widget-header">
-                <div class="widget-title">
-                    <span>{{ w.icon }}</span>
-                    <span>{{ w.type.toUpperCase() }}</span>
-                </div>
+            <div class="widget-header" :style="{ background: 'var(--widget-header)', color: 'var(--text-color)' }">
 
                 <div style="display: flex; align-items: center; gap: 8px;">
 
