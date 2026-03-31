@@ -13,10 +13,10 @@ const UhrWidget = {
                 <g v-if="!widgetData.isTransparent" style="user-select: none;">
                     <text @click.stop="prevTheme" x="32" y="52" :fill="currentTheme.text" 
                           style="cursor: pointer; font-size: 8px; opacity: 0.2; transition: opacity 0.2s;" 
-                          onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">◀</text>
+                          onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2"><</text>
                     <text @click.stop="nextTheme" x="60" y="52" :fill="currentTheme.text" 
                           style="cursor: pointer; font-size: 8px; opacity: 0.2; transition: opacity 0.2s;" 
-                          onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">▶</text>
+                          onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">>/text>
                 </g>
 
                 <line v-for="n in 12" :key="'strich-'+n" v-show="n % 3 !== 0" x1="50" y1="6" x2="50" y2="12" :stroke="currentTheme.marks" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + (n * 30) + ' 50 50)'" style="transition: stroke 0.3s ease;" />
