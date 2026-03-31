@@ -269,19 +269,11 @@
              @mousedown="startDrag($event, index)"
              @touchstart="startDrag($event, index)">
 
-            <div class="widget-header"
-                 :style="{
-                     background: 'var(--widget-header)',
-                     color: 'var(--text-color)',
-                     display: 'flex',
-                     alignItems: 'center',
-                     width: '100%',
-                     boxSizing: 'border-box',
-                     padding: '5px'
-                 }">
-                <span style="margin-right: auto; font-weight: bold; text-transform: capitalize; padding-left: 5px;">
-                    {{ w.type }}
-                </span>
+            <div class="widget-header">
+                <div class="widget-title">
+                    <span>{{ w.icon }}</span>
+                    <span>{{ w.type.toUpperCase() }}</span>
+                </div>
 
                 <div style="display: flex; align-items: center; gap: 8px;">
 
