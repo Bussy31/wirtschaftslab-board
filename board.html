@@ -219,6 +219,13 @@
                         style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                     ⚠️ Reset
                 </button>
+
+                <button :class="{active: activeSettingsTab === 'kontakt'}" @click="activeSettingsTab = 'kontakt'"
+                        :style="{ background: activeSettingsTab === 'kontakt' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    ✉️ Kontakt
+                </button>
+            </div>
             </div>
 
             <div v-if="activeSettingsTab === 'klassen'">
@@ -383,19 +390,20 @@
                 <button @click="resetAll" class="btn-primary ignore-text-color ignore-theme" style="background: #ef4444; padding: 15px 30px; font-size: 1.1rem; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
                     🔥 Jetzt alles unwiderruflich löschen
                 </button>
-                <div style="margin-top: 50px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px;">
-                    <h3 :style="{ color: 'var(--text-color)' }" style="margin-bottom: 10px; font-size: 1.2rem;">Fragen, Wünsche oder Feedback?</h3>
-                    <p :style="{ color: 'var(--text-color)' }" style="margin-bottom: 20px; font-size: 0.9rem; opacity: 0.8; line-height: 1.5;">
-                        Wenn etwas nicht funktioniert oder du Ideen für neue Funktionen hast, melde dich gerne bei mir!
-                    </p>
-                    <a href="mailto:deine.email@adresse.de"
-                       style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: background 0.2s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
-                        ✉️ Kontakt aufnehmen
-                    </a>
-                    <p :style="{ color: 'var(--text-color)' }" style="margin-top: 25px; font-size: 0.85rem; opacity: 0.6; margin-bottom: 0;">
-                        Philipp Bußmann
-                    </p>
-                </div>
+            </div>
+
+            <div v-if="activeSettingsTab === 'kontakt'" class="tab-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
+                <h3 :style="{ color: 'var(--text-color)' }" style="margin-top: 0; font-size: 1.5rem;">Fragen, Wünsche oder Feedback?</h3>
+                <p :style="{ color: 'var(--text-color)' }" style="opacity: 0.8; max-width: 400px; margin: 10px auto 25px auto; line-height: 1.5;">
+                    Wenn etwas auf dem Board nicht so funktioniert, wie es soll, oder du coole Ideen für neue Widgets und Funktionen hast, melde dich gerne direkt bei mir!
+                </p>
+                <a href="mailto:deine.email@adresse.de"
+                   style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: background 0.2s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
+                    ✉️ E-Mail schreiben
+                </a>
+                <p :style="{ color: 'var(--text-color)' }" style="margin-top: 35px; font-size: 0.9rem; opacity: 0.5; margin-bottom: 0;">
+                    © Philipp Bußmann
+                </p>
             </div>
         </div>
     </div>
