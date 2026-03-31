@@ -65,19 +65,19 @@
         .dropdown-content button {
             color: var(--text-color) !important;
         }
-        /* Dynamischer Hover für den Switch-Button (überschreibt das Standard-Blau) */
-        /* Dynamische Farbe für den normalen Zustand (überschreibt das Standard-Blau) */
         button.switch-btn {
             background-color: var(--button-color) !important;
             color: var(--text-color) !important;
             transition: filter 0.2s ease, transform 0.2s ease !important;
         }
-
-        /* Dynamischer Hover: Farbe behalten, aber heller machen */
         button.switch-btn:hover {
             background-color: var(--button-color) !important;
             filter: brightness(1.15) !important;
             transform: scale(1.05) !important;
+        }
+        input[type="range"] {
+            accent-color: var(--button-color);
+            cursor: pointer;
         }
     </style>
 </head>
