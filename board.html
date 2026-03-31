@@ -47,7 +47,7 @@
         .btn-primary:not(.ignore-theme),
         .btn-icon:not(.ignore-theme),
         .floating-exit-btn:not(.ignore-theme) {
-            background-color: var(--button-color);
+            background-color: var(--button-color) !important;
         }
         .btn-primary:not(.ignore-theme):not(.ignore-text-color),
         .btn-icon:not(.ignore-theme):not(.ignore-text-color),
@@ -544,7 +544,7 @@
             </div>
         </div>
     </div>
-    <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn" style="color: white; background: transparent; border: none;" title="Vollbild beenden">🗗 Beenden</button>
+    <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn ignore-theme" style="color: white; background: transparent; border: none;" title="Vollbild beenden">🗗 Beenden</button>
     <div class="copyright">© 2026 Philipp Bußmann</div>
 </div>
 
