@@ -3,7 +3,7 @@ const ZufallWidget = {
     template: `
         <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 5px; gap: 10px; box-sizing: border-box;">
             
-            <div v-if="!showSettings && modus === 'text'" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <div v-if="!showSettings && currentModus === 'text'" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                 <div v-if="anzeigeName" 
                      :style="{ 
                         background: isSpinning ? 'rgba(245, 158, 11, 0.2)' : 'rgba(16, 185, 129, 0.2)', 
@@ -19,7 +19,7 @@ const ZufallWidget = {
                 </div>
             </div>
 
-            <div v-if="!showSettings && modus === 'rad'" style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+            <div v-if="!showSettings && currentModus === 'rad'" style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
                 
                 <div style="position: relative; width: 60cqmin; height: 60cqmin; margin: 0 auto 10px auto;">
                     
@@ -38,14 +38,15 @@ const ZufallWidget = {
                              :style="{
                                  position: 'absolute',
                                  top: '50%', left: '50%',
-                                 transform: 'translate(-50%, -50%) rotate(' + ((i * 360 / namenList.length) + (180 / Math.max(1, namenList.length))) + 'deg) translateY(-20cqmin)',
+                                 /* Der doppelte rotate-Befehl dreht die Scheibe UND kippt den Text um 90 Grad */
+                                 transform: 'translate(-50%, -50%) rotate(' + ((i * 360 / namenList.length) + (180 / Math.max(1, namenList.length))) + 'deg) translateY(-17cqmin) rotate(-90deg)',
                                  transformOrigin: 'center center',
                                  fontSize: 'clamp(0.6rem, 3.5cqmin, 1.2rem)',
                                  fontWeight: 'bold',
                                  color: 'white',
                                  textShadow: '1px 1px 2px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)',
                                  whiteSpace: 'nowrap',
-                                 maxWidth: '25cqmin',
+                                 maxWidth: '22cqmin',
                                  overflow: 'hidden',
                                  textOverflow: 'ellipsis'
                              }">
@@ -70,9 +71,6 @@ const ZufallWidget = {
 
             <div v-if="!showSettings" style="display:flex; gap:5px; margin-top: auto; z-index: 10;">
                 <button @click="spin" class="btn-primary" style="flex:1;" :disabled="isSpinning">Zufall</button>
-                <button @click="toggleModus" class="btn-secondary" title="Modus wechseln" style="width: 40px;">
-                    {{ modus === 'text' ? '🎡' : '📝' }}
-                </button>
                 <button @click="showSettings = true" class="btn-secondary" style="width: 40px;">⚙️</button>
             </div>
             <div v-else style="display:flex; margin-top: auto;">
@@ -86,19 +84,21 @@ const ZufallWidget = {
             anzeigeName: '',
             isSpinning: false,
             showSettings: false,
-            modus: this.widgetData.modus || 'rad', // Standardmäßig jetzt Rad!
-            wheelRotation: 0 // Speichert den aktuellen Drehwinkel des Rades
+            wheelRotation: 0
         };
     },
     computed: {
         namenList() {
             return this.schuelerListe.split('\n').map(n => n.trim()).filter(n => n.length > 0);
         },
+        // Holt sich den Modus direkt live aus der übergeordneten WidgetData (wird vom neuen Button in board.html gesteuert)
+        currentModus() {
+            return this.widgetData.modus || 'rad';
+        },
         wheelGradient() {
             const namen = this.namenList;
             if (namen.length === 0) return 'conic-gradient(gray 0%, gray 100%)';
 
-            // Schöne Farben für die Tortenstücke
             const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef'];
             const step = 100 / Math.max(1, namen.length);
             let grad = [];
@@ -114,20 +114,13 @@ const ZufallWidget = {
         getNamen() {
             return this.namenList;
         },
-        toggleModus() {
-            if (this.isSpinning) return;
-            this.modus = this.modus === 'text' ? 'rad' : 'text';
-            this.anzeigeName = '';
-            this.saveState();
-        },
         spin() {
             const namen = this.getNamen();
             if (namen.length === 0) return;
 
             this.isSpinning = true;
 
-            if (this.modus === 'text') {
-                // ALTE LOGIK: Text-Slotmachine
+            if (this.currentModus === 'text') {
                 this.anzeigeName = '';
                 let duration = 4000;
                 let startTime = Date.now();
@@ -149,27 +142,22 @@ const ZufallWidget = {
                 };
                 spinTick();
             } else {
-                // NEUE LOGIK: Glücksrad drehen
                 this.anzeigeName = '';
                 const num = namen.length;
                 const sliceAngle = 360 / num;
 
-                // Wir drehen das Rad um mindestens 5 volle Umdrehungen (1800 Grad) + zufälliger Winkel
                 const extraSpins = 360 * 5;
                 const randomOffset = Math.floor(Math.random() * 360);
 
                 this.wheelRotation += extraSpins + randomOffset;
 
-                // Warten, bis die CSS-Animation (4 Sekunden) fertig ist, dann Gewinner berechnen
                 setTimeout(() => {
                     this.isSpinning = false;
-
-                    // Rechnet aus, welches Stück am Ende genau oben (unter dem Pfeil) steht
                     const finalAngle = (360 - (this.wheelRotation % 360)) % 360;
                     const index = Math.floor(finalAngle / sliceAngle);
 
                     this.anzeigeName = namen[index];
-                }, 4000); // 4000 Millisekunden = 4 Sekunden (muss zur CSS-Transition passen)
+                }, 4000);
             }
         },
         closeSettings() {
@@ -178,7 +166,7 @@ const ZufallWidget = {
         },
         saveState() {
             this.widgetData.schuelerListe = this.schuelerListe;
-            this.widgetData.modus = this.modus;
+            if(!this.widgetData.modus) this.widgetData.modus = 'rad';
             this.$emit('save');
         }
     }
