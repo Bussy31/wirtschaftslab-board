@@ -535,41 +535,37 @@ const app = createApp({
                 try {
                     const importedData = JSON.parse(e.target.result);
 
+                    // Prüfen, ob es eine gültige Datei ist
                     if (importedData.settings && importedData.boards) {
-
                         this.settings = importedData.settings;
                         this.saveSettings();
 
-                        for (const [klasseName, widgets] of Object.entries(importedData.boards)) {
-                            localStorage.setItem('board_' + klasseName, JSON.stringify(widgets));
+                        // Boards wiederherstellen
+                        for (const [klasseName, boardData] of Object.entries(importedData.boards)) {
+                            localStorage.setItem('board_' + klasseName, JSON.stringify(boardData));
                         }
 
+                        // Hintergründe wiederherstellen
                         if (importedData.backgrounds) {
-                            for (const [klasseName, bg] of Object.entries(importedData.backgrounds)) {
-                                localStorage.setItem('hintergrund_' + klasseName, bg);
+                            for (const [klasseName, bgData] of Object.entries(importedData.backgrounds)) {
+                                localStorage.setItem('hintergrund_' + klasseName, bgData);
                             }
                         }
 
+                        // NEU: Designs wiederherstellen
                         if (importedData.designs) {
-                            for (const [klasseName, design] of Object.entries(importedData.designs)) {
-                                localStorage.setItem('design_' + klasseName, JSON.stringify(design));
+                            for (const [klasseName, designData] of Object.entries(importedData.designs)) {
+                                localStorage.setItem('design_' + klasseName, JSON.stringify(designData));
                             }
                         }
 
-                        if (this.settings.klassen && this.settings.klassen.length > 0) {
-                            this.wechsleKlasse(this.settings.klassen[0].name);
-                        } else {
-                            this.wechsleKlasse('Standard');
-                        }
-
-                        alert("✅ Komplett-Backup inkl. Hintergründe erfolgreich geladen!");
+                        this.loadBoard();
+                        alert("Backup erfolgreich importiert!");
                     } else {
-                        this.widgets = importedData;
-                        this.saveToLocal();
-                        alert("ℹ️ Einzelnes Board in die aktuelle Klasse importiert.");
+                        alert("Ungültiges Backup-Format.");
                     }
                 } catch (err) {
-                    alert("❌ Fehler beim Importieren. Ist das die richtige Datei?");
+                    alert("Fehler beim Importieren. Ist das die richtige Datei?");
                     console.error(err);
                 }
                 event.target.value = '';
