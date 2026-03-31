@@ -17,13 +17,13 @@ const HandlungsplanWidget = {
                     boxShadow: '0 2px 4px rgba(0,0,0,0.3)' 
                  }">
                 
-                <div :style="{ width: progress + '%', background: progress === 100 ? '#10b981' : '#3b82f6', height: '100%', transition: 'width 0.4s ease, background 0.4s ease' }"></div>
+                <div :style="{ width: progress + '%', background: progress === 100 ? '#10b981' : 'var(--button-color)', height: '100%', transition: 'width 0.4s ease, background 0.4s ease' }"></div>
                 
                 <div :style="{ 
                     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
                     display: 'flex', alignItems: 'center', justifyContent: 'center', 
                     fontSize: (0.8 * currentZoom) + 'rem', 
-                    fontWeight: 'bold', color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.9)', pointerEvents: 'none' 
+                    fontWeight: 'bold', color: 'var(--text-color)', textShadow: '0 1px 3px rgba(0,0,0,0.9)', pointerEvents: 'none' 
                 }">
                     Fortschritt ({{ progress }}%)
                 </div>
@@ -36,18 +36,19 @@ const HandlungsplanWidget = {
                         <div v-for="(schritt, index) in schritte" :key="index" 
                              :style="{
                                  display: 'flex', alignItems: 'center', gap: (8 * currentZoom) + 'px', 
-                                 background: widgetData.isTransparent ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255,255,255,0.1)', 
+                                 background: widgetData.isTransparent ? 'transparent' : 'rgba(255,255,255,0.1)', 
                                  padding: (10 * currentZoom) + 'px ' + (12 * currentZoom) + 'px', 
                                  borderRadius: '8px', transition: 'all 0.2s', 
                                  border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.05)',
-                                 boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : 'none'
+                                 boxShadow: widgetData.isTransparent ? 'none' : 'none'
                              }">
                             <input type="checkbox" :checked="schritt.done" @change="toggleSchritt(index)" 
-                                   :style="{ cursor: 'pointer', width: (20 * currentZoom) + 'px', height: (20 * currentZoom) + 'px', accentColor: '#3b82f6', flexShrink: 0 }">
+                                   :style="{ cursor: 'pointer', width: (20 * currentZoom) + 'px', height: (20 * currentZoom) + 'px', accentColor: 'var(--button-color)', flexShrink: 0 }">
                             
                             <span :style="{ 
                                     textDecoration: schritt.done ? 'line-through' : 'none', 
-                                    color: schritt.done ? 'rgba(255,255,255,0.5)' : 'white', 
+                                    color: 'var(--text-color)', 
+                                    opacity: schritt.done ? 0.4 : 1,
                                     flexGrow: 1, 
                                     fontSize: (1.05 * currentZoom) + 'rem', 
                                     cursor: 'pointer', 
@@ -58,8 +59,8 @@ const HandlungsplanWidget = {
                             </span>
                             
                             <div v-if="!widgetData.isTransparent" style="display: flex; gap: 5px; flex-shrink: 0; align-items: center;">
-                                <button @click.stop="moveUp(index)" :disabled="index === 0" :style="{ opacity: index === 0 ? 0.3 : 0.8, background: 'transparent', border: 'none', color: 'white', cursor: index === 0 ? 'default' : 'pointer', fontSize: (1.2 * currentZoom) + 'rem' }">⬆️</button>
-                                <button @click.stop="moveDown(index)" :disabled="index === schritte.length - 1" :style="{ opacity: index === schritte.length - 1 ? 0.3 : 0.8, background: 'transparent', border: 'none', color: 'white', cursor: index === schritte.length - 1 ? 'default' : 'pointer', fontSize: (1.2 * currentZoom) + 'rem' }">⬇️</button>
+                                <button @click.stop="moveUp(index)" :disabled="index === 0" :style="{ opacity: index === 0 ? 0.2 : 0.8, background: 'transparent', border: 'none', color: 'var(--text-color)', cursor: index === 0 ? 'default' : 'pointer', fontSize: (1.2 * currentZoom) + 'rem' }">⬆️</button>
+                                <button @click.stop="moveDown(index)" :disabled="index === schritte.length - 1" :style="{ opacity: index === schritte.length - 1 ? 0.2 : 0.8, background: 'transparent', border: 'none', color: 'var(--text-color)', cursor: index === schritte.length - 1 ? 'default' : 'pointer', fontSize: (1.2 * currentZoom) + 'rem' }">⬇️</button>
                                 <button @click.stop="removeSchritt(index)" :style="{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: (1.2 * currentZoom) + 'rem', opacity: 0.8 }">✖</button>
                             </div>
                         </div>
@@ -70,20 +71,22 @@ const HandlungsplanWidget = {
                             <div @click="toggleSchritt(index)" 
                                  :style="{
                                     width: '90%',
-                                    background: widgetData.isTransparent ? 'rgba(15, 23, 42, 0.9)' : (schritt.done ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)'),
-                                    border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : (schritt.done ? '2px solid rgba(16, 185, 129, 0.4)' : '2px solid rgba(59, 130, 246, 0.6)'),
-                                    color: schritt.done ? 'rgba(255,255,255,0.5)' : 'white',
+                                    background: widgetData.isTransparent ? 'transparent' : (schritt.done ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)'),
+                                    border: widgetData.isTransparent ? '1px solid rgba(255,255,255,0.2)' : (schritt.done ? '2px solid #10b981' : '2px solid var(--button-color)'),
+                                    color: 'var(--text-color)',
+                                    opacity: schritt.done ? 0.5 : 1,
                                     textDecoration: schritt.done ? 'line-through' : 'none',
                                     padding: (10 * currentZoom) + 'px ' + (15 * currentZoom) + 'px', 
                                     borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', textAlign: 'center', transition: 'all 0.3s',
-                                    boxShadow: widgetData.isTransparent ? '0 4px 8px rgba(0,0,0,0.6)' : 'none',
+                                    boxShadow: widgetData.isTransparent ? 'none' : 'none',
                                     fontSize: (1.05 * currentZoom) + 'rem'
                                  }">
                                 {{ index + 1 }}. {{ schritt.text }}
                             </div>
                             <div v-if="index < schritte.length - 1" 
                                  :style="{ 
-                                    color: (widgetData.isTransparent ? 'white' : 'rgba(255,255,255,0.5)'), 
+                                    color: 'var(--text-color)', 
+                                    opacity: widgetData.isTransparent ? 1 : 0.5,
                                     fontSize: (1.5 * currentZoom) + 'rem', 
                                     fontWeight: 'bold', margin: '-4px 0',
                                     textShadow: widgetData.isTransparent ? '0 2px 4px rgba(0,0,0,0.8)' : 'none'
@@ -98,12 +101,12 @@ const HandlungsplanWidget = {
             <div v-if="!widgetData.isTransparent" style="display: flex; gap: 8px; flex-shrink: 0; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); align-items: center;">
                 
                 <div style="display: flex; align-items: center; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
-                    <button @click="changeZoom(-0.1)" style="background: transparent; border: none; color: white; cursor: pointer; padding: 6px 8px; font-size: 0.9rem;" title="Kleiner">➖</button>
-                    <span style="font-size: 0.75rem; color: white; width: 40px; text-align: center; font-weight: bold;">{{ Math.round(currentZoom * 100) }}%</span>
-                    <button @click="changeZoom(0.1)" style="background: transparent; border: none; color: white; cursor: pointer; padding: 6px 8px; font-size: 0.9rem;" title="Größer">➕</button>
+                    <button @click="changeZoom(-0.1)" style="background: transparent; border: none; color: var(--text-color); cursor: pointer; padding: 6px 8px; font-size: 0.9rem;" title="Kleiner">➖</button>
+                    <span style="font-size: 0.75rem; color: var(--text-color); width: 40px; text-align: center; font-weight: bold;">{{ Math.round(currentZoom * 100) }}%</span>
+                    <button @click="changeZoom(0.1)" style="background: transparent; border: none; color: var(--text-color); cursor: pointer; padding: 6px 8px; font-size: 0.9rem;" title="Größer">➕</button>
                 </div>
 
-                <input type="text" v-model="neuerSchritt" @keyup.enter="addSchritt" placeholder="Neuer Schritt..." style="flex-grow: 1; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px;">
+                <input type="text" v-model="neuerSchritt" @keyup.enter="addSchritt" placeholder="Neuer Schritt..." style="flex-grow: 1; background: rgba(0,0,0,0.2); color: var(--text-color); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; outline: none;">
             </div>
         </div>
     `,
