@@ -210,7 +210,7 @@
                            style="cursor: pointer; width: 60px; height: 30px; border: none; border-radius: 10px; background: transparent; padding: 0; outline: none;"
                            title="Farbe wählen">
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;">
+                <div class="custom-scrollbar" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-height: 210px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
                     <div v-for="bg in availableBackgrounds" :key="bg"
                          @click="setHintergrund(bg)"
                          :style="{
