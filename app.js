@@ -295,41 +295,26 @@ const app = createApp({
             if (typeof this.saveToLocal === 'function') this.saveToLocal();
         },
         aktualisiereWidgets() {
-            const aktuelleKlasse = this.settings.klassen.find(k => k.name === this.aktiveKlasse);
+            if (this.widgets.length === 0) return; // Wenn keine Widgets da sind, mach nichts
 
-            if (aktuelleKlasse && aktuelleKlasse.schueler && aktuelleKlasse.schueler.length > 0) {
-                const anwesendeSchueler = aktuelleKlasse.schueler
-                    .filter(s => !s.absent)
-                    .map(s => s.name)
-                    .join('\n');
+            this.widgets.forEach(w => {
+                // 1. Widget minimieren (in die Leiste packen)
+                w.isMinimized = true;
 
-                if (!anwesendeSchueler) {
-                    alert("Es sind momentan keine anwesenden Schüler in dieser Klasse eingetragen.");
-                    return;
-                }
+                // 2. Start-Koordinaten basierend auf dem Typ berechnen (exakt wie beim Erstellen)
+                const isNotiz = w.type === 'notiz';
+                const isGruppen = w.type === 'gruppen';
 
-                let hatAktualisiert = false;
+                // X- und Y-Position wieder auf den Standardwert in die Mitte setzen
+                w.x = window.innerWidth / 2 - (isNotiz ? 300 : (isGruppen ? 250 : 150));
+                w.y = 100;
+            });
 
-                this.widgets.forEach(w => {
-                    if (w.type === 'gruppen' || w.type === 'zufall') {
-                        w.schuelerListe = anwesendeSchueler;
-                        if (w.type === 'gruppen') {
-                            const anzahlGruppen = w.gruppen.length > 0 ? w.gruppen.length : (w.parameter || 4);
-                            w.gruppen = [];
-                            for (let i = 0; i < anzahlGruppen; i++) {
-                                w.gruppen.push([]);
-                            }
-                            w.unassigned = anwesendeSchueler.split('\n');
-                        }
-                        hatAktualisiert = true;
-                    }
-                });
+            // Änderungen lokal speichern, damit sie auch nach einem Neuladen dort bleiben
+            this.saveToLocal();
 
-                if (hatAktualisiert) {
-                    this.saveToLocal();
-                    window.location.reload();
-                }
-            }
+            // Ein Neuladen der Seite (window.location.reload()) ist hier nicht mehr nötig,
+            // da Vue die Widgets sofort flüssig verschwinden lässt!
         },
         minimizeWidget(index) {
             // Setzt den Status auf "minimiert" und speichert
