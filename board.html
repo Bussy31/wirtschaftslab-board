@@ -187,6 +187,7 @@
                         <div class="schueler-tags">
                             <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
                                   :class="['schueler-tag', { 'is-absent': s.absent }]"
+                                  :style="!s.absent ? { background: 'var(--button-color)', color: 'var(--text-color)' } : {}"
                                   @click="toggleAbsent(s)"
                                   title="Klicken, um anwesend/krank zu wechseln">
                                 {{ s.name }}
