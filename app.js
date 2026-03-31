@@ -486,9 +486,10 @@ const app = createApp({
             // 1. Grundgerüst für das Backup erstellen
             const backupData = {
                 settings: this.settings,
+                aktiveKlasse: this.aktiveKlasse, // NEU: Speichert, welche Klasse gerade geöffnet ist!
                 boards: {},
                 backgrounds: {},
-                designs: {} // NEU: Hier kommen die Designs rein
+                designs: {}
             };
 
             // 2. Standard-Klasse sichern
@@ -510,7 +511,6 @@ const app = createApp({
                     const bgData = localStorage.getItem('hintergrund_' + klasse.name);
                     if (bgData) backupData.backgrounds[klasse.name] = bgData;
 
-                    // NEU: Design der Klasse sichern
                     const designData = localStorage.getItem('design_' + klasse.name);
                     if (designData) backupData.designs[klasse.name] = JSON.parse(designData);
                 });
@@ -540,6 +540,13 @@ const app = createApp({
                         this.settings = importedData.settings;
                         this.saveSettings();
 
+                        // NEU: Setzt die aktive Klasse wieder auf den Stand vom Backup
+                        if (importedData.aktiveKlasse) {
+                            this.aktiveKlasse = importedData.aktiveKlasse;
+                        } else {
+                            this.aktiveKlasse = 'Standard'; // Fallback für alte Backups
+                        }
+
                         // Boards wiederherstellen
                         for (const [klasseName, boardData] of Object.entries(importedData.boards)) {
                             localStorage.setItem('board_' + klasseName, JSON.stringify(boardData));
@@ -552,14 +559,14 @@ const app = createApp({
                             }
                         }
 
-                        // NEU: Designs wiederherstellen
+                        // Designs wiederherstellen
                         if (importedData.designs) {
                             for (const [klasseName, designData] of Object.entries(importedData.designs)) {
                                 localStorage.setItem('design_' + klasseName, JSON.stringify(designData));
                             }
                         }
 
-                        this.loadBoard();
+                        this.loadBoard(); // Lädt jetzt sofort die "aktiveKlasse" aus dem Backup!
                         alert("Backup erfolgreich importiert!");
                     } else {
                         alert("Ungültiges Backup-Format.");
