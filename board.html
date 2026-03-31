@@ -108,10 +108,10 @@
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         🖼️ Hintergrund
                     </button>
-                    <button @click="activeSettingsTab = 'hintergrund'"
-                            :style="{ background: activeSettingsTab === 'hintergrund' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                    <button @click="activeSettingsTab = 'design'"
+                            :style="{ background: activeSettingsTab === 'design' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                        🖼️ Hintergrund
+                        🎨 Design
                     </button>
                     <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'"
                             :style="{ background: activeSettingsTab === 'Reset' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
