@@ -293,9 +293,7 @@ const app = createApp({
             this.neuerKlassenName = '';
             this.saveSettings();
 
-            // Wenn es die allererste Klasse ist...
             if (this.settings.klassen.length === 1) {
-                // ...wechseln wir die Klasse nur im Hintergrund, OHNE das Menü zu schließen!
                 this.aktiveKlasse = name;
                 localStorage.setItem('aktiveKlasse', name);
                 this.loadBoard();
