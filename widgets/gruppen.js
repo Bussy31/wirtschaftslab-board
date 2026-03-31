@@ -8,7 +8,6 @@ const GruppenWidget = {
             unassigned: this.widgetData.unassigned || [],
             schuelerText: this.widgetData.schuelerListe || '',
             showList: false,
-            // NEU: Wir merken uns jetzt den Index (Listenplatz), nicht mehr den Namen!
             selectedStudentIndex: null,
             selectedSource: null
         };

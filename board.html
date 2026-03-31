@@ -187,7 +187,8 @@
              v-show="!w.isMinimized"
              :style="{
                  left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
-                 boxSizing: 'border-box'
+                 boxSizing: 'border-box',
+                 transform: 'rotate(' + (w.rotation || 0) + 'deg)'
              }"
              @mousedown="startDrag($event, index)"
              @touchstart="startDrag($event, index)">
@@ -249,7 +250,14 @@
             <div class="widget-content">
                 <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
             </div>
+
             <div class="custom-resize-handle" @mousedown.stop="startResize($event, index)" @touchstart.stop="startResize($event, index)"></div>
+
+            <div @mousedown.stop="startRotate($event, index)"
+                 @touchstart.stop="startRotate($event, index)"
+                 style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); border-radius: 50%; cursor: grab; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); color: white; z-index: 10;">
+                ↻
+            </div>
         </div>
     </div>
     <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn" title="Vollbild beenden">🗗 Beenden</button>

@@ -12,6 +12,10 @@ const app = createApp({
             resizingIndex: null,
             startWidth: 0,
             startHeight: 0,
+            rotatingIndex: null,
+            centerX: 0,
+            centerY: 0,
+            startAngle: 0,
             aktuelleZeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
 
             showSettings: false,
@@ -76,6 +80,54 @@ const app = createApp({
     },
 
     methods: {
+        startRotate(event, index) {
+            // Verhindert, dass das iPad scrollt oder markiert
+            if (event.cancelable) event.preventDefault();
+
+            this.rotatingIndex = index;
+
+            // Finde das Widget auf dem Bildschirm, um die Mitte (Achse) zu berechnen
+            const widgetElements = document.querySelectorAll('.widget');
+            const rect = widgetElements[index].getBoundingClientRect();
+            this.centerX = rect.left + rect.width / 2;
+            this.centerY = rect.top + rect.height / 2;
+
+            // Position des Fingers (Touch) oder der Maus
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            // Winkel berechnen
+            const radians = Math.atan2(clientY - this.centerY, clientX - this.centerX);
+            this.startAngle = radians * (180 / Math.PI) - (this.widgets[index].rotation || 0);
+
+            // Dem Browser sagen: Hör jetzt auf jede Bewegung!
+            document.addEventListener('mousemove', this.doRotate);
+            document.addEventListener('touchmove', this.doRotate, { passive: false });
+            document.addEventListener('mouseup', this.stopRotate);
+            document.addEventListener('touchend', this.stopRotate);
+        },
+        doRotate(event) {
+            if (this.rotatingIndex === null) return;
+            if (event.cancelable) event.preventDefault();
+
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            // Neuen Winkel berechnen und anwenden
+            const radians = Math.atan2(clientY - this.centerY, clientX - this.centerX);
+            let currentAngle = radians * (180 / Math.PI);
+
+            this.widgets[this.rotatingIndex].rotation = currentAngle - this.startAngle;
+        },
+        stopRotate() {
+            this.rotatingIndex = null;
+            document.removeEventListener('mousemove', this.doRotate);
+            document.removeEventListener('touchmove', this.doRotate);
+            document.removeEventListener('mouseup', this.stopRotate);
+            document.removeEventListener('touchend', this.stopRotate);
+
+            if (typeof this.saveToLocal === 'function') this.saveToLocal();
+        },
         aktualisiereWidgets() {
             const aktuelleKlasse = this.settings.klassen.find(k => k.name === this.aktiveKlasse);
 
