@@ -16,13 +16,13 @@ const MedienWidget = {
                          style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 5px; border-radius: 8px; border: 2px solid; cursor: pointer; transition: all 0.2s ease; text-align: center;">
                          
                          <span style="font-size: 2rem; margin-bottom: 4px;">{{ medium.icon }}</span>
-                         <span style="font-size: 0.8rem; font-weight: 600; color: #e2e8f0; line-height: 1.1;">{{ medium.label }}</span>
+                         <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-color); line-height: 1.1;">{{ medium.label }}</span>
                     </div>
                 </div>
 
                 <button @click="showList = false" 
                         @mousedown.stop @touchstart.stop
-                        style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; flex-shrink: 0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        style="margin-top: 10px; padding: 10px; background: var(--button-color); border: none; color: var(--text-color); border-radius: 8px; cursor: pointer; font-weight: bold; flex-shrink: 0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <span>übernehmen</span> 
                 </button>
             </div>
@@ -37,7 +37,7 @@ const MedienWidget = {
                     gridTemplateRows: selectedMediaData.length > 2 ? '1fr 1fr' : '1fr' 
                  }">
                  
-                 <div v-if="selectedMediaData.length === 0" style="display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: clamp(1rem, 10cqmin, 2rem); text-align: center;">
+                 <div v-if="selectedMediaData.length === 0" style="display: flex; align-items: center; justify-content: center; color: var(--text-color); opacity: 0.6; font-size: clamp(1rem, 10cqmin, 2rem); text-align: center;">
                     Klicke hier, um <br>Medien zu wählen
                  </div>
 
