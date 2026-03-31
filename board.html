@@ -215,7 +215,7 @@
             <h2 style="margin: 0; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; gap: 8px;">⚙️ Einstellungen</h2>
             <button @click="showSettings = false" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0; display: flex; align-items: center;">✕</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body custom-scrollbar" style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
             <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
                 <button @click="activeSettingsTab = 'klassen'"
                         :style="{ background: activeSettingsTab === 'klassen' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
