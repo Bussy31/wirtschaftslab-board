@@ -411,6 +411,42 @@ const app = createApp({
                 this.saveSettings();
             }
         },
+        renameKlasse(index) {
+            const alteKlasse = this.settings.klassen[index];
+            const alterName = alteKlasse.name;
+
+            // Ein simples Pop-up öffnet sich und fragt nach dem neuen Namen
+            const neuerName = prompt(`Neuen Namen für die Klasse "${alterName}" eingeben:`, alterName);
+
+            // Nur weitermachen, wenn der User etwas eingegeben hat und es nicht der gleiche Name ist
+            if (neuerName && neuerName.trim() !== "" && neuerName.trim() !== alterName) {
+                const bereinigterName = neuerName.trim();
+
+                // 1. Prüfen, ob es den neuen Namen schon gibt
+                if (this.settings.klassen.some(k => k.name === bereinigterName)) {
+                    alert("Dieser Klassenname existiert bereits!");
+                    return;
+                }
+
+                // 2. Namen im Array ändern
+                alteKlasse.name = bereinigterName;
+
+                // 3. Wenn das die gerade geladene Klasse ist, auch die aktive Klasse ändern
+                if (this.aktiveKlasse === alterName) {
+                    this.aktiveKlasse = bereinigterName;
+                }
+
+                // 4. Gespeichertes Design auf den neuen Namen übertragen (wichtig!)
+                const altesDesign = localStorage.getItem('design_' + alterName);
+                if (altesDesign) {
+                    localStorage.setItem('design_' + bereinigterName, altesDesign);
+                    localStorage.removeItem('design_' + alterName);
+                }
+
+                // 5. Speichern
+                this.saveToLocal();
+            }
+        },
         addSchuelerInline(klasse, event) {
             const name = event.target.value;
             if (name && name.trim()) {

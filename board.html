@@ -253,9 +253,11 @@
                                 </button>
                                 <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
                             </div>
-                            <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
-                        </div>
-
+                                <div>
+                                    <button @click="renameKlasse(index)" class="btn-small" style="color:#f59e0b; border-color:rgba(245,158,11,0.3); background: rgba(245,158,11,0.1); margin-right: 5px;">✏️ Umbenennen</button>
+                                    <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
+                                </div>
+                            </div>
                         <div class="schueler-tags">
                             <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
                                   :class="['schueler-tag', { 'is-absent': s.absent }]"
