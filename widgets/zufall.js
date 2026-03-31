@@ -1,7 +1,8 @@
 const ZufallWidget = {
     props: ['widgetData'],
     template: `
-        <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; gap: 10px; box-sizing: border-box;">
+        <div @mouseenter="isHovered = true" @mouseleave="isHovered = false"
+             style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 5px; gap: 5px; box-sizing: border-box; position: relative;">
             
             <div v-if="!showSettings && currentModus === 'text'" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                 <div v-if="anzeigeName" 
@@ -20,8 +21,8 @@ const ZufallWidget = {
             </div>
 
             <div v-if="!showSettings && currentModus === 'rad'" style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-                <div style="position: relative; width: 65cqmin; height: 65cqmin; margin-bottom: 10px;">
-                    <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 10; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));"></div>
+                <div style="position: relative; width: 80cqmin; height: 80cqmin; margin-bottom: 5px;">
+                    <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); z-index: 10; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));"></div>
                     
                     <div :style="{
                         width: '100%', height: '100%',
@@ -36,22 +37,22 @@ const ZufallWidget = {
                              :style="{
                                  position: 'absolute',
                                  top: '50%', left: '50%',
-                                 transform: 'translate(-50%, -50%) rotate(' + ((i * 360 / namenList.length) + (180 / Math.max(1, namenList.length))) + 'deg) translateY(-20cqmin) rotate(-90deg)',
+                                 transform: 'translate(-50%, -50%) rotate(' + ((i * 360 / namenList.length) + (180 / Math.max(1, namenList.length))) + 'deg) translateY(-25cqmin) rotate(-90deg)',
                                  transformOrigin: 'center center',
-                                 fontSize: 'clamp(0.5rem, 3cqmin, 1.1rem)',
+                                 fontSize: 'clamp(0.5rem, 3.5cqmin, 1.1rem)',
                                  fontWeight: 'bold',
                                  color: 'white',
                                  textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
                                  whiteSpace: 'nowrap',
-                                 maxWidth: '25cqmin',
+                                 maxWidth: '30cqmin',
                                  overflow: 'hidden'
                              }">
                              {{ name }}
                         </div>
                     </div>
                 </div>
-                <div style="height: 30px; display: flex; align-items: center;">
-                    <div v-if="anzeigeName && !isSpinning" style="font-size: clamp(1rem, 5cqmin, 1.8rem); font-weight: bold; color: #34d399; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                <div style="height: 25px; display: flex; align-items: center;">
+                    <div v-if="anzeigeName && !isSpinning" style="font-size: clamp(0.9rem, 4.5cqmin, 1.6rem); font-weight: bold; color: #34d399; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
                         {{ anzeigeName }}
                     </div>
                 </div>
@@ -63,14 +64,19 @@ const ZufallWidget = {
                           placeholder="Namen hier rein..."></textarea>
             </div>
 
-            <div v-if="!showSettings" style="display:flex; gap:8px; align-items: stretch;">
-                <button @click="spin" class="btn-primary" style="flex: 1; height: 36px;" :disabled="isSpinning">Zufall</button>
-                <button @click="showSettings = true" class="btn-secondary" style="width: 40px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            <div v-if="!showSettings" 
+                 :style="{ 
+                    opacity: (widgetData.isTransparent && !isHovered) ? 0 : 1,
+                    transition: 'opacity 0.3s ease'
+                 }"
+                 style="display:flex; gap:8px; align-items: stretch; margin-top: auto;">
+                <button @click="spin" class="btn-primary" style="flex: 1; height: 32px;" :disabled="isSpinning">Zufall</button>
+                <button @click="showSettings = true" class="btn-secondary" style="width: 36px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
                     ⚙️
                 </button>
             </div>
-            <div v-else style="display:flex;">
-                <button @click="closeSettings" class="btn-primary" style="flex:1; height: 36px;">Speichern</button>
+            <div v-else style="display:flex; margin-top: auto;">
+                <button @click="closeSettings" class="btn-primary" style="flex:1; height: 32px;">Speichern</button>
             </div>
         </div>
     `,
@@ -80,7 +86,8 @@ const ZufallWidget = {
             anzeigeName: '',
             isSpinning: false,
             showSettings: false,
-            wheelRotation: 0
+            wheelRotation: 0,
+            isHovered: false // Neu für die Hover-Erkennung
         };
     },
     computed: {
