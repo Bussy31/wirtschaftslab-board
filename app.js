@@ -113,6 +113,63 @@ const app = createApp({
     },
 
     methods: {
+        // === METHODEN FÜR DIE GLASSCHEIBE ===
+        toggleDrawingMode() {
+            this.isDrawingMode = !this.isDrawingMode;
+            if (this.isDrawingMode) {
+                // Warten, bis das HTML geladen ist, dann Leinwand aufbauen
+                this.$nextTick(() => {
+                    this.initCanvas();
+                });
+            }
+        },
+        initCanvas() {
+            const canvas = this.$refs.drawingCanvas;
+            if (!canvas) return;
+
+            // Passt die Zeichenfläche exakt an den Monitor an
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            this.ctx = canvas.getContext('2d');
+            this.ctx.lineCap = 'round';   // Runde Pinselstriche
+            this.ctx.lineJoin = 'round';
+            this.ctx.lineWidth = 6;       // Dicke des Stifts
+        },
+        startDrawing(e) {
+            this.isDrawing = true;
+            this.draw(e);
+        },
+        startTouchDrawing(e) {
+            this.isDrawing = true;
+            this.touchDraw(e);
+        },
+        draw(e) {
+            if (!this.isDrawing || !this.ctx) return;
+            this.ctx.strokeStyle = this.drawColor;
+            this.ctx.lineTo(e.clientX, e.clientY);
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.moveTo(e.clientX, e.clientY);
+        },
+        touchDraw(e) {
+            if (!this.isDrawing || !this.ctx) return;
+            const touch = e.touches[0];
+            this.ctx.strokeStyle = this.drawColor;
+            this.ctx.lineTo(touch.clientX, touch.clientY);
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.moveTo(touch.clientX, touch.clientY);
+        },
+        stopDrawing() {
+            this.isDrawing = false;
+            if (this.ctx) this.ctx.beginPath(); // Setzt den Stift ab
+        },
+        clearCanvas() {
+            if (!this.ctx) return;
+            const canvas = this.$refs.drawingCanvas;
+            this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        },
         applyDesign() {
             const root = document.documentElement;
             const d = this.settings.design;
@@ -613,63 +670,6 @@ const app = createApp({
             this.isFullscreen = !!document.fullscreenElement;
         }
     },
-    // === METHODEN FÜR DIE GLASSCHEIBE ===
-        toggleDrawingMode() {
-            this.isDrawingMode = !this.isDrawingMode;
-            if (this.isDrawingMode) {
-                // Warten, bis das HTML geladen ist, dann Leinwand aufbauen
-                this.$nextTick(() => {
-                    this.initCanvas();
-                });
-            }
-        },
-        initCanvas() {
-            const canvas = this.$refs.drawingCanvas;
-            if (!canvas) return;
-
-            // Passt die Zeichenfläche exakt an den Monitor an
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            this.ctx = canvas.getContext('2d');
-            this.ctx.lineCap = 'round';   // Runde Pinselstriche
-            this.ctx.lineJoin = 'round';
-            this.ctx.lineWidth = 6;       // Dicke des Stifts
-        },
-        startDrawing(e) {
-            this.isDrawing = true;
-            this.draw(e);
-        },
-        startTouchDrawing(e) {
-            this.isDrawing = true;
-            this.touchDraw(e);
-        },
-        draw(e) {
-            if (!this.isDrawing || !this.ctx) return;
-            this.ctx.strokeStyle = this.drawColor;
-            this.ctx.lineTo(e.clientX, e.clientY);
-            this.ctx.stroke();
-            this.ctx.beginPath();
-            this.ctx.moveTo(e.clientX, e.clientY);
-        },
-        touchDraw(e) {
-            if (!this.isDrawing || !this.ctx) return;
-            const touch = e.touches[0];
-            this.ctx.strokeStyle = this.drawColor;
-            this.ctx.lineTo(touch.clientX, touch.clientY);
-            this.ctx.stroke();
-            this.ctx.beginPath();
-            this.ctx.moveTo(touch.clientX, touch.clientY);
-        },
-        stopDrawing() {
-            this.isDrawing = false;
-            if (this.ctx) this.ctx.beginPath(); // Setzt den Stift ab
-        },
-        clearCanvas() {
-            if (!this.ctx) return;
-            const canvas = this.$refs.drawingCanvas;
-            this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-        },
 
     watch: {
         'settings.design': {
