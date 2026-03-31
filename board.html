@@ -91,7 +91,7 @@
             <div style="width: 2px; height: 30px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
 
             <button @click="clearCanvas" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 1.5rem; transition: 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Alles löschen">🗑️</button>
-            <button @click="toggleDrawingMode" style="background: #ef4444; border: none; color: white; cursor: pointer; padding: 10px 20px; border-radius: 20px; font-weight: bold; margin-left: 10px; font-size: 1rem;">✕ Beenden</button>
+            <button @click="toggleDrawingMode" style="background: var(--button-color); border: none; color: var(--text-color); cursor: pointer; padding: 10px 20px; border-radius: 20px; font-weight: bold; margin-left: 10px; font-size: 1rem;">✕ Beenden</button>
         </div>
     </div>
     <div :class="['toolbar', { 'hidden': isFullscreen }]" :style="{ background: 'var(--widget-header)' }">
