@@ -217,16 +217,6 @@
                             <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Textfarbe</label>
                             <input type="color" v-model="settings.design.textColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
                         </div>
-
-                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Schriftart</label>
-                            <select v-model="settings.design.fontMain" style="width: 100%; padding: 8px; border-radius: 4px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                                <option value="Arial, sans-serif">Standard (Arial)</option>
-                                <option value="'Comic Sans MS', cursive, sans-serif">Verspielt (Comic Sans)</option>
-                                <option value="'Courier New', Courier, monospace">Schreibmaschine</option>
-                                <option value="'Times New Roman', Times, serif">Klassisch (Serif)</option>
-                            </select>
-                        </div>
                     </div>
                     <button @click="resetDesign" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; cursor: pointer;">🔄 Design auf Standard zurücksetzen</button>
                 </div>
@@ -262,7 +252,16 @@
              @mousedown="startDrag($event, index)"
              @touchstart="startDrag($event, index)">
 
-            <div class="widget-header" :style="{ background: 'var(--widget-header)', color: 'var(--text-color)' }">
+            <div class="widget-header"
+                 :style="{
+                     background: 'var(--widget-header)',
+                     color: 'var(--text-color)',
+                     display: 'flex',
+                     justifyContent: 'flex-end',
+                     alignItems: 'center',
+                     width: '100%',
+                     boxSizing: 'border-box'
+                 }">
 
                 <div style="display: flex; align-items: center; gap: 8px;">
 
