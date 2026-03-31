@@ -22,6 +22,19 @@
         .widget.ghost-mode:hover .widget-header {
             opacity: 1;
         }
+        .widget.ghost-mode:hover .widget-header {
+            opacity: 1;
+        }
+        .custom-rotate-handle {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .widget:hover .custom-rotate-handle,
+        .widget:active .custom-rotate-handle {
+            opacity: 1;
+        }
+    </style>
+</head>
     </style>
 </head>
 <body>
@@ -253,9 +266,11 @@
 
             <div class="custom-resize-handle" @mousedown.stop="startResize($event, index)" @touchstart.stop="startResize($event, index)"></div>
 
-            <div @mousedown.stop="startRotate($event, index)"
+           <div v-show="!w.isTransparent"
+                 class="custom-rotate-handle"
+                 @mousedown.stop="startRotate($event, index)"
                  @touchstart.stop="startRotate($event, index)"
-                 style="position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; cursor: grab; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); color: white; z-index: 50;">
+                 style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; cursor: grab; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.8); z-index: 50;">
                 ↻
             </div>
         </div>
