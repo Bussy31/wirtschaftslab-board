@@ -41,6 +41,11 @@
         .btn-icon:not(.ignore-theme),
         .floating-exit-btn:not(.ignore-theme) {
             background-color: var(--button-color) !important;
+        }
+
+        .btn-primary:not(.ignore-theme):not(.ignore-text-color),
+        .btn-icon:not(.ignore-theme):not(.ignore-text-color),
+        .floating-exit-btn:not(.ignore-theme):not(.ignore-text-color) {
             color: var(--text-color) !important;
         }
 
@@ -96,7 +101,7 @@
         <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️</button>
         <button @click="exportBoard" class="btn-export btn-small">💾 Export</button>
         <button @click="$refs.fileInput.click()" class="btn-import btn-small">📂 Import</button>
-        <button @click="toggleFullscreen" class="btn-primary" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
+        <button @click="toggleFullscreen" class="btn-primary ignore-text-color" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
 
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
