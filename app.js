@@ -255,9 +255,27 @@ const app = createApp({
             } else {
                 this.settings.hintergrund = '#1e293b';
             }
+
+            // NEU: Das Design für genau diese Klasse laden
+            const savedDesign = localStorage.getItem('design_' + this.aktiveKlasse);
+            if (savedDesign) {
+                this.settings.design = JSON.parse(savedDesign);
+            } else {
+                // Wenn noch kein Design gespeichert wurde: Standard-Werte setzen
+                this.settings.design = {
+                    widgetBg: '#1e293b', widgetBgOpacity: 90,
+                    widgetHeader: '#0f172a', widgetHeaderOpacity: 95,
+                    textColor: '#ffffff', buttonColor: '#3b82f6'
+                };
+            }
+
+            // Standard-Buttons und Texte umfärben
+            document.documentElement.style.setProperty('--button-color', this.settings.design.buttonColor);
+            document.documentElement.style.setProperty('--text-color', this.settings.design.textColor);
         },
         saveToLocal() {
             localStorage.setItem('board_' + this.aktiveKlasse, JSON.stringify(this.widgets));
+
         },
         wechsleKlasse(klassenName) {
             this.aktiveKlasse = klassenName;
@@ -288,6 +306,7 @@ const app = createApp({
                 const klasseName = this.settings.klassen[index].name;
                 localStorage.removeItem('board_' + klasseName);
                 localStorage.removeItem('hintergrund_' + klasseName);
+                localStorage.removeItem('design_' + klasseName); // NEU: Design-Speicher löschen
                 this.settings.klassen.splice(index, 1);
 
                 if (this.aktiveKlasse === klasseName) {
@@ -464,12 +483,25 @@ const app = createApp({
         },
 
         exportBoard() {
+            // 1. Grundgerüst für das Backup erstellen
             const backupData = {
                 settings: this.settings,
                 boards: {},
-                backgrounds: {}
+                backgrounds: {},
+                designs: {} // NEU: Hier kommen die Designs rein
             };
 
+            // 2. Standard-Klasse sichern
+            const standardBoard = localStorage.getItem('board_Standard');
+            if (standardBoard) backupData.boards['Standard'] = JSON.parse(standardBoard);
+
+            const standardBg = localStorage.getItem('hintergrund_Standard');
+            if (standardBg) backupData.backgrounds['Standard'] = standardBg;
+
+            const standardDesign = localStorage.getItem('design_Standard');
+            if (standardDesign) backupData.designs['Standard'] = JSON.parse(standardDesign);
+
+            // 3. Alle anderen Klassen aus den Settings durchgehen und sichern
             if (this.settings.klassen) {
                 this.settings.klassen.forEach(klasse => {
                     const boardData = localStorage.getItem('board_' + klasse.name);
@@ -477,22 +509,21 @@ const app = createApp({
 
                     const bgData = localStorage.getItem('hintergrund_' + klasse.name);
                     if (bgData) backupData.backgrounds[klasse.name] = bgData;
+
+                    // NEU: Design der Klasse sichern
+                    const designData = localStorage.getItem('design_' + klasse.name);
+                    if (designData) backupData.designs[klasse.name] = JSON.parse(designData);
                 });
             }
 
-            const standardBoard = localStorage.getItem('board_Standard');
-            if (standardBoard) backupData.boards['Standard'] = JSON.parse(standardBoard);
-
-            const standardBg = localStorage.getItem('hintergrund_Standard');
-            if (standardBg) backupData.backgrounds['Standard'] = standardBg;
-
-            const dataStr = JSON.stringify(backupData);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = "wirtschaftslab-komplett-backup.json";
-            link.click();
+            // 4. Datei herunterladen
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "wirtschaftslab_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
         },
 
         importBoard(event) {
@@ -516,6 +547,12 @@ const app = createApp({
                         if (importedData.backgrounds) {
                             for (const [klasseName, bg] of Object.entries(importedData.backgrounds)) {
                                 localStorage.setItem('hintergrund_' + klasseName, bg);
+                            }
+                        }
+
+                        if (importedData.designs) {
+                            for (const [klasseName, design] of Object.entries(importedData.designs)) {
+                                localStorage.setItem('design_' + klasseName, JSON.stringify(design));
                             }
                         }
 
@@ -559,12 +596,20 @@ const app = createApp({
             this.isFullscreen = !!document.fullscreenElement;
         }
     },
+
     watch: {
         'settings.design': {
             deep: true,
-            handler() {
-                this.applyDesign();
-                this.saveSettings();
+            handler(newDesign) {
+                // 1. Speichert das Design unter dem Namen der aktuellen Klasse
+                if (this.aktiveKlasse && newDesign) {
+                    localStorage.setItem('design_' + this.aktiveKlasse, JSON.stringify(newDesign));
+                }
+                // 2. Aktualisiert sofort die globalen CSS-Farben (z.B. für Standard-Buttons)
+                if (newDesign && newDesign.buttonColor) {
+                    document.documentElement.style.setProperty('--button-color', newDesign.buttonColor);
+                    document.documentElement.style.setProperty('--text-color', newDesign.textColor);
+                }
             }
         }
     }
