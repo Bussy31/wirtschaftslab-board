@@ -115,12 +115,12 @@ const app = createApp({
             root.style.setProperty('--button-color', d.buttonColor || '#3b82f6');
         },
         resetDesign() {
+            this.settings.hintergrund = '1e293b'
             this.settings.design = {
                 widgetBg: '#1e293b', widgetBgOpacity: 90,
                 widgetHeader: '#0f172a', widgetHeaderOpacity: 90,
                 textColor: '#ffffff', fontMain: 'Arial, sans-serif',
                 buttonColor: '#3b82f6',
-                background: '#1e293b'
             };
             this.applyDesign();
             this.saveSettings();
