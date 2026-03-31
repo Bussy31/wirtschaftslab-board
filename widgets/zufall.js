@@ -15,14 +15,14 @@ const ZufallWidget = {
                      style="border-radius: 8px; padding: 2cqh; text-align: center; font-size: clamp(1.2rem, 8cqw, 4rem); font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.2; word-wrap: break-word;">
                     {{ isSpinning ? '🔄 ' + anzeigeName : '🎉 ' + anzeigeName + ' 🎉' }}
                 </div>
-                <div v-else style="text-align: center; color: rgba(255,255,255,0.4); font-style: italic; font-size: clamp(1rem, 5cqw, 2rem);">
+                <div v-else style="text-align: center; color: var(--text-color); opacity: 0.5; font-style: italic; font-size: clamp(1rem, 5cqw, 2rem);">
                     Bereit...
                 </div>
             </div>
 
             <div v-if="!showSettings && currentModus === 'rad'" style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-                <div style="position: relative; width: 80cqmin; height: 80cqmin; margin-bottom: 5px;">
-                    <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); z-index: 10; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));"></div>
+                <div style="position: relative; width: 75cqmin; height: 75cqmin; margin-bottom: 5px;">
+                    <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); z-index: 10; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid var(--text-color); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));"></div>
                     
                     <div :style="{
                         width: '100%', height: '100%',
@@ -51,16 +51,22 @@ const ZufallWidget = {
                         </div>
                     </div>
                 </div>
-                <div style="height: 25px; display: flex; align-items: center;">
-                    <div v-if="anzeigeName && !isSpinning" style="font-size: clamp(0.9rem, 4.5cqmin, 1.6rem); font-weight: bold; color: #34d399; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                        {{ anzeigeName }}
+                
+                <div style="height: 35px; width: 100%; display: flex; align-items: center; justify-content: center; margin-top: 2px;">
+                    <div v-if="anzeigeName && !isSpinning" 
+                         style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; border-radius: 6px; padding: 4px 12px; text-align: center; font-size: clamp(0.9rem, 4.5cqmin, 1.3rem); font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.5); max-width: 95%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        🎉 {{ anzeigeName }} 🎉
                     </div>
                 </div>
             </div>
 
-            <div v-if="showSettings" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <div v-if="showSettings" style="flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0;">
+                <div style="display: flex; gap: 5px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px;">
+                    <button @click="widgetData.modus = 'rad'" :style="{ flex: 1, padding: '6px', fontSize: '0.85rem', background: currentModus === 'rad' ? 'var(--button-color)' : 'transparent', color: 'var(--text-color)', border: 'none', borderRadius: '4px', cursor: 'pointer' }">🎡 Rad</button>
+                    <button @click="widgetData.modus = 'text'" :style="{ flex: 1, padding: '6px', fontSize: '0.85rem', background: currentModus === 'text' ? 'var(--button-color)' : 'transparent', color: 'var(--text-color)', border: 'none', borderRadius: '4px', cursor: 'pointer' }">🔤 Text</button>
+                </div>
                 <textarea v-model="schuelerListe" 
-                          style="flex: 1; width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; padding: 10px; resize: none; font-family: inherit;"
+                          style="flex: 1; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: var(--text-color); border-radius: 8px; padding: 10px; resize: none; font-family: inherit; outline: none;"
                           placeholder="Namen hier rein..."></textarea>
             </div>
 
@@ -70,13 +76,13 @@ const ZufallWidget = {
                     transition: 'opacity 0.3s ease'
                  }"
                  style="display:flex; gap:8px; align-items: stretch; margin-top: auto;">
-                <button @click="spin" class="btn-primary" style="flex: 1; height: 32px;" :disabled="isSpinning">Zufall</button>
-                <button @click="showSettings = true" class="btn-secondary" style="width: 36px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                <button @click="spin" style="flex: 1; height: 32px; background: var(--button-color); color: var(--text-color); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" :disabled="isSpinning">🎲 Zufall</button>
+                <button @click="showSettings = true" style="width: 36px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-color); border-radius: 6px; cursor: pointer;">
                     ⚙️
                 </button>
             </div>
             <div v-else style="display:flex; margin-top: auto;">
-                <button @click="closeSettings" class="btn-primary" style="flex:1; height: 32px;">Speichern</button>
+                <button @click="closeSettings" style="flex:1; height: 32px; background: var(--button-color); color: var(--text-color); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">✅ Speichern</button>
             </div>
         </div>
     `,
@@ -87,7 +93,7 @@ const ZufallWidget = {
             isSpinning: false,
             showSettings: false,
             wheelRotation: 0,
-            isHovered: false // Neu für die Hover-Erkennung
+            isHovered: false
         };
     },
     computed: {
