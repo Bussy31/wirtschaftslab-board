@@ -19,12 +19,6 @@ const DateimanagementWidget = {
                 <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*, application/pdf" style="display: none;">
             </div>
 
-            <button v-if="widgetData.dateiUrl" 
-                    @click="clearDatei" 
-                    style="position: absolute; top: 10px; right: 10px; background: rgba(239, 68, 68, 0.8); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; opacity: 0; transition: opacity 0.2s;"
-                    onmouseover="this.style.opacity=1" 
-                    onmouseout="this.style.opacity=0.3"
-                    title="Datei entfernen">✕</button>
         </div>
     `,
     data() {
