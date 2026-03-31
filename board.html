@@ -82,7 +82,14 @@
                 style="width: 100%; height: 100%; display: block;"></canvas>
 
         <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--widget-bg); padding: 15px 25px; border-radius: 30px; display: flex; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; border: 1px solid rgba(255,255,255,0.2); align-items: center;">
-
+            <div style="display: flex; align-items: center; gap: 8px; margin-right: 5px;">
+                <button @click="setBrushSize(3)" :style="{ background: brushSize === 3 ? 'white' : 'rgba(255,255,255,0.3)' }" style="width: 8px; height: 8px; border-radius: 50%; border: none; cursor: pointer; transition: 0.2s;" title="Dünn"></button>
+                <button @click="setBrushSize(6)" :style="{ background: brushSize === 6 ? 'white' : 'rgba(255,255,255,0.3)' }" style="width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; transition: 0.2s;" title="Mittel"></button>
+                <button @click="setBrushSize(16)" :style="{ background: brushSize === 16 ? 'white' : 'rgba(255,255,255,0.3)' }" style="width: 22px; height: 22px; border-radius: 50%; border: none; cursor: pointer; transition: 0.2s;" title="Dick"></button>
+            </div>
+            <div style="width: 2px; height: 30px; background: rgba(255,255,255,0.2); margin: 0 5px;"></div>
+            <button @click="toggleEraser" :style="{ background: isEraser ? 'rgba(255,255,255,0.2)' : 'transparent', border: isEraser ? '2px solid white' : '2px solid transparent' }" style="border-radius: 10px; color: white; cursor: pointer; font-size: 1.5rem; padding: 2px 5px; transition: 0.2s;" title="Radiergummi">🧽</button>
+            <div style="width: 2px; height: 30px; background: rgba(255,255,255,0.2); margin: 0 5px;"></div>
             <button @click="drawColor = '#ef4444'" :style="{ border: drawColor === '#ef4444' ? '3px solid white' : '3px solid transparent' }" style="width: 35px; height: 35px; border-radius: 50%; background: #ef4444; cursor: pointer; transition: 0.2s;"></button>
             <button @click="drawColor = '#3b82f6'" :style="{ border: drawColor === '#3b82f6' ? '3px solid white' : '3px solid transparent' }" style="width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; cursor: pointer; transition: 0.2s;"></button>
             <button @click="drawColor = '#22c55e'" :style="{ border: drawColor === '#22c55e' ? '3px solid white' : '3px solid transparent' }" style="width: 35px; height: 35px; border-radius: 50%; background: #22c55e; cursor: pointer; transition: 0.2s;"></button>

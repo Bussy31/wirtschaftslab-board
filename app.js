@@ -25,6 +25,8 @@ const app = createApp({
             isDrawing: false,
             drawColor: '#ef4444',
             ctx: null,
+            brushSize: 6,
+            isEraser: false,
 
             availableBackgrounds: [
                 'hintergruende/bild1.jpg',
@@ -113,7 +115,6 @@ const app = createApp({
     },
 
     methods: {
-        // === METHODEN FÜR DIE GLASSCHEIBE ===
         toggleDrawingMode() {
             this.isDrawingMode = !this.isDrawingMode;
             if (this.isDrawingMode) {
@@ -134,7 +135,7 @@ const app = createApp({
             this.ctx = canvas.getContext('2d');
             this.ctx.lineCap = 'round';   // Runde Pinselstriche
             this.ctx.lineJoin = 'round';
-            this.ctx.lineWidth = 6;       // Dicke des Stifts
+            this.ctx.lineWidth = this.brushSize;
         },
         startDrawing(e) {
             this.isDrawing = true;
@@ -169,6 +170,26 @@ const app = createApp({
             if (!this.ctx) return;
             const canvas = this.$refs.drawingCanvas;
             this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        },
+        setBrushSize(size) {
+            this.brushSize = size;
+            if (this.ctx) this.ctx.lineWidth = size;
+        },
+        toggleEraser() {
+            this.isEraser = !this.isEraser;
+            if (this.ctx) {
+                // "destination-out" macht den Pinselstrich transparent (er radiert)
+                // "source-over" ist normales Zeichnen
+                this.ctx.globalCompositeOperation = this.isEraser ? 'destination-out' : 'source-over';
+            }
+        },
+        setDrawColor(color) {
+            this.drawColor = color;
+            this.isEraser = false; // Radierer ausschalten, wenn eine Farbe geklickt wird
+            if (this.ctx) {
+                this.ctx.globalCompositeOperation = 'source-over';
+                this.ctx.strokeStyle = color;
+            }
         },
         applyDesign() {
             const root = document.documentElement;
