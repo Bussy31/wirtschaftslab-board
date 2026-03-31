@@ -95,10 +95,12 @@
 
         <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: var(--widget-bg); padding: 12px 20px; border-radius: 40px; display: flex; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 9999; border: 1px solid rgba(255,255,255,0.2); align-items: center;">
 
-            <div style="display: flex; align-items: center; gap: 10px; padding-right: 5px;">
-                <button @click="setBrushSize(4)" :style="{ border: brushSize === 4 ? '2px solid white' : '2px solid transparent', transform: brushSize === 4 ? 'scale(1.2)' : 'scale(1)' }" style="width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
-                <button @click="setBrushSize(10)" :style="{ border: brushSize === 10 ? '2px solid white' : '2px solid transparent', transform: brushSize === 10 ? 'scale(1.2)' : 'scale(1)' }" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
-                <button @click="setBrushSize(25)" :style="{ border: brushSize === 25 ? '2px solid white' : '2px solid transparent', transform: brushSize === 25 ? 'scale(1.2)' : 'scale(1)' }" style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+            <div style="display: flex; align-items: center; gap: 10px; padding-right: 5px;" title="Stiftdicke auswählen">
+                <span style="font-size: 1.3rem; opacity: 0.9; margin-right: 5px;">🖌️</span>
+
+                <button @click="setBrushSize(4)" title="Dünner Stift" :style="{ border: brushSize === 4 ? '2px solid white' : '2px solid transparent', transform: brushSize === 4 ? 'scale(1.2)' : 'scale(1)' }" style="width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+                <button @click="setBrushSize(10)" title="Mittlerer Stift" :style="{ border: brushSize === 10 ? '2px solid white' : '2px solid transparent', transform: brushSize === 10 ? 'scale(1.2)' : 'scale(1)' }" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+                <button @click="setBrushSize(25)" title="Dicker Stift" :style="{ border: brushSize === 25 ? '2px solid white' : '2px solid transparent', transform: brushSize === 25 ? 'scale(1.2)' : 'scale(1)' }" style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
             </div>
 
             <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>
