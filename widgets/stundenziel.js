@@ -24,7 +24,7 @@ const StundenzielWidget = {
                 
                 <button @click="isEditing = !isEditing" 
                         @mousedown.stop @touchstart.stop
-                        style="background: var(--button-color); border: none; color: var(--text-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                        style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
                     {{ isEditing ? '✅ OK' : '✏️ Edit' }}
                 </button>
             </div>
@@ -62,7 +62,7 @@ const StundenzielWidget = {
     },
     created() {
         if (this.widgetData.zielText === undefined) this.widgetData.zielText = "";
-        if (this.widgetData.fontSize === undefined) this.widgetData.fontSize = 40; // Standardstartwert
+        if (this.widgetData.fontSize === undefined) this.widgetData.fontSize = 40;
     },
     methods: {
         changeFontSize(delta) {
