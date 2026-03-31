@@ -113,11 +113,20 @@ const app = createApp({
             const clientX = event.touches ? event.touches[0].clientX : event.clientX;
             const clientY = event.touches ? event.touches[0].clientY : event.clientY;
 
-            // Neuen Winkel berechnen und anwenden
+            // Neuen Winkel berechnen
             const radians = Math.atan2(clientY - this.centerY, clientX - this.centerX);
             let currentAngle = radians * (180 / Math.PI);
 
-            this.widgets[this.rotatingIndex].rotation = currentAngle - this.startAngle;
+            let newRotation = currentAngle - this.startAngle;
+
+            let nearest90 = Math.round(newRotation / 90) * 90;
+
+            if (Math.abs(newRotation - nearest90) <= 8) {
+                newRotation = nearest90;
+            }
+
+            // Winkel auf das Widget anwenden
+            this.widgets[this.rotatingIndex].rotation = newRotation;
         },
         stopRotate() {
             this.rotatingIndex = null;
