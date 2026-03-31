@@ -104,8 +104,7 @@
     </div>
 
     <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false">
-        <div class="modal-content settings-modal">
-
+        <div class="modal-content" style="max-width: 600px; width: 90%; color: var(--text-color);">
             <div class="modal-header">
                 <h2>⚙️ Einstellungen</h2>
                 <span @click="showSettings = false" class="close-btn" style="font-size: 1.5rem;">✖</span>
@@ -114,24 +113,24 @@
             <div class="modal-body">
                 <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
                     <button @click="activeSettingsTab = 'klassen'"
-                            :style="{ background: activeSettingsTab === 'klassen' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            :style="{ background: activeSettingsTab === 'klassen' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         🏫 Klassen
                     </button>
                     <button @click="activeSettingsTab = 'hintergrund'"
-                            :style="{ background: activeSettingsTab === 'hintergrund' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            :style="{ background: activeSettingsTab === 'hintergrund' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         🖼️ Hintergrund
                     </button>
 
                     <button @click="activeSettingsTab = 'design'"
-                            :style="{ background: activeSettingsTab === 'design' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            :style="{ background: activeSettingsTab === 'design' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         🎨 Design
                     </button>
 
                     <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'"
-                            :style="{ background: activeSettingsTab === 'reset' ? 'var(--accent)' : 'rgba(255,255,255,0.1)' }"
+                            :style="{ background: activeSettingsTab === 'reset' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
                             style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
                         ⚠️ Reset
                     </button>
