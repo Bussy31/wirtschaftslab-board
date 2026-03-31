@@ -10,7 +10,6 @@
     <style>
         :root {
             --button-color: #3b82f6;
-            --background-color: f8fafc;
             --text-color: white;
         }
         .widget.ghost-mode {
@@ -71,7 +70,7 @@
             <button class="btn-primary" @click.stop="showWidgetMenu = !showWidgetMenu">
                 🛠️ Widgets ▼
             </button>
-            <div class="dropdown-content" v-if="showWidgetMenu" style="background: var(--background-color); color: var(--text-color);">
+            <div class="dropdown-content" v-if="showWidgetMenu">
                 <button @click="addWidget('uhr', '⏱️'); showWidgetMenu = false">⏱️ Uhr</button>
                 <button @click="addWidget('countdown', '⏳'); showWidgetMenu = false">⏳ Timer</button>
                 <button @click="addWidget('stoppuhr', '⏲️'); showWidgetMenu = false">⏲️ Stoppuhr</button>
@@ -255,7 +254,7 @@
                         Möchtest du alle gespeicherten Daten (Klassen, Schüler und Widgets) löschen?
                         Das Board wird danach komplett leer neu geladen.
                     </p>
-                    <button @click="resetAll" class="btn-primary" style="background: #ef4444; padding: 15px 30px; font-size: 1.1rem; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
+                    <button @click="resetAll" class="btn-primary ignore-text-color ignore-theme" style="background: #ef4444; padding: 15px 30px; font-size: 1.1rem; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
                         🔥 Jetzt alles unwiderruflich löschen
                     </button>
                 </div>
