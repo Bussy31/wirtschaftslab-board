@@ -405,15 +405,31 @@
             </div>
 
             <div v-if="activeSettingsTab === 'kontakt'" class="tab-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
+
                 <h3 :style="{ color: 'var(--text-color)' }" style="margin-top: 0; font-size: 1.5rem;">Fragen, Wünsche oder Feedback?</h3>
                 <p :style="{ color: 'var(--text-color)' }" style="opacity: 0.8; max-width: 400px; margin: 10px auto 25px auto; line-height: 1.5;">
                     Wenn etwas auf dem Board nicht so funktioniert, wie es soll, oder du coole Ideen für neue Widgets und Funktionen hast, melde dich gerne direkt bei mir!
                 </p>
                 <a href="mailto:philipp97bu@outlook.de"
-                   style="display: inline-block; background-color: var(--button-color); color: var(--text-color); padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: opacity 0.2s; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);"
-                   >✉️ E-Mail schreiben
+                   style="display: inline-block; background-color: var(--button-color); color: var(--text-color); padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); transition: transform 0.2s ease, box-shadow 0.2s ease;"
+                   onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.4)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0, 0, 0, 0.3)';">
+                   ✉️ E-Mail schreiben
                 </a>
-                <p :style="{ color: 'var(--text-color)' }" style="margin-top: 35px; font-size: 0.9rem; opacity: 0.5; margin-bottom: 0;">
+
+                <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 450px;">
+                    <p :style="{ color: 'var(--text-color)' }" style="opacity: 0.8; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px;">
+                        Informationen zum <strong>Datenschutz</strong> sowie weitere <strong>interaktive Lernprogramme</strong> für den Fachbereich Wirtschaft findest du auf meiner Internetseite:
+                    </p>
+                    <a href="https://wirtschaftslab-schule.freeddns.org" target="_blank" rel="noopener noreferrer"
+                       style="display: inline-block; color: var(--text-color); text-decoration: none; padding: 10px 20px; border: 2px solid var(--button-color); border-radius: 8px; font-weight: bold; transition: all 0.2s ease;"
+                       onmouseover="this.style.backgroundColor='var(--button-color)'; this.style.transform='translateY(-2px)';"
+                       onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)';">
+                        🌐 Zur Internetseite
+                    </a>
+                </div>
+
+                <p :style="{ color: 'var(--text-color)' }" style="margin-top: 40px; font-size: 0.9rem; opacity: 0.5; margin-bottom: 0;">
                     © Philipp Bußmann
                 </p>
             </div>
@@ -516,7 +532,7 @@
         </div>
     </div>
     <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn" title="Vollbild beenden">🗗 Beenden</button>
-    <div class="copyright">© 2026 Philipp Bußmann   </div>
+    <div class="copyright">© 2026 Philipp Bußmann</div>
 </div>
 
 <script src="widgets/uhr.js"></script>
