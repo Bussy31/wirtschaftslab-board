@@ -120,7 +120,7 @@
                 <button @click="addWidget('ampel','🚦'); showWidgetMenu = false">🚦 Lärmampel</button>
                 <button @click="addWidget('stundenziel','🎯'); showWidgetMenu = false">🎯 Stundenziel</button>
                 <button @click="addWidget('dateimanagement','📁'); showWidgetMenu = false">📁 Datei</button>
-                <button @click="toggleDrawingMode" class="widget-btn" showWidgetMenu=false">✍️ Zeichnen</button>
+                <button @click="toggleDrawingMode(); showWidgetMenu = false" class="widget-btn">✍️ Zeichnen</button>
             </div>
         </div>
 
