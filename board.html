@@ -62,6 +62,17 @@
         .dropdown-content button {
             color: var(--text-color) !important;
         }
+        .switch-btn {
+        background-color: var(--button-color) !important;
+        color: var(--text-color) !important;
+        border: none !important;
+        transition: opacity 0.2s;
+        }
+
+        .switch-btn:hover {
+            opacity: 0.9;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -168,7 +179,8 @@
                         <div class="klasse-header">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
-                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Dieses Board laden</button>                                <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
+                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn" :style="{background: 'var(--button-color)', color: 'var(--text-color)' }">Dieses Board laden</button>
+                                <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
                             </div>
                             <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
                         </div>
