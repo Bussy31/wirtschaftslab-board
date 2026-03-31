@@ -101,13 +101,14 @@
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
-    <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false">
-        <div class="modal-content" style="color: var(--text-color);">
-            <div class="modal-header">
-                <h2>⚙️ Einstellungen</h2>
-                <span @click="showSettings = false" class="close-btn" style="font-size: 1.5rem;">✖</span>
+    <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);">
+        <div class="modal-content"
+             :style="{ background: 'var(--widget-bg)', color: 'var(--text-color)' }"
+             style="max-width: 600px; width: 90%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+            <div :style="{ background: 'var(--widget-header)' }" style="margin: -20px -20px 20px -20px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h2 style="margin: 0; font-size: 1.2rem;">⚙️ Einstellungen</h2>
+                <button @click="showSettings = false" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem;">✕</button>
             </div>
-
             <div class="modal-body">
                 <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
                     <button @click="activeSettingsTab = 'klassen'"
