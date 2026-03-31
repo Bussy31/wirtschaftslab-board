@@ -8,23 +8,23 @@ const StundenzielWidget = {
                 
                 <button @click="importFromHandlungsplan" 
                         @mousedown.stop @touchstart.stop
-                        style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #e2e8f0; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                        style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
                     📋 Import HP
                 </button>
 
                 <div style="display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 2px 6px;">
                     <button @click="changeFontSize(-5)" @mousedown.stop @touchstart.stop
-                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;" title="Schrift verkleinern">-</button>
+                            style="background: rgba(255,255,255,0.1); border: none; color: var(--text-color); border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;" title="Schrift verkleinern">-</button>
                     
-                    <span style="color: #cbd5e1; font-size: 0.75rem; min-width: 22px; text-align: center; font-weight: 600; letter-spacing: 0.5px;">Aa</span>
+                    <span style="color: var(--text-color); opacity: 0.8; font-size: 0.75rem; min-width: 22px; text-align: center; font-weight: 600; letter-spacing: 0.5px;">Aa</span>
                     
                     <button @click="changeFontSize(5)" @mousedown.stop @touchstart.stop
-                            style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;" title="Schrift vergrößern">+</button>
+                            style="background: rgba(255,255,255,0.1); border: none; color: var(--text-color); border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;" title="Schrift vergrößern">+</button>
                 </div>
                 
                 <button @click="isEditing = !isEditing" 
                         @mousedown.stop @touchstart.stop
-                        style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #e2e8f0; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                        style="background: var(--button-color); border: none; color: var(--text-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
                     {{ isEditing ? '✅ OK' : '✏️ Edit' }}
                 </button>
             </div>
@@ -36,7 +36,7 @@ const StundenzielWidget = {
                           @mousedown.stop @touchstart.stop
                           @input="$emit('save')"
                           placeholder="Stundenziel eingeben..."
-                          style="width: 95%; height: 90%; background: rgba(0,0,0,0.3); color: white; border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; padding: 10px; font-family: inherit; font-size: 1.1rem; resize: none; text-align: center; outline: none;"></textarea>
+                          style="width: 95%; height: 90%; background: rgba(0,0,0,0.3); color: var(--text-color); border: 1px dashed rgba(255,255,255,0.3); border-radius: 12px; padding: 10px; font-family: inherit; font-size: 1.1rem; resize: none; text-align: center; outline: none;"></textarea>
                 
                 <div v-else 
                      @click="isEditing = true"
@@ -47,7 +47,7 @@ const StundenzielWidget = {
                         fontWeight: '700',
                         textShadow: widgetData.isTransparent ? '2px 2px 8px rgba(0,0,0,0.8)' : 'none'
                      }"
-                     style="color: #ffffff; cursor: pointer; padding: 5px; width: 100%; word-wrap: break-word; overflow-y: auto;">
+                     style="color: var(--text-color); cursor: pointer; padding: 5px; width: 100%; word-wrap: break-word; overflow-y: auto;">
                     {{ widgetData.zielText || 'Ziel eintragen...' }}
                 </div>
 
