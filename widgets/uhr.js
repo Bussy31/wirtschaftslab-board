@@ -3,23 +3,19 @@ const UhrWidget = {
     template: `
         <div style="position: relative; container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
             
+            <div v-if="!widgetData.isTransparent" style="position: absolute; top: 5px; right: 8px; display: flex; gap: 8px; z-index: 10;">
+                <button @click.stop="prevTheme" title="Vorheriges Design" style="background: none; border: none; color: var(--text-color); font-size: 14px; cursor: pointer; opacity: 0.3; transition: opacity 0.2s; padding: 0;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3">◀</button>
+                <button @click.stop="nextTheme" title="Nächstes Design" style="background: none; border: none; color: var(--text-color); font-size: 14px; cursor: pointer; opacity: 0.3; transition: opacity 0.2s; padding: 0;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3">▶</button>
+            </div>
+            
             <div v-if="!widgetData.isAnalog" :style="{ color: currentTheme.text }" style="font-size: clamp(1.5rem, 18cqw, 6rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: color 0.3s ease;">
                 {{ zeit }}
             </div>
             
             <svg v-else viewBox="0 0 100 100" style="width: 80cqmin; height: 80cqmin; max-width: 100%; max-height: 100%; filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.4)); font-family: 'Inter', sans-serif;">
                 <circle cx="50" cy="50" r="48" :fill="currentTheme.bg" :stroke="currentTheme.border" stroke-width="1.5" style="transition: all 0.3s ease;"/>
-                
-                <g v-if="!widgetData.isTransparent" style="user-select: none;">
-                    <text @click.stop="prevTheme" x="32" y="52" :fill="currentTheme.text" 
-                          style="cursor: pointer; font-size: 8px; opacity: 0.2; transition: opacity 0.2s;" 
-                          onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2"><</text>
-                    <text @click.stop="nextTheme" x="60" y="52" :fill="currentTheme.text" 
-                          style="cursor: pointer; font-size: 8px; opacity: 0.2; transition: opacity 0.2s;" 
-                          onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">>/text>
-                </g>
 
-                <line v-for="n in 12" :key="'strich-'+n" v-show="n % 3 !== 0" x1="50" y1="6" x2="50" y2="12" :stroke="currentTheme.marks" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + (n * 30) + ' 50 50)'" style="transition: stroke 0.3s ease;" />
+                <line v-for="n in 12" :key="'strich-'+n" v-show="n % 3 !== 0" x1="50" y1="6" x2="50" y2="12" :stroke="currentTheme.marks" stroke-width="2" stroke-linecap="round" :transform="'rotate(' + (n * 30) + ' 50 50)'" style="transition: stroke 0.3s ease;" :opacity="currentTheme.name === 'Auto' ? 0.6 : 1" />
                 
                 <text x="50" y="11" :fill="currentTheme.text" font-size="12" font-weight="bold" text-anchor="middle" dominant-baseline="central" style="transition: fill 0.3s ease;">12</text>
                 <text x="89" y="50" :fill="currentTheme.text" font-size="12" font-weight="bold" text-anchor="middle" dominant-baseline="central" style="transition: fill 0.3s ease;">3</text>
@@ -41,6 +37,10 @@ const UhrWidget = {
         return {
             jetzt: new Date(),
             themes: [
+                // Das neue AUTO-Theme: Greift direkt auf die Board-Einstellungen zu!
+                { name: 'Auto', bg: 'var(--widget-bg)', border: 'var(--button-color)', text: 'var(--text-color)', hours: 'var(--text-color)', minutes: 'var(--text-color)', seconds: 'var(--button-color)', marks: 'var(--text-color)' },
+
+                // Die bisherigen Themes für den manuellen Wechsel
                 { name: 'Standard', bg: 'rgba(30, 41, 59, 0.85)', border: '#3b82f6', text: '#f8fafc', hours: '#ffffff', minutes: '#ffffff', seconds: '#f97316', marks: '#94a3b8' },
                 { name: 'Dark Minimal', bg: '#121212', border: '#333333', text: '#ffffff', hours: '#ffffff', minutes: '#a3a3a3', seconds: '#ef4444', marks: '#525252' },
                 { name: 'Light Clean', bg: '#ffffff', border: '#e5e7eb', text: '#111827', hours: '#1f2937', minutes: '#4b5563', seconds: '#ef4444', marks: '#d1d5db' },
@@ -60,6 +60,7 @@ const UhrWidget = {
         minutenWinkel() { return (this.jetzt.getMinutes() * 6) + (this.jetzt.getSeconds() * 0.1); },
         sekundenWinkel() { return this.jetzt.getSeconds() * 6; },
         currentTheme() {
+            // Holt das Theme basierend auf dem Index (Standard ist 0 = Auto)
             const index = this.widgetData.themeIndex || 0;
             return this.themes[index % this.themes.length];
         }
@@ -76,7 +77,7 @@ const UhrWidget = {
         }
     },
     mounted() {
-        if (this.widgetData.themeIndex === undefined) this.widgetData.themeIndex = 0;
+        if (this.widgetData.themeIndex === undefined) this.widgetData.themeIndex = 0; // Setzt neue Uhren automatisch auf "Auto"
         this.timer = setInterval(() => { this.jetzt = new Date(); }, 1000);
     },
     unmounted() { clearInterval(this.timer); }
