@@ -13,7 +13,7 @@ const ArbeitsphaseWidget = {
                      style="flex: 1; min-height: 35px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10%; gap: 15px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease; background-color: rgba(255,255,255,0.05);">
                      
                      <span style="font-size: 1.5rem;">{{ phase.icon }}</span>
-                     <span style="font-size: 1rem; font-weight: 600; color: #e2e8f0;">{{ phase.label }}</span>
+                     <span style="font-size: 1rem; font-weight: 500; color: var(--text-color);">{{ phase.label }}</span>
                 </div>
             </div>
 
@@ -21,14 +21,15 @@ const ArbeitsphaseWidget = {
                  @click="showList = true"
                  @mousedown.stop
                  @touchstart.stop
-                 :style="displayModeStyle"
-                 style="width: 80%; height: 80%; margin: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; text-align: center; position: relative;">
-                 
-                 <span style="font-size: clamp(2.5rem, 30cqmin, 8rem); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); line-height: 1.2;">{{ activePhaseData.icon }}</span>
-                 
-                 <span :style="{ color: activePhaseData.color }" style="font-size: clamp(1rem, 10cqmin, 3rem); font-weight: bold; margin-top: 5px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                     {{ activePhaseData.label }}
-                 </span>
+                 :style="[{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.3s ease' }, displayModeStyle]">
+                
+                <span :style="{ fontSize: 'clamp(3rem, 25cqw, 10rem)', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))', transition: 'transform 0.2s ease' }">
+                    {{ activePhaseData.icon }}
+                </span>
+                
+                <span :style="{ fontSize: 'clamp(1.5rem, 12cqw, 4rem)', fontWeight: 'bold', color: 'var(--text-color)', textShadow: '0 2px 10px rgba(0,0,0,0.5)', textAlign: 'center' }">
+                    {{ activePhaseData.label }}
+                </span>
                  
             </div>
 
@@ -63,14 +64,13 @@ const ArbeitsphaseWidget = {
     created() {
         if (!this.widgetData.activePhase) {
             this.widgetData.activePhase = 'plenum';
-            this.showList = true;
         }
     },
     methods: {
-        selectPhase(id) {
-            this.widgetData.activePhase = id;
-            this.$emit('save');
+        selectPhase(phaseId) {
+            this.widgetData.activePhase = phaseId;
             this.showList = false;
+            this.$emit('save');
         }
     }
 };
