@@ -242,7 +242,14 @@
                         <div class="klasse-header">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
-                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn" :style="{background: 'var(--button-color)', color: 'var(--text-color)' }">Dieses Board laden</button>
+                                <button v-if="aktiveKlasse !== klasse.name"
+                                        @click="wechsleKlasse(klasse.name)"
+                                        class="btn-small switch-btn"
+                                        :style="{ background: 'var(--button-color)', color: 'var(--text-color)', transition: 'filter 0.2s ease, transform 0.2s ease' }"
+                                        onmouseover="this.style.filter='brightness(0.85)'; this.style.transform='scale(1.05)';"
+                                        onmouseout="this.style.filter='brightness(1)'; this.style.transform='scale(1)';">
+                                    Dieses Board laden
+                                </button>
                                 <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
                             </div>
                             <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
