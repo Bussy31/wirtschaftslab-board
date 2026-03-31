@@ -11,6 +11,8 @@
         :root {
             --button-color: #3b82f6;
             --text-color: white;
+            --widget-header: #0f172a;
+            --widget-hintergrund: #1e293b;
         }
         .widget.ghost-mode {
             background: transparent !important;
@@ -119,213 +121,212 @@
     </div>
 
     <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);">
-        <div class="modal-content"
-            style="background: #1e293b; color: white; max-width: 600px; width: 90%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
-            <div style="background: #0f172a; margin: -20px -20px 25px -20px; padding: 40px 30px 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <h2 style="margin: 0; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; gap: 8px;">⚙️ Einstellungen</h2>
-                <button @click="showSettings = false" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0; display: flex; align-items: center;">✕</button>
+    <div class="modal-content"
+        style="background: var(--widget-bg); color: var(--text-color); max-width: 600px; width: 90%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+        <div style="background: var(--widget-header); margin: -20px -20px 25px -20px; padding: 40px 30px 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin: 0; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; gap: 8px;">⚙️ Einstellungen</h2>
+            <button @click="showSettings = false" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0; display: flex; align-items: center;">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                <button @click="activeSettingsTab = 'klassen'"
+                        :style="{ background: activeSettingsTab === 'klassen' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    🏫 Klassen
+                </button>
+                <button @click="activeSettingsTab = 'hintergrund'"
+                        :style="{ background: activeSettingsTab === 'hintergrund' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    🖼️ Hintergrund
+                </button>
+
+                <button @click="activeSettingsTab = 'design'"
+                        :style="{ background: activeSettingsTab === 'design' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    🎨 Design
+                </button>
+
+                <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'"
+                        :style="{ background: activeSettingsTab === 'reset' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    ⚠️ Reset
+                </button>
             </div>
-            <div class="modal-body">
-                <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
-                    <button @click="activeSettingsTab = 'klassen'"
-                            :style="{ background: activeSettingsTab === 'klassen' ? '#3b82f6' : 'rgba(255,255,255,0.1)' }"
-                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                        🏫 Klassen
-                    </button>
-                    <button @click="activeSettingsTab = 'hintergrund'"
-                            :style="{ background: activeSettingsTab === 'hintergrund' ? '#3b82f6' : 'rgba(255,255,255,0.1)' }"
-                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                        🖼️ Hintergrund
-                    </button>
 
-                    <button @click="activeSettingsTab = 'design'"
-                            :style="{ background: activeSettingsTab === 'design' ? '#3b82f6' : 'rgba(255,255,255,0.1)' }"
-                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                        🎨 Design
-                    </button>
-
-                    <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'"
-                            :style="{ background: activeSettingsTab === 'reset' ? '#3b82f6' : 'rgba(255,255,255,0.1)' }"
-                            style="border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                        ⚠️ Reset
-                    </button>
+            <div v-if="activeSettingsTab === 'klassen'">
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                    Aktives Board: <strong>{{ aktiveKlasse }}</strong>
                 </div>
 
-                <div v-if="activeSettingsTab === 'klassen'">
-                    <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
-                        Aktives Board: <strong>{{ aktiveKlasse }}</strong>
-                    </div>
+                <div class="input-group">
+                    <input type="text" v-model="neuerKlassenName" placeholder="Neue Klasse (z.B. 9b)" @keyup.enter="addKlasse">
+                    <button @click="addKlasse" class="btn-primary">Hinzufügen</button>
+                </div>
 
-                    <div class="input-group">
-                        <input type="text" v-model="neuerKlassenName" placeholder="Neue Klasse (z.B. 9b)" @keyup.enter="addKlasse">
-                        <button @click="addKlasse" class="btn-primary">Hinzufügen</button>
-                    </div>
-
-                    <div class="klassen-liste">
-                        <div v-for="(klasse, index) in settings.klassen" :key="index" class="klasse-item">
-                            <div class="klasse-header">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
-                                    <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
-                                    <span v-else class="active-badge">Aktuell geladen</span>
-                                </div>
-                                <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
+                <div class="klassen-liste">
+                    <div v-for="(klasse, index) in settings.klassen" :key="index" class="klasse-item">
+                        <div class="klasse-header">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
+                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
+                                <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
                             </div>
+                            <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
+                        </div>
 
-                            <div class="schueler-tags">
-                                <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
-                                      :class="['schueler-tag', { 'is-absent': s.absent }]"
-                                      @click="toggleAbsent(s)"
-                                      title="Klicken, um anwesend/krank zu wechseln">
-                                    {{ s.name }}
-                                    <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)">×</span>
-                                </span>
-                                <input type="text" class="inline-s-input" placeholder="Schüler + Enter..." @keyup.enter="addSchuelerInline(klasse, $event)">
-                            </div>
+                        <div class="schueler-tags">
+                            <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
+                                  :class="['schueler-tag', { 'is-absent': s.absent }]"
+                                  @click="toggleAbsent(s)"
+                                  title="Klicken, um anwesend/krank zu wechseln">
+                                {{ s.name }}
+                                <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)">×</span>
+                            </span>
+                            <input type="text" class="inline-s-input" placeholder="Schüler + Enter..." @keyup.enter="addSchuelerInline(klasse, $event)">
                         </div>
-                        <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">
-                            Noch keine Klassen angelegt.
-                        </div>
+                    </div>
+                    <div v-if="!settings.klassen || settings.klassen.length === 0" :style="{ color: 'var(--text-color)', opacity: 0.6 }" style="font-style: italic; text-align: center; margin-top: 20px;">
+                        Noch keine Klassen angelegt.
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="activeSettingsTab === 'hintergrund'">
+                <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px;">
+                    <strong style="font-size: 1rem;">🎨 Einfarbiger Hintergrund:</strong>
+
+                    <input type="color" v-model="customColor" @change="setHintergrund(customColor)"
+                           style="cursor: pointer; width: 60px; height: 30px; border: none; border-radius: 10px; background: transparent; padding: 0; outline: none;"
+                           title="Farbe wählen">
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;">
+                    <div v-for="bg in availableBackgrounds" :key="bg"
+                         @click="setHintergrund(bg)"
+                         :style="{
+                             backgroundImage: 'url(' + bg + ')',
+                             backgroundSize: 'cover',
+                             backgroundPosition: 'center',
+                             height: '90px',
+                             borderRadius: '8px',
+                             cursor: 'pointer',
+                             border: settings.hintergrund === bg ? '3px solid var(--button-color)' : '3px solid transparent',
+                             boxShadow: settings.hintergrund === bg ? '0 0 10px var(--button-color)' : 'none',
+                             transition: 'all 0.2s ease'
+                         }">
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 15px; font-style: italic;">
+                </p>
+            </div>
+
+            <div v-if="activeSettingsTab === 'design'" style="display: flex; flex-direction: column; gap: 15px; color: var(--text-color);">
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="margin: 0; font-size: 1.1rem; letter-spacing: 0.5px;">Farbpalette</h3>
+
+                    <div style="display: flex; gap: 4px; align-items: center; justify-content: flex-end;">
+
+                        <button @click="settings.design.widgetBg='#1e293b'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#0f172a'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#3b82f6'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(59, 130, 246, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Slate Base">
+                            <div style="background: #1e293b; height: 80%; width: 100%;"></div>
+                            <div style="background: #3b82f6; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#111111'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#000000'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#e11d48'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(225, 29, 72, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Deep Night">
+                            <div style="background: #111111; height: 80%; width: 100%;"></div>
+                            <div style="background: #e11d48; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#1f2937'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#111827'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#14b8a6'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(20, 184, 166, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Tech Teal">
+                            <div style="background: #1f2937; height: 80%; width: 100%;"></div>
+                            <div style="background: #14b8a6; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#052e16'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#022c22'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#a7f3d0'; settings.design.buttonColor='#22c55e'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(34, 197, 94, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Emerald Green">
+                            <div style="background: #052e16; height: 80%; width: 100%;"></div>
+                            <div style="background: #22c55e; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#1e3a8a'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#172554'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#bfdbfe'; settings.design.buttonColor='#38bdf8'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(56, 189, 248, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Sky Blue">
+                            <div style="background: #1e3a8a; height: 80%; width: 100%;"></div>
+                            <div style="background: #38bdf8; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#312e81'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#1e1b4b'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ddd6fe'; settings.design.buttonColor='#d946ef'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(217, 70, 239, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Indigo Violet">
+                            <div style="background: #312e81; height: 80%; width: 100%;"></div>
+                            <div style="background: #d946ef; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#172554'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#0f172a'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#f8fafc'; settings.design.buttonColor='#fcd34d'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(252, 211, 77, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Corporate Gold">
+                            <div style="background: #172554; height: 80%; width: 100%;"></div>
+                            <div style="background: #fcd34d; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#2e3440'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#1f232b'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#eceff4'; settings.design.buttonColor='#88c0d0'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(136, 192, 208, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Nord Clean">
+                            <div style="background: #2e3440; height: 80%; width: 100%;"></div>
+                            <div style="background: #88c0d0; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#443c36'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#332d29'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#f5eadd'; settings.design.buttonColor='#ea580c'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(234, 88, 12, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Sepia Low Light">
+                            <div style="background: #443c36; height: 80%; width: 100%;"></div>
+                            <div style="background: #ea580c; height: 20%; width: 100%;"></div>
+                        </button>
+
+                        <button @click="settings.design.widgetBg='#134e4a'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#111827'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ccfbf1'; settings.design.buttonColor='#2dd4bf'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(45, 212, 191, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Mint Mint">
+                            <div style="background: #134e4a; height: 80%; width: 100%;"></div>
+                            <div style="background: #2dd4bf; height: 20%; width: 100%;"></div>
+                        </button>
                     </div>
                 </div>
 
-                <div v-if="activeSettingsTab === 'hintergrund'">
-                    <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px;">
-                        <strong style="color: white; font-size: 1rem;">🎨 Einfarbiger Hintergrund:</strong>
-
-                        <input type="color" v-model="customColor" @change="setHintergrund(customColor)"
-                               style="cursor: pointer; width: 60px; height: 30px; border: none; border-radius: 10px; background: transparent; padding: 0; outline: none;"
-                               title="Farbe wählen">
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;">
-                        <div v-for="bg in availableBackgrounds" :key="bg"
-                             @click="setHintergrund(bg)"
-                             :style="{
-                                 backgroundImage: 'url(' + bg + ')',
-                                 backgroundSize: 'cover',
-                                 backgroundPosition: 'center',
-                                 height: '90px',
-                                 borderRadius: '8px',
-                                 cursor: 'pointer',
-                                 border: settings.hintergrund === bg ? '3px solid #10b981' : '3px solid transparent',
-                                 boxShadow: settings.hintergrund === bg ? '0 0 10px rgba(16, 185, 129, 0.8)' : 'none',
-                                 transition: 'all 0.2s ease'
-                             }">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Widget Hintergrund</label>
+                        <input type="color" v-model="settings.design.widgetBg" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
+                            <span>Deckkraft:</span>
+                            <span>{{ settings.design.widgetBgOpacity }}%</span>
                         </div>
+                        <input type="range" v-model="settings.design.widgetBgOpacity" min="0" max="100" style="width: 100%;">
                     </div>
-                    <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 15px; font-style: italic;">
-                    </p>
+
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Kopfzeile</label>
+                        <input type="color" v-model="settings.design.widgetHeader" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
+                            <span>Deckkraft:</span>
+                            <span>{{ settings.design.widgetHeaderOpacity }}%</span>
+                        </div>
+                        <input type="range" v-model="settings.design.widgetHeaderOpacity" min="0" max="100" style="width: 100%;">
+                    </div>
                 </div>
 
-                <div v-if="activeSettingsTab === 'design'" style="display: flex; flex-direction: column; gap: 15px; color: white;">
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <h3 style="margin: 0; font-size: 1.1rem; letter-spacing: 0.5px;">Farbpalette</h3>
-
-                        <div style="display: flex; gap: 4px; align-items: center; justify-content: flex-end;">
-
-                            <button @click="settings.design.widgetBg='#1e293b'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#0f172a'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#3b82f6'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(59, 130, 246, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Slate Base">
-                                <div style="background: #1e293b; height: 80%; width: 100%;"></div>
-                                <div style="background: #3b82f6; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#111111'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#000000'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#e11d48'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(225, 29, 72, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Deep Night">
-                                <div style="background: #111111; height: 80%; width: 100%;"></div>
-                                <div style="background: #e11d48; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#1f2937'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#111827'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#14b8a6'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(20, 184, 166, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Tech Teal">
-                                <div style="background: #1f2937; height: 80%; width: 100%;"></div>
-                                <div style="background: #14b8a6; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#052e16'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#022c22'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#a7f3d0'; settings.design.buttonColor='#22c55e'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(34, 197, 94, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Emerald Green">
-                                <div style="background: #052e16; height: 80%; width: 100%;"></div>
-                                <div style="background: #22c55e; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#1e3a8a'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#172554'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#bfdbfe'; settings.design.buttonColor='#38bdf8'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(56, 189, 248, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Sky Blue">
-                                <div style="background: #1e3a8a; height: 80%; width: 100%;"></div>
-                                <div style="background: #38bdf8; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#312e81'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#1e1b4b'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ddd6fe'; settings.design.buttonColor='#d946ef'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(217, 70, 239, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Indigo Violet">
-                                <div style="background: #312e81; height: 80%; width: 100%;"></div>
-                                <div style="background: #d946ef; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#172554'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#0f172a'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#f8fafc'; settings.design.buttonColor='#fcd34d'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(252, 211, 77, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Corporate Gold">
-                                <div style="background: #172554; height: 80%; width: 100%;"></div>
-                                <div style="background: #fcd34d; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#2e3440'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#1f232b'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#eceff4'; settings.design.buttonColor='#88c0d0'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(136, 192, 208, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Nord Clean">
-                                <div style="background: #2e3440; height: 80%; width: 100%;"></div>
-                                <div style="background: #88c0d0; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#443c36'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#332d29'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#f5eadd'; settings.design.buttonColor='#ea580c'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(234, 88, 12, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Sepia Low Light">
-                                <div style="background: #443c36; height: 80%; width: 100%;"></div>
-                                <div style="background: #ea580c; height: 20%; width: 100%;"></div>
-                            </button>
-
-                            <button @click="settings.design.widgetBg='#134e4a'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#111827'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ccfbf1'; settings.design.buttonColor='#2dd4bf'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(45, 212, 191, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Mint Mint">
-                                <div style="background: #134e4a; height: 80%; width: 100%;"></div>
-                                <div style="background: #2dd4bf; height: 20%; width: 100%;"></div>
-                            </button>
-
-                        </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Textfarbe</label>
+                        <input type="color" v-model="settings.design.textColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Widget Hintergrund</label>
-                            <input type="color" v-model="settings.design.widgetBg" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
-                                <span>Deckkraft:</span>
-                                <span>{{ settings.design.widgetBgOpacity }}%</span>
-                            </div>
-                            <input type="range" v-model="settings.design.widgetBgOpacity" min="0" max="100" style="width: 100%;">
-                        </div>
-
-                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Kopfzeile</label>
-                            <input type="color" v-model="settings.design.widgetHeader" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
-                                <span>Deckkraft:</span>
-                                <span>{{ settings.design.widgetHeaderOpacity }}%</span>
-                            </div>
-                            <input type="range" v-model="settings.design.widgetHeaderOpacity" min="0" max="100" style="width: 100%;">
-                        </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Button-Farbe</label>
+                        <input type="color" v-model="settings.design.buttonColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
                     </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Textfarbe</label>
-                            <input type="color" v-model="settings.design.textColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
-                        </div>
-
-                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                            <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Button-Farbe</label>
-                            <input type="color" v-model="settings.design.buttonColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
-                        </div>
-                    </div>
-                    <button @click="resetDesign" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; cursor: pointer;">🔄 Design auf Standard zurücksetzen</button>
                 </div>
+                <button @click="resetDesign" :style="{ color: 'var(--text-color)' }" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer;">🔄 Design auf Standard zurücksetzen</button>
+            </div>
 
-                <div v-if="activeSettingsTab === 'reset'" class="tab-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
-                    <h3 style="color: white; margin-top: 0; font-size: 1.5rem;">Werkseinstellungen</h3>
-                    <p style="color: #94a3b8; max-width: 400px; margin: 10px auto 25px auto; line-height: 1.5;">
-                        Möchtest du alle gespeicherten Daten (Klassen, Schüler und Widgets) löschen?
-                        Das Board wird danach komplett leer neu geladen.
-                    </p>
-                    <button @click="resetAll" class="btn-primary ignore-text-color ignore-theme" style="background: #ef4444; padding: 15px 30px; font-size: 1.1rem; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
-                        🔥 Jetzt alles unwiderruflich löschen
-                    </button>
-                </div>
+            <div v-if="activeSettingsTab === 'reset'" class="tab-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
+                <h3 :style="{ color: 'var(--text-color)' }" style="margin-top: 0; font-size: 1.5rem;">Werkseinstellungen</h3>
+                <p :style="{ color: 'var(--text-color)' }" style="opacity: 0.7; max-width: 400px; margin: 10px auto 25px auto; line-height: 1.5;">
+                    Möchtest du alle gespeicherten Daten (Klassen, Schüler und Widgets) löschen?
+                    Das Board wird danach komplett leer neu geladen.
+                </p>
+                <button @click="resetAll" class="btn-primary ignore-text-color ignore-theme" style="background: #ef4444; padding: 15px 30px; font-size: 1.1rem; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
+                    🔥 Jetzt alles unwiderruflich löschen
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <div class="board" :style="(settings.hintergrund || '').startsWith('#') ? { background: settings.hintergrund } : { backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(' + settings.hintergrund + ')' }">
 
