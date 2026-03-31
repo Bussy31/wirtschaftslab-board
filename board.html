@@ -246,18 +246,19 @@
                         <div class="klasse-header">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
-                                <button v-if="aktiveKlasse !== klasse.name"
-                                        @click="wechsleKlasse(klasse.name)"
-                                        class="btn-small switch-btn">
-                                    Dieses Board laden
-                                </button>
+                                <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
                                 <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
                             </div>
-                                <div>
-                                    <button @click="renameKlasse(index)" class="btn-small" style="color:#f59e0b; border-color:rgba(245,158,11,0.3); background: rgba(245,158,11,0.1); margin-right: 5px;">✏️ Umbenennen</button>
-                                    <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
-                                </div>
+
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button @click="renameKlasse(index)" class="btn-small" style="color: var(--text-color); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                                    ✏️ Umbenennen
+                                </button>
+                                <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">
+                                    Löschen
+                                </button>
                             </div>
+                        </div>
                         <div class="schueler-tags">
                             <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
                                   :class="['schueler-tag', { 'is-absent': s.absent }]"
