@@ -4,13 +4,13 @@ const CountdownWidget = {
         <div style="container-type: size; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             
             <div v-if="!isRunning && timeLeft === 0" style="display: flex; gap: 3cqw; align-items: center; z-index: 10;">
-                <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 25cqw; min-width: 60px; font-size: clamp(1.2rem, 8cqw, 3.5rem); padding: 1cqw; text-align: center; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
-                <span style="font-size: clamp(1.2rem, 6cqw, 2.5rem); color: rgba(255,255,255,0.7);">min</span>
+                <input type="number" v-model.number="eingabeMinuten" min="1" max="99" style="width: 25cqw; min-width: 60px; font-size: clamp(1.2rem, 8cqw, 3.5rem); padding: 1cqw; text-align: center; background: rgba(255,255,255,0.05); color: var(--text-color); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+                <span style="font-size: clamp(1.2rem, 6cqw, 2.5rem); color: var(--text-color); opacity: 0.7;">min</span>
             </div>
 
             <div v-else style="width: 90cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5cqh;">
                 
-                <div style="font-size: clamp(2rem, 14cqw, 9rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 4px 10px rgba(0,0,0,0.6); line-height: 1.1; color: white;">
+                <div style="font-size: clamp(2rem, 14cqw, 9rem); font-weight: bold; font-variant-numeric: tabular-nums; text-shadow: 0 4px 10px rgba(0,0,0,0.6); line-height: 1.1; color: var(--text-color);">
                     {{ formatTime(timeLeft) }}
                 </div>
                 
@@ -60,9 +60,10 @@ const CountdownWidget = {
         },
         barColor() {
             const fraction = this.timeLeft / this.totalTime;
-            if (fraction > 0.5) return '#3b82f6';
-            if (fraction > 0.2) return '#fbbf24';
-            return '#ef4444';
+            // HIER DIE ANPASSUNG: Balken startet in deiner gewählten Button-Farbe
+            if (fraction > 0.5) return 'var(--button-color)';
+            if (fraction > 0.2) return '#fbbf24'; // Warnung: Gelb
+            return '#ef4444'; // Kritisch: Rot
         }
     },
     mounted() { if (this.isRunning) this.tick(); },
