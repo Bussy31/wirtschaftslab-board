@@ -185,8 +185,14 @@
 
         <button @click="aktualisiereWidgets" class="btn-primary" title="Alle Widgets aufräumen & zentrieren" style="background-color: #3b82f6; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-right: 5px;">🧹</button>
         <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️</button>
-        <button @click="exportBoard" class="btn-export btn-small" style="color: var(--text-color)">💾 Export</button>
-        <button @click="$refs.fileInput.click()" class="btn-import btn-small" style="color: var(--text-color)">📂 Import</button>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+            <button @click="exportBoard" class="btn-export btn-small" style="color: var(--text-color); width: 100%; justify-content: flex-start;">
+                💾 Export
+            </button>
+            <button @click="$refs.fileInput.click()" class="btn-import btn-small" style="color: var(--text-color); width: 100%; justify-content: flex-start;">
+                📂 Import
+            </button>
+        </div>
         <button @click="toggleFullscreen" class="btn-primary ignore-text-color" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
 
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
