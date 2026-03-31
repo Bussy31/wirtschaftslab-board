@@ -613,7 +613,6 @@ const app = createApp({
             }
         }
     }
-    }
 });
 
 app.component('uhr-widget', UhrWidget);
