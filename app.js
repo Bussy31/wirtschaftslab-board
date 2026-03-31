@@ -604,17 +604,15 @@ const app = createApp({
         'settings.design': {
             deep: true,
             handler(newDesign) {
-                // 1. Speichert das Design unter dem Namen der aktuellen Klasse
                 if (this.aktiveKlasse && newDesign) {
                     localStorage.setItem('design_' + this.aktiveKlasse, JSON.stringify(newDesign));
                 }
-                // 2. Aktualisiert sofort die globalen CSS-Farben (z.B. für Standard-Buttons)
-                if (newDesign && newDesign.buttonColor) {
-                    document.documentElement.style.setProperty('--button-color', newDesign.buttonColor);
-                    document.documentElement.style.setProperty('--text-color', newDesign.textColor);
-                }
+                // FEHLERBEHEBUNG: Wir rufen einfach deine fertige Funktion auf,
+                // damit ALLE Farben (inklusive Widget-Hintergrund) live angewendet werden!
+                this.applyDesign();
             }
         }
+    }
     }
 });
 
