@@ -59,7 +59,12 @@
 
 <div id="app" :style="boardStyle">
     <div :class="['toolbar', { 'hidden': isFullscreen }]" :style="{ background: 'var(--widget-header)' }">
-        <div class="brand">🎓 wirtschaftslab-board <span class="active-profile-badge">{{ aktiveKlasse }}</span></div>
+        <div class="brand" style="color: var(--text-color);">
+            🎓 wirtschaftslab-board
+            <span class="active-profile-badge" style="background: var(--button-color); color: var(--text-color);">
+                {{ aktiveKlasse }}
+            </span>
+    </div>
 
         <div class="dropdown">
             <button class="btn-primary" @click.stop="showWidgetMenu = !showWidgetMenu">
