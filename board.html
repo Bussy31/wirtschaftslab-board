@@ -75,7 +75,9 @@
 <body>
 
 <div id="app" :style="boardStyle">
-    <div v-show="isDrawingMode" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9998; cursor: crosshair; background: rgba(0,0,0,0.15); backdrop-filter: blur(2px);">
+    <div v-show="isDrawingMode"
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9998; cursor: crosshair; transition: background 0.1s, backdrop-filter 0.1s;"
+         :style="{ background: 'rgba(0, 0, 0, ' + (blurIntensity / 100 * 0.95) + ')', backdropFilter: 'blur(' + (blurIntensity / 100 * 20) + 'px)', WebkitBackdropFilter: 'blur(' + (blurIntensity / 100 * 20) + 'px)' }">
 
         <canvas ref="drawingCanvas"
                 @mousedown="startDrawing" @mousemove="draw" @mouseup="stopDrawing" @mouseleave="stopDrawing"
@@ -85,24 +87,14 @@
         <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: var(--widget-bg); padding: 12px 20px; border-radius: 40px; display: flex; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 9999; border: 1px solid rgba(255,255,255,0.2); align-items: center;">
 
             <div style="display: flex; align-items: center; gap: 10px; padding-right: 5px;">
-                <button @click="setBrushSize(4)"
-                        :style="{ border: brushSize === 4 ? '2px solid white' : '2px solid transparent', transform: brushSize === 4 ? 'scale(1.2)' : 'scale(1)' }"
-                        style="width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
-
-                <button @click="setBrushSize(10)"
-                        :style="{ border: brushSize === 10 ? '2px solid white' : '2px solid transparent', transform: brushSize === 10 ? 'scale(1.2)' : 'scale(1)' }"
-                        style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
-
-                <button @click="setBrushSize(25)"
-                        :style="{ border: brushSize === 25 ? '2px solid white' : '2px solid transparent', transform: brushSize === 25 ? 'scale(1.2)' : 'scale(1)' }"
-                        style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+                <button @click="setBrushSize(4)" :style="{ border: brushSize === 4 ? '2px solid white' : '2px solid transparent', transform: brushSize === 4 ? 'scale(1.2)' : 'scale(1)' }" style="width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+                <button @click="setBrushSize(10)" :style="{ border: brushSize === 10 ? '2px solid white' : '2px solid transparent', transform: brushSize === 10 ? 'scale(1.2)' : 'scale(1)' }" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+                <button @click="setBrushSize(25)" :style="{ border: brushSize === 25 ? '2px solid white' : '2px solid transparent', transform: brushSize === 25 ? 'scale(1.2)' : 'scale(1)' }" style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
             </div>
 
             <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>
 
-            <button @click="toggleEraser"
-                    :style="{ background: isEraser ? '#3b82f6' : 'transparent', border: isEraser ? '1px solid white' : '1px solid rgba(255,255,255,0.3)' }"
-                    style="border-radius: 12px; color: white; cursor: pointer; font-size: 1.2rem; padding: 5px 10px; transition: 0.2s; display: flex; align-items: center; gap: 5px;" title="Radierer">
+            <button @click="toggleEraser" :style="{ background: isEraser ? '#3b82f6' : 'transparent', border: isEraser ? '1px solid white' : '1px solid rgba(255,255,255,0.3)' }" style="border-radius: 12px; color: white; cursor: pointer; font-size: 1.2rem; padding: 5px 10px; transition: 0.2s; display: flex; align-items: center; gap: 5px;" title="Radierer">
                 <span>🧽</span>
                 <small v-if="isEraser" style="font-size: 0.7rem; font-weight: bold;">AN</small>
             </button>
@@ -116,6 +108,13 @@
                 <button @click="setDrawColor('#3b82f6')" :style="{ outline: drawColor === '#3b82f6' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #3b82f6; cursor: pointer; border: none; outline-offset: 2px;"></button>
                 <button @click="setDrawColor('#22c55e')" :style="{ outline: drawColor === '#22c55e' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #22c55e; cursor: pointer; border: none; outline-offset: 2px;"></button>
                 <button @click="setDrawColor('#fcd34d')" :style="{ outline: drawColor === '#fcd34d' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #fcd34d; cursor: pointer; border: none; outline-offset: 2px;"></button>
+            </div>
+
+            <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>
+
+            <div style="display: flex; align-items: center; gap: 8px;" title="Hintergrund abdunkeln">
+                <span style="font-size: 1.2rem; opacity: 0.8;">👁️</span>
+                <input type="range" v-model="blurIntensity" min="0" max="100" style="width: 70px; cursor: pointer; accent-color: #3b82f6;">
             </div>
 
             <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>

@@ -27,6 +27,7 @@ const app = createApp({
             ctx: null,
             brushSize: 10,
             isEraser: false,
+            blurIntensity: 15,
 
             availableBackgrounds: [
                 'hintergruende/bild1.jpg',
