@@ -25,7 +25,7 @@ const app = createApp({
             isDrawing: false,
             drawColor: '#ef4444',
             ctx: null,
-            brushSize: 6,
+            brushSize: 10,
             isEraser: false,
 
             availableBackgrounds: [
