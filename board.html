@@ -2,10 +2,23 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>wirtschaftslab-board</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WiLab Board">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/drag-drop-touch"></script>
     <style>
+        :root {
+            --button-color: #3b82f6;
+            --text-color: white;
+            --widget-header: #0f172a;
+            --widget-bg: #1e293b;
+        }
         .widget.ghost-mode {
             background: transparent !important;
             border: none !important;
@@ -20,41 +33,222 @@
         .widget.ghost-mode:hover .widget-header {
             opacity: 1;
         }
+        .widget.ghost-mode:hover .widget-header {
+            opacity: 1;
+        }
+        .custom-rotate-handle {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .widget:hover .custom-rotate-handle,
+        .widget:active .custom-rotate-handle {
+            opacity: 1;
+        }
+        .btn-primary:not(.ignore-theme),
+        .btn-icon:not(.ignore-theme),
+        .floating-exit-btn:not(.ignore-theme) {
+            background-color: var(--button-color) !important;
+        }
+        .btn-primary:not(.ignore-theme):not(.ignore-text-color),
+        .btn-icon:not(.ignore-theme):not(.ignore-text-color),
+        .floating-exit-btn:not(.ignore-theme):not(.ignore-text-color) {
+            color: var(--text-color) !important;
+        }
+        .dropdown-content button:not(.ignore-theme):hover {
+            background-color: var(--button-color) !important;
+            opacity: 0.8;
+        }
+        .dropdown-content {
+            background-color: var(--widget-bg) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        .dropdown-content button {
+            color: var(--text-color) !important;
+        }
+        button.switch-btn {
+            background-color: var(--button-color) !important;
+            color: var(--text-color) !important;
+            transition: filter 0.2s ease, transform 0.2s ease !important;
+        }
+        button.switch-btn:hover {
+            background-color: var(--button-color) !important;
+            filter: brightness(1.15) !important;
+            transform: scale(1.05) !important;
+        }
+        input[type="range"] {
+            accent-color: var(--button-color);
+            cursor: pointer;
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            appearance: none;
+            padding: 0;
+            border: none;
+            background: transparent;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <div :class="['toolbar', { 'hidden': isFullscreen }]">
-        <div class="brand">🎓 wirtschaftslab-board <span class="active-profile-badge">{{ aktiveKlasse }}</span></div>
+<div id="app" :style="boardStyle">
+    <div v-show="isDrawingMode"
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9998; cursor: crosshair; transition: background 0.1s, backdrop-filter 0.1s;"
+         :style="{ background: 'rgba(0, 0, 0, ' + (blurIntensity / 100 * 0.95) + ')', backdropFilter: 'blur(' + (blurIntensity / 100 * 20) + 'px)', WebkitBackdropFilter: 'blur(' + (blurIntensity / 100 * 20) + 'px)' }">
 
-        <button class="btn-primary" @click="addWidget('uhr', '⏱️')">⏱️ Uhr</button>
-        <button class="btn-primary" @click="addWidget('countdown', '⏳')">⏳ Timer</button>
-        <button class="btn-primary" @click="addWidget('stoppuhr', '⏲️')">⏲️ Stoppuhr</button>
-        <button class="btn-primary" @click="addWidget('notiz', '📝')">📝 Notiz</button>
-        <button class="btn-primary" @click="addWidget('zufall', '🎲')">🎲 Zufall</button>
-        <button class="btn-primary" @click="addWidget('qr', '📱')">📱 QR-Code</button>
-        <button class="btn-primary" @click="addWidget('handlungsplan', '📋')">📋 Handlungsplan</button>
+        <canvas ref="drawingCanvas"
+                @mousedown="startDrawing" @mousemove="draw" @mouseup="stopDrawing" @mouseleave="stopDrawing"
+                @touchstart.prevent="startTouchDrawing" @touchmove.prevent="touchDraw" @touchend.prevent="stopDrawing"
+                style="width: 100%; height: 100%; display: block;"></canvas>
+
+        <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: var(--widget-bg); padding: 12px 20px; border-radius: 40px; display: flex; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 9999; border: 1px solid rgba(255,255,255,0.2); align-items: center;">
+
+            <div style="display: flex; align-items: center; gap: 10px; padding-right: 5px;" title="Stiftdicke auswählen">
+                <span style="font-size: 1.3rem; opacity: 0.9; margin-right: 5px;">🖌️</span>
+
+                <button @click="setBrushSize(4)" title="Dünner Stift" :style="{ border: brushSize === 4 ? '2px solid white' : '2px solid transparent', transform: brushSize === 4 ? 'scale(1.2)' : 'scale(1)' }" style="width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+                <button @click="setBrushSize(10)" title="Mittlerer Stift" :style="{ border: brushSize === 10 ? '2px solid white' : '2px solid transparent', transform: brushSize === 10 ? 'scale(1.2)' : 'scale(1)' }" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+                <button @click="setBrushSize(25)" title="Dicker Stift" :style="{ border: brushSize === 25 ? '2px solid white' : '2px solid transparent', transform: brushSize === 25 ? 'scale(1.2)' : 'scale(1)' }" style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.2s; padding: 0;"></button>
+            </div>
+
+            <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>
+
+            <button @click="toggleEraser"
+                    :style="{ background: isEraser ? 'var(--button-color)' : 'transparent', border: isEraser ? '1px solid var(--text-color)' : '1px solid transparent' }"
+                    style="border-radius: 12px; color: var(--text-color); font-family: inherit; cursor: pointer; font-size: 1.2rem; padding: 5px 10px; transition: 0.2s; display: flex; align-items: center; gap: 5px;"
+                    title="Radierer">
+                <span>🧽</span>
+                <small v-if="isEraser" style="font-size: 0.7rem; font-weight: bold; font-family: inherit;">AN</small>
+            </button>
+
+            <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>
+
+            <div style="display: flex; gap: 8px;">
+                <button @click="setDrawColor('#000000')" :style="{ outline: drawColor === '#000000' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #000000; cursor: pointer; border: 1px solid rgba(255,255,255,0.4); outline-offset: 2px;"></button>
+                <button @click="setDrawColor('#ffffff')" :style="{ outline: drawColor === '#ffffff' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #ffffff; cursor: pointer; border: 1px solid rgba(0,0,0,0.2); outline-offset: 2px;"></button>
+                <button @click="setDrawColor('#ef4444')" :style="{ outline: drawColor === '#ef4444' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #ef4444; cursor: pointer; border: none; outline-offset: 2px;"></button>
+                <button @click="setDrawColor('#3b82f6')" :style="{ outline: drawColor === '#3b82f6' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #3b82f6; cursor: pointer; border: none; outline-offset: 2px;"></button>
+                <button @click="setDrawColor('#22c55e')" :style="{ outline: drawColor === '#22c55e' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #22c55e; cursor: pointer; border: none; outline-offset: 2px;"></button>
+                <button @click="setDrawColor('#fcd34d')" :style="{ outline: drawColor === '#fcd34d' && !isEraser ? '2px solid white' : 'none' }" style="width: 30px; height: 30px; border-radius: 50%; background: #fcd34d; cursor: pointer; border: none; outline-offset: 2px;"></button>
+            </div>
+
+            <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>
+
+            <div style="display: flex; align-items: center; gap: 8px;" title="Hintergrund abdunkeln">
+                <span style="font-size: 1.2rem; opacity: 0.8;">👁️</span>
+                <input type="range" v-model="blurIntensity" min="0" max="100" style="width: 70px; cursor: pointer; accent-color: var(--button-color);">
+            </div>
+
+            <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.2);"></div>
+
+            <button @click="clearCanvas" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 1.3rem; transition: 0.2s;" title="Alles löschen">🗑️</button>
+            <button @click="toggleDrawingMode" style="background: var(--button-color); border: none; color: var(--text-color); cursor: pointer; padding: 8px 15px; border-radius: 15px; font-weight: bold; font-size: 0.9rem;">✕ Beenden</button>
+        </div>
+    </div>
+    <div :class="['toolbar', { 'hidden': isFullscreen }]" :style="{ background: 'var(--widget-header)' }">
+        <div class="brand" style="color: var(--text-color);">
+            🎓 wirtschaftslab-board
+            <span class="active-profile-badge" style="background: var(--button-color); color: var(--text-color);">
+                {{ aktiveKlasse }}
+            </span>
+    </div>
+
+        <div class="dropdown" style="margin-right: -10px;">
+            <button class="btn-primary" @click.stop="showWidgetMenu = !showWidgetMenu">
+                🛠️ Widgets ▼
+            </button>
+            <div class="dropdown-content" v-if="showWidgetMenu">
+                <button @click="addWidget('uhr', '⏱️'); showWidgetMenu = false">⏱️ Uhr</button>
+                <button @click="addWidget('countdown', '⏳'); showWidgetMenu = false">⏳ Countdown</button>
+                <button @click="addWidget('stoppuhr', '⏲️'); showWidgetMenu = false">⏲️ Stoppuhr</button>
+                <button @click="addWidget('notiz', '📝'); showWidgetMenu = false">📝 Notiz</button>
+                <button @click="addWidget('zufall', '🎲'); showWidgetMenu = false">🎲 Zufall</button>
+                <button @click="addWidget('gruppen', '👥'); showWidgetMenu = false">👥 Gruppen</button>
+                <button @click="addWidget('qr', '📱'); showWidgetMenu = false">📱 QR-Code</button>
+                <button @click="addWidget('handlungsplan', '📋'); showWidgetMenu = false">📋 Handlungsplan</button>
+                <button @click="addWidget('arbeitsphase','🧩'); showWidgetMenu = false">🧩 Arbeitsphase</button>
+                <button @click="addWidget('medien','📱'); showWidgetMenu = false">📱 Mediennutzung</button>
+                <button @click="addWidget('ampel','🚦'); showWidgetMenu = false">🚦 Lärmampel</button>
+                <button @click="addWidget('stundenziel','🎯'); showWidgetMenu = false">🎯 Stundenziel</button>
+                <button @click="addWidget('dateimanagement','📁'); showWidgetMenu = false">📁 Datei</button>
+                <button @click="toggleDrawingMode(); showWidgetMenu = false" class="widget-btn">✍️ Zeichnen</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 15px; align-items: center; overflow-x: auto; flex-grow: 1;">
+            <template v-for="(w, index) in widgets">
+                <button v-if="w.isMinimized"
+                        :key="'min-'+w.id"
+                        class="btn-primary"
+                        @click="restoreWidget(index)"
+                        :title="w.type + ' wiederherstellen'"
+                        style="background: rgba(59, 130, 246, 0.4); border: 1px dashed #93c5fd; box-shadow: none;">
+                        {{ w.type.charAt(0).toUpperCase() + w.type.slice(1) }}
+                </button>
+            </template>
+        </div>
+
 
         <div style="flex-grow: 1;"></div>
 
-        <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️ Einstellungen</button>
-        <button @click="exportBoard" class="btn-export btn-small">💾 Export</button>
-        <button @click="$refs.fileInput.click()" class="btn-import btn-small">📂 Import</button>
-        <button @click="toggleFullscreen" class="btn-primary" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
+        <button @click="aktualisiereWidgets" class="btn-primary" title="Alle Widgets aufräumen & zentrieren" style="background-color: #3b82f6; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-right: 5px;">🧹</button>
+        <button @click="showSettings = true" class="btn-primary" title="Einstellungen">⚙️</button>
+        <button @click="exportBoard" class="btn-export btn-small" style="color: var(--text-color)">💾 Export</button>
+        <button @click="$refs.fileInput.click()" class="btn-import btn-small" style="color: var(--text-color)">📂 Import</button>
+        <button @click="toggleFullscreen" class="btn-primary ignore-text-color" title="Vollbild an/aus">{{ isFullscreen ? '🗗' : '⛶' }}</button>
 
         <input type="file" ref="fileInput" @change="importBoard" style="display: none" accept=".json">
     </div>
 
-    <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false">
-        <div class="modal-content settings-modal">
-            <div class="modal-header">
-                <h2>⚙️ Einstellungen & Klassen</h2>
-                <span @click="showSettings = false" class="close-btn" style="font-size: 1.5rem;">✖</span>
-            </div>
-            <div class="modal-body">
+    <div v-if="showSettings" class="modal-overlay" @click.self="showSettings = false" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);">
+    <div class="modal-content"
+        :style="{ background: settings.design.widgetBg, color: settings.design.textColor }"
+        style="max-width: 600px; width: 90%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+       <div :style="{ background: settings.design.widgetHeader }"
+            style="margin: -20px -20px 25px -20px; padding: 40px 30px 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin: 0; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; gap: 8px;">⚙️ Einstellungen</h2>
+            <button @click="showSettings = false" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0; display: flex; align-items: center;">✕</button>
+        </div>
+        <div class="modal-body custom-scrollbar" style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+            <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                <button @click="activeSettingsTab = 'klassen'"
+                        :style="{ background: activeSettingsTab === 'klassen' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    🏫 Klassen
+                </button>
+                <button @click="activeSettingsTab = 'hintergrund'"
+                        :style="{ background: activeSettingsTab === 'hintergrund' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    🖼️ Hintergrund
+                </button>
 
-                <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                <button @click="activeSettingsTab = 'design'"
+                        :style="{ background: activeSettingsTab === 'design' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    🎨 Design
+                </button>
+
+                <button :class="{active: activeSettingsTab === 'reset'}" @click="activeSettingsTab = 'reset'"
+                        :style="{ background: activeSettingsTab === 'reset' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    ⚠️ Reset
+                </button>
+
+                <button :class="{active: activeSettingsTab === 'kontakt'}" @click="activeSettingsTab = 'kontakt'"
+                        :style="{ background: activeSettingsTab === 'kontakt' ? 'var(--button-color)' : 'rgba(255,255,255,0.1)' }"
+                        style="border:none; color: var(--text-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    ✉️ Kontakt
+                </button>
+            </div>
+
+            <div v-if="activeSettingsTab === 'klassen'">
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
                     Aktives Board: <strong>{{ aktiveKlasse }}</strong>
                 </div>
 
@@ -68,67 +262,241 @@
                         <div class="klasse-header">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <strong style="font-size: 1.1rem;">🏫 {{ klasse.name }}</strong>
-
                                 <button v-if="aktiveKlasse !== klasse.name" @click="wechsleKlasse(klasse.name)" class="btn-small switch-btn">Dieses Board laden</button>
-                                <span v-else class="active-badge">Aktuell geladen</span>
+                                <span v-else class="active-badge" :style="{ background: 'var(--button-color)', color: 'var(--text-color)' }">Aktuell geladen</span>
                             </div>
 
-                            <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">Löschen</button>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button @click="renameKlasse(index)" class="btn-small" style="color: var(--text-color); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                                    Umbenennen
+                                </button>
+                                <button @click="removeKlasse(index)" class="btn-small" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">
+                                    Löschen
+                                </button>
+                            </div>
                         </div>
-
                         <div class="schueler-tags">
                             <span v-for="(s, sIndex) in klasse.schueler" :key="sIndex"
                                   :class="['schueler-tag', { 'is-absent': s.absent }]"
+                                  :style="!s.absent ? { background: 'var(--button-color)', color: 'var(--text-color)' } : {}"
                                   @click="toggleAbsent(s)"
                                   title="Klicken, um anwesend/krank zu wechseln">
                                 {{ s.name }}
                                 <span class="remove-s" @click.stop="removeSchueler(klasse, sIndex)">×</span>
                             </span>
-
                             <input type="text" class="inline-s-input" placeholder="Schüler + Enter..." @keyup.enter="addSchuelerInline(klasse, $event)">
                         </div>
                     </div>
-                    <div v-if="!settings.klassen || settings.klassen.length === 0" style="color: rgba(255,255,255,0.5); font-style: italic; text-align: center; margin-top: 20px;">
+                    <div v-if="!settings.klassen || settings.klassen.length === 0" :style="{ color: 'var(--text-color)', opacity: 0.6 }" style="font-style: italic; text-align: center; margin-top: 20px;">
                         Noch keine Klassen angelegt.
                     </div>
                 </div>
             </div>
+
+            <div v-if="activeSettingsTab === 'hintergrund'">
+                <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px;">
+                    <strong style="font-size: 1rem;">🎨 Einfarbiger Hintergrund:</strong>
+
+                    <input type="color" v-model="customColor" @change="setHintergrund(customColor)"
+                           style="cursor: pointer; width: 60px; height: 30px; border: none; border-radius: 10px; background: transparent; padding: 0; outline: none;"
+                           title="Farbe wählen">
+                </div>
+                <div class="custom-scrollbar" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-height: 210px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
+                    <div v-for="bg in availableBackgrounds" :key="bg"
+                         @click="setHintergrund(bg)"
+                         :style="{
+                             backgroundImage: 'url(' + bg + ')',
+                             backgroundSize: 'cover',
+                             backgroundPosition: 'center',
+                             height: '90px',
+                             borderRadius: '8px',
+                             cursor: 'pointer',
+                             border: settings.hintergrund === bg ? '3px solid var(--button-color)' : '3px solid transparent',
+                             boxShadow: settings.hintergrund === bg ? '0 0 10px var(--button-color)' : 'none',
+                             transition: 'all 0.2s ease'
+                         }">
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 15px; font-style: italic;">
+                </p>
+            </div>
+
+            <div v-if="activeSettingsTab === 'design'" style="display: flex; flex-direction: column; gap: 15px; color: var(--text-color);">
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="margin: 0; font-size: 1.1rem; letter-spacing: 0.5px;">Farbpalette</h3>
+
+                    <div style="display: flex; gap: 4px; align-items: center; justify-content: flex-end;">
+
+                        <button @click="settings.design.widgetBg='#1e293b'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#0f172a'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#3b82f6'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(59, 130, 246, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Slate Base">
+                            <div style="background: #1e293b; height: 80%; width: 100%;"></div>
+                            <div style="background: #3b82f6; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#111111'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#000000'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#e11d48'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(225, 29, 72, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Deep Night">
+                            <div style="background: #111111; height: 80%; width: 100%;"></div>
+                            <div style="background: #e11d48; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#1f2937'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#111827'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ffffff'; settings.design.buttonColor='#14b8a6'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(20, 184, 166, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Tech Teal">
+                            <div style="background: #1f2937; height: 80%; width: 100%;"></div>
+                            <div style="background: #14b8a6; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#052e16'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#022c22'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#a7f3d0'; settings.design.buttonColor='#22c55e'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(34, 197, 94, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Emerald Green">
+                            <div style="background: #052e16; height: 80%; width: 100%;"></div>
+                            <div style="background: #22c55e; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#1e3a8a'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#172554'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#bfdbfe'; settings.design.buttonColor='#38bdf8'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(56, 189, 248, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Sky Blue">
+                            <div style="background: #1e3a8a; height: 80%; width: 100%;"></div>
+                            <div style="background: #38bdf8; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#312e81'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#1e1b4b'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ddd6fe'; settings.design.buttonColor='#d946ef'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(217, 70, 239, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Indigo Violet">
+                            <div style="background: #312e81; height: 80%; width: 100%;"></div>
+                            <div style="background: #d946ef; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#172554'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#0f172a'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#f8fafc'; settings.design.buttonColor='#fcd34d'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(252, 211, 77, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Corporate Gold">
+                            <div style="background: #172554; height: 80%; width: 100%;"></div>
+                            <div style="background: #fcd34d; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#2e3440'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#1f232b'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#eceff4'; settings.design.buttonColor='#88c0d0'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(136, 192, 208, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Nord Clean">
+                            <div style="background: #2e3440; height: 80%; width: 100%;"></div>
+                            <div style="background: #88c0d0; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#443c36'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#332d29'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#f5eadd'; settings.design.buttonColor='#ea580c'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(234, 88, 12, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Sepia Low Light">
+                            <div style="background: #443c36; height: 80%; width: 100%;"></div>
+                            <div style="background: #ea580c; height: 20%; width: 100%;"></div>
+                        </button>
+                        <button @click="settings.design.widgetBg='#134e4a'; settings.design.widgetBgOpacity=90; settings.design.widgetHeader='#111827'; settings.design.widgetHeaderOpacity=95; settings.design.textColor='#ccfbf1'; settings.design.buttonColor='#2dd4bf'" style="width: 24px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; overflow: hidden; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 10px rgba(45, 212, 191, 0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'" title="Mint Mint">
+                            <div style="background: #134e4a; height: 80%; width: 100%;"></div>
+                            <div style="background: #2dd4bf; height: 20%; width: 100%;"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Widget Hintergrund</label>
+                        <input type="color" v-model="settings.design.widgetBg" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
+                            <span>Deckkraft:</span>
+                            <span>{{ settings.design.widgetBgOpacity }}%</span>
+                        </div>
+                        <input type="range" v-model="settings.design.widgetBgOpacity" min="0" max="100" style="width: 100%;">
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Kopfzeile</label>
+                        <input type="color" v-model="settings.design.widgetHeader" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-top: 5px;">
+                            <span>Deckkraft:</span>
+                            <span>{{ settings.design.widgetHeaderOpacity }}%</span>
+                        </div>
+                        <input type="range" v-model="settings.design.widgetHeaderOpacity" min="0" max="100" style="width: 100%;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Textfarbe</label>
+                        <input type="color" v-model="settings.design.textColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        <label style="display: block; font-size: 0.9em; margin-bottom: 5px;">Button-Farbe</label>
+                        <input type="color" v-model="settings.design.buttonColor" style="width: 100%; height: 40px; border: none; cursor: pointer; background: transparent;">
+                    </div>
+                </div>
+                <button @click="resetDesign" :style="{ color: 'var(--text-color)' }" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer;">🔄 Design auf Standard zurücksetzen</button>
+            </div>
+
+            <div v-if="activeSettingsTab === 'reset'" class="tab-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
+                <h3 :style="{ color: 'var(--text-color)' }" style="margin-top: 0; font-size: 1.5rem;">Werkseinstellungen</h3>
+                <p :style="{ color: 'var(--text-color)' }" style="opacity: 0.7; max-width: 400px; margin: 10px auto 25px auto; line-height: 1.5;">
+                    Möchtest du alle gespeicherten Daten (Klassen, Schüler und Widgets) löschen?
+                    Das Board wird danach komplett leer neu geladen.
+                </p>
+                <button @click="resetAll" class="btn-primary" style="background-color: var(--button-color); padding: 15px 30px; font-size: 1.1rem; border: none; border-radius: 12px; cursor: pointer; color: var(--text-color); font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
+                    🔥 Jetzt alles unwiderruflich löschen
+                </button>
+            </div>
+
+            <div v-if="activeSettingsTab === 'kontakt'" class="tab-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
+
+                <h3 :style="{ color: 'var(--text-color)' }" style="margin-top: 0; font-size: 1.5rem;">Fragen, Wünsche oder Feedback?</h3>
+                <p :style="{ color: 'var(--text-color)' }" style="opacity: 0.8; max-width: 400px; margin: 10px auto 25px auto; line-height: 1.5;">
+                    Wenn etwas auf dem Board nicht so funktioniert, wie es soll, oder du coole Ideen für neue Widgets und Funktionen hast, melde dich gerne direkt bei mir!
+                </p>
+                <a href="mailto:philipp97bu@outlook.de"
+                   style="display: inline-block; background-color: var(--button-color); color: var(--text-color); padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); transition: transform 0.2s ease, box-shadow 0.2s ease;"
+                   onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.4)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0, 0, 0, 0.3)';">
+                   ✉️ E-Mail schreiben
+                </a>
+
+                <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 450px;">
+                    <p :style="{ color: 'var(--text-color)' }" style="opacity: 0.8; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px;">
+                        Informationen zum <strong>Datenschutz</strong> sowie weitere <strong>interaktive Lernprogramme</strong> für den Fachbereich Wirtschaft findest du auf meiner Internetseite:
+                    </p>
+                    <a href="https://wirtschaftslab-schule.freeddns.org" target="_blank" rel="noopener noreferrer"
+                       style="display: inline-block; color: var(--text-color); text-decoration: none; padding: 10px 20px; background-color: var(--button-color); border: 2px solid var(--button-color); border-radius: 8px; font-weight: bold; font-size: 1.1rem; transition: all 0.2s ease;"
+                       onmouseover="this.style.backgroundColor='var(--button-color)'; this.style.transform='translateY(-2px)';">
+                        🌐 Zur Internetseite
+                    </a>
+                </div>
+
+                <p :style="{ color: 'var(--text-color)' }" style="margin-top: 40px; font-size: 0.9rem; opacity: 0.5; margin-bottom: 0;">
+                    © Philipp Bußmann
+                </p>
+            </div>
         </div>
     </div>
+</div>
 
-    <div class="board">
+    <div class="board" :style="(settings.hintergrund || '').startsWith('#') ? { background: settings.hintergrund } : { backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(' + settings.hintergrund + ')' }">
+
         <div v-for="(w, index) in widgets"
              :key="w.id"
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
+             v-show="!w.isMinimized"
              :style="{
                  left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
-                 boxSizing: 'border-box'
+                 boxSizing: 'border-box',
+                 transform: 'rotate(' + (w.rotation || 0) + 'deg)',
+                 background: 'var(--widget-bg)',
+                 color: 'var(--text-color)',
+                 fontFamily: 'var(--font-main)'
              }"
              @mousedown="startDrag($event, index)"
              @touchstart="startDrag($event, index)">
 
             <div class="widget-header">
-                <div class="widget-title">
+                <div class="widget-title" style="color: var(--text-color);">
                     <span>{{ w.icon }}</span>
                     <span>{{ w.type.toUpperCase() }}</span>
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 8px;">
 
-                    <button v-if="w.type === 'countdown' && w.timeLeft > 0" @click.stop="w.isRunning = !w.isRunning; saveToLocal()"
+                    <button v-if="w.type === 'countdown'" @click.stop="w.timeLeft > 0 ? (w.isRunning = !w.isRunning) : (w.startTrigger = Date.now()); saveToLocal()"
                             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
-                            title="Pause / Weiter">
+                            title="Start / Pause / Weiter">
                         {{ w.isRunning ? '⏸' : '▶' }}
                     </button>
-                    <button v-if="w.type === 'countdown' && w.timeLeft > 0" @click.stop="w.resetTrigger = Date.now(); saveToLocal()"
-                            style="background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: #fca5a5; cursor: pointer; height: 24px;"
-                            title="Stopp">
+
+                    <button v-if="w.type === 'countdown'" @click.stop="w.resetTrigger = Date.now(); saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: #ffffff; cursor: pointer; height: 24px;"
+                            title="Stopp / Reset">
                         ⏹
                     </button>
 
-                    <button @click.stop="w.isTransparent = !w.isTransparent; saveToLocal()"
-                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;">
-                        {{ w.isTransparent ? '👁️' : '👻' }}
+                    <button v-if="w.type === 'stoppuhr'" @click.stop="w.isRunning = !w.isRunning; saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
+                            title="Start / Pause">
+                        {{ w.isRunning ? '⏸' : '▶' }}
+                    </button>
+
+                    <button v-if="w.type === 'stoppuhr'" @click.stop="w.resetTrigger = Date.now(); saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: #ffffff; cursor: pointer; height: 24px;"
+                            title="Reset">
+                        ⏹
                     </button>
 
                     <button v-if="w.type === 'uhr'" @click.stop="w.isAnalog = !w.isAnalog; saveToLocal()"
@@ -142,6 +510,25 @@
                         {{ w.isVisual ? '📋' : '🗺️' }}
                     </button>
 
+                    <button v-if="w.type === 'zufall'"
+                            @click.stop="w.modus = ((w.modus || 'rad') === 'text' ? 'rad' : 'text'); saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px; display: flex; align-items: center; justify-content: center;"
+                            title="Ansicht wechseln">
+                        {{ (w.modus || 'rad') === 'text' ? '🎡' : '📝' }}
+                    </button>
+
+                    <button v-if="w.type === 'dateimanagement' && w.dateiUrl"
+                            @click.stop="w.dateiUrl = null; w.dateiName = null; w.dateiTyp = null; saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: #ffffff; cursor: pointer; height: 24px; transition: background 0.2s, border-color 0.2s;"
+                            title="Datei entfernen">🗑️
+                    </button>
+
+                    <button @click.stop="w.isTransparent = !w.isTransparent; saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;">
+                        {{ w.isTransparent ? '👁️' : '👻' }}
+                    </button>
+
+                    <span style="cursor: pointer; margin-right: 2px; font-size: 1.1rem; line-height: 1; display: inline-block; transform: translateY(5px);" @click.stop="minimizeWidget(index)" title="Minimieren">➖</span>
                     <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
                 </div>
             </div>
@@ -149,9 +536,21 @@
             <div class="widget-content">
                 <component :is="w.type + '-widget'" :widget-data="w" @save="saveToLocal"></component>
             </div>
+
+            <div class="custom-resize-handle"
+                 @mousedown.stop.prevent="startResize($event, index)"
+                 @touchstart.stop.prevent="startResize($event, index)">
+            </div>
+
+           <div class="custom-rotate-handle"
+                 @mousedown.stop.prevent="startRotate($event, index)"
+                 @touchstart.stop.prevent="startRotate($event, index)"
+                 style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; cursor: grab; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.8); z-index: 50;">
+                ↻
+            </div>
         </div>
     </div>
-    <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn" title="Vollbild beenden">🗗 Beenden</button>
+    <button v-if="isFullscreen" @click="toggleFullscreen" class="floating-exit-btn ignore-theme" style="color: white; background: transparent; border: none;" title="Vollbild beenden">🗗 Beenden</button>
     <div class="copyright">© 2026 Philipp Bußmann</div>
 </div>
 
@@ -162,7 +561,17 @@
 <script src="widgets/zufall.js"></script>
 <script src="widgets/qr.js"></script>
 <script src="widgets/handlungsplan.js"></script>
+<script src="widgets/gruppen.js"></script>
+<script src="widgets/arbeitsphase.js"></script>
+<script src="widgets/medien.js"></script>
+<script src="widgets/ampel.js"></script>
+<script src="widgets/stundenziel.js"></script>
+<script src="widgets/dateimanagement.js"></script>
 <script src="app.js"></script>
-
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+</script>
 </body>
 </html>

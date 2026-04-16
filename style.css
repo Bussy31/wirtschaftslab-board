@@ -14,20 +14,18 @@ body {
     color: white;
     margin: 0;
     overflow: hidden;
-    height: 100vh;
-    width: 100vw;
+    height: 100dvh;
+    width: 100dvw;
 }
 
 .board {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
     z-index: 1;
 
-    /* 👇 HIER TRÄGST DU DEN NAMEN DEINES BILDES EIN: 👇 */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('GenoKolleg.jpg');
 
     background-size: cover;
     background-position: center;
@@ -146,8 +144,7 @@ button:hover {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* --- Widgets --- */
-/* --- Widgets --- */
+
 .widget {
     position: absolute;
     background: var(--widget-bg);
@@ -210,6 +207,54 @@ button:hover {
 .widget-content input {
     user-select: text;
     cursor: text;
+}
+
+/* --- APPLE & SAFARI OPTIMIERUNG FÜR DAS RESIZE-FELD --- */
+.widget::-webkit-resizer {
+    background-color: var(--accent);
+    /* Macht ein schickes, geriffeltes Muster unten rechts */
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 3px,
+        rgba(255, 255, 255, 0.5) 3px,
+        rgba(255, 255, 255, 0.5) 6px
+    );
+    border-top-left-radius: 8px; /* Leicht abgerundet nach innen */
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Verhindert, dass Text auf dem iPad beim versehentlichen Doppeltippen markiert wird */
+.widget-header, .btn-primary, .schueler-tag {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Versteckt das Handle im Transparent-Modus */
+.widget.ghost-mode .custom-resize-handle {
+    opacity: 0;
+    pointer-events: none; /* Verhindert, dass man es aus Versehen greift */
+    transition: opacity 0.3s ease;
+}
+
+/* Zeigt das Handle nur, wenn man die Kachel berührt/darüberfährt */
+.widget.ghost-mode:hover .custom-resize-handle,
+.widget.ghost-mode:active .custom-resize-handle {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Optional: Damit man im Transparent-Modus auch den Header
+   wieder sieht, wenn man ihn anfassen will (hast du ja schon ähnlich drin) */
+.widget.ghost-mode:hover .widget-header {
+    opacity: 1;
+}
+
+.draggable-name {
+    -webkit-user-select: none;   /* Verhindert Textmarkierung */
+    -webkit-touch-callout: none; /* Verhindert das Kontextmenü (Suche) bei langem Drücken */
+    user-select: none;
+    touch-action: none;          /* Hilft dem iPad zu verstehen, dass wir hier selbst ziehen */
 }
 
 .close-btn {
@@ -340,6 +385,69 @@ button:hover {
     border-color: var(--accent);
     background: rgba(0,0,0,0.5);
     width: 160px;
+}
+/* --- Dropdown Menü für Widgets --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--widget-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+
+    /* NEU: Breite angepasst für zwei Spalten */
+    min-width: 380px;
+
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+    border: 1px solid var(--widget-border);
+    border-radius: 8px;
+    z-index: 1000;
+    padding: 12px;
+    margin-top: 10px;
+
+    /* NEU: Grid-Layout für zwei Spalten */
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Zwei gleich große Spalten nebeneinander */
+    gap: 6px; /* Abstand zwischen den Buttons */
+}
+
+.dropdown-content button {
+    background: transparent;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+.dropdown-content button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Eigene Ecke zum Vergrößern (iPad Fix) --- */
+.widget {
+    resize: none !important; /* Schaltet den fehlerhaften Standard ab */
+}
+
+.custom-resize-handle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 30px;
+    height: 30px;
+    cursor: se-resize;
+    background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.4) 50%);
+    border-bottom-right-radius: 12px;
+    z-index: 10;
 }
 
 /* --- Copyright Style --- */
