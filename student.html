@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kartenabfrage</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0f172a;
+            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .logo { font-size: 2rem; margin-bottom: 8px; text-align: center; }
+        h1 { font-size: 1.3rem; text-align: center; margin-bottom: 4px; }
+        .frage-text {
+            text-align: center;
+            opacity: 0.55;
+            font-size: 0.85rem;
+            margin-bottom: 22px;
+            min-height: 20px;
+        }
+        .session-badge {
+            display: block;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.78rem;
+            opacity: 0.4;
+            margin-bottom: 20px;
+            letter-spacing: 0.05em;
+        }
+        label {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-bottom: 6px;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        input, textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #f1f5f9;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            margin-bottom: 18px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus { border-color: #3b82f6; background: rgba(255,255,255,0.09); }
+        .farben {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+        .farbe-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+        }
+        .farbe-btn.aktiv {
+            border-color: white;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+        }
+        .submit-btn {
+            width: 100%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.35);
+        }
+        .submit-btn:hover:not(:disabled) {
+            background: #2563eb;
+            box-shadow: 0 6px 20px rgba(59,130,246,0.5);
+        }
+        .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+        .submit-btn:disabled { background: rgba(255,255,255,0.12); cursor: default; box-shadow: none; }
+        .status {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .status.success { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+        .status.error   { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .status.info    { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+        .sent-list { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .sent-item {
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+        .center-view {
+            text-align: center;
+            padding: 30px 10px;
+        }
+        .center-view .icon { font-size: 3rem; margin-bottom: 14px; }
+        .center-view h2 { margin-bottom: 8px; }
+        .center-view p { opacity: 0.55; font-size: 0.9rem; line-height: 1.5; }
+        .hint { text-align: center; font-size: 0.75rem; opacity: 0.35; margin-top: 14px; }
+    </style>
+</head>
+<body>
+<div class="card" id="root">
+
+    <!-- Verbinde -->
+    <div id="view-loading" class="center-view">
+        <div class="icon">⏳</div>
+        <h2>Verbinde...</h2>
+    </div>
+
+    <!-- Fehler / Session nicht gefunden -->
+    <div id="view-error" class="center-view" style="display:none;">
+        <div class="icon">❌</div>
+        <h2>Session nicht gefunden</h2>
+        <p>Diese Session ist nicht mehr aktiv oder der Link ist ungültig.<br>Bitte scanne den QR-Code erneut.</p>
+    </div>
+
+    <!-- Session beendet -->
+    <div id="view-ended" class="center-view" style="display:none;">
+        <div class="icon">✅</div>
+        <h2>Session beendet</h2>
+        <p>Die Lehrkraft hat die Session geschlossen.<br>Deine Karten wurden übermittelt.</p>
+    </div>
+
+    <!-- Hauptformular -->
+    <div id="view-main" style="display:none;">
+        <div class="logo">🃏</div>
+        <h1>Kartenabfrage</h1>
+        <p class="frage-text" id="frage-text"></p>
+        <span class="session-badge" id="session-badge"></span>
+
+        <div id="status-box" class="status" style="display:none;"></div>
+
+        <label>Dein Name (optional)</label>
+        <input type="text" id="autor" placeholder="z.B. Max Mustermann" maxlength="50" autocomplete="name">
+
+        <label>Deine Antwort</label>
+        <textarea id="text" rows="3" placeholder="Hier tippen..." maxlength="500"></textarea>
+
+        <label>Kartenfarbe</label>
+        <div class="farben" id="farben"></div>
+
+        <button class="submit-btn" id="submit-btn" onclick="submit()">
+            ✓ Karte einreichen
+        </button>
+
+        <p class="hint">Strg + Enter zum Absenden</p>
+
+        <div class="sent-list" id="sent-list"></div>
+    </div>
+
+</div>
+
+<script>
+    const FARBEN = ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316'];
+    let farbe = FARBEN[0];
+    let ws = null;
+    let connected = false;
+    let sentCount = 0;
+
+    const params  = new URLSearchParams(window.location.search);
+    const session = (params.get('session') || '').toUpperCase();
+
+    function show(id) {
+        ['view-loading','view-error','view-ended','view-main'].forEach(v => {
+            document.getElementById(v).style.display = v === id ? 'block' : 'none';
+        });
+    }
+
+    function status(msg, type, autohide) {
+        const el = document.getElementById('status-box');
+        el.className = 'status ' + type;
+        el.textContent = msg;
+        el.style.display = 'block';
+        if (autohide) setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+    // Farbbuttons aufbauen
+    const farbenEl = document.getElementById('farben');
+    FARBEN.forEach(f => {
+        const btn = document.createElement('button');
+        btn.className = 'farbe-btn' + (f === farbe ? ' aktiv' : '');
+        btn.style.background = f;
+        btn.title = f;
+        btn.onclick = () => {
+            farbe = f;
+            document.querySelectorAll('.farbe-btn').forEach(b => b.classList.remove('aktiv'));
+            btn.classList.add('aktiv');
+        };
+        farbenEl.appendChild(btn);
+    });
+
+    // Name aus localStorage laden
+    const savedName = localStorage.getItem('ka_autor');
+    if (savedName) document.getElementById('autor').value = savedName;
+
+    // Session-ID prüfen
+    if (!session) { show('view-error'); }
+    else           { connect(); }
+
+    function connect() {
+        const wsUrl = 'wss://' + window.location.hostname + '/ws';
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({ type: 'join', role: 'student', sessionId: session }));
+        };
+
+        ws.onmessage = (e) => {
+            const msg = JSON.parse(e.data);
+
+            if (msg.type === 'joined') {
+                connected = true;
+                document.getElementById('session-badge').textContent = 'Session ' + session;
+                show('view-main');
+            }
+            if (msg.type === 'error') {
+                show('view-error');
+            }
+            if (msg.type === 'session_ended') {
+                show('view-ended');
+            }
+            if (msg.type === 'card_received') {
+                const textVal = document.getElementById('text').value.trim();
+                status('✅ Karte eingereicht!', 'success', true);
+                sentCount++;
+                document.getElementById('text').value = '';
+
+                // In die "gesendete Karten"-Liste
+                const item = document.createElement('div');
+                item.className = 'sent-item';
+                item.style.background = farbe;
+                item.style.color = textColor(farbe);
+                item.textContent = textVal || '(Karte ' + sentCount + ')';
+                document.getElementById('sent-list').prepend(item);
+            }
+        };
+
+        ws.onclose = () => {
+            if (!connected) show('view-error');
+            else show('view-ended');
+        };
+        ws.onerror = () => { if (!connected) show('view-error'); };
+    }
+
+    function submit() {
+        const text  = document.getElementById('text').value.trim();
+        const autor = document.getElementById('autor').value.trim();
+
+        if (!text) { status('Bitte eine Antwort eingeben.', 'error', false); return; }
+        if (!ws || ws.readyState !== 1) { status('Keine Verbindung zum Server.', 'error', false); return; }
+
+        if (autor) localStorage.setItem('ka_autor', autor);
+
+        ws.send(JSON.stringify({ type: 'card', text, autor, farbe }));
+
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        setTimeout(() => btn.disabled = false, 1500);
+    }
+
+    document.getElementById('text').addEventListener('keydown', e => {
+        if (e.key === 'Enter' && e.ctrlKey) submit();
+    });
+
+    function textColor(hex) {
+        const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+        return (r*299 + g*587 + b*114) / 1000 > 128 ? '#1e293b' : '#ffffff';
+    }
+</script>
+</body>
+</html>

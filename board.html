@@ -178,6 +178,8 @@
                 <button @click="addWidget('stundenziel','🎯'); showWidgetMenu = false">🎯 Stundenziel</button>
                 <button @click="addWidget('dateimanagement','📁'); showWidgetMenu = false">📁 Datei</button>
                 <button @click="toggleDrawingMode(); showWidgetMenu = false" class="widget-btn">✍️ Zeichnen</button>
+                <hr style="border-color:rgba(255,255,255,0.1); margin:4px 0;">
+                <button @click="addWidget('kartenabfrage', '🃏'); showWidgetMenu = false">🃏 Kartenabfrage</button>
             </div>
         </div>
 
@@ -459,7 +461,9 @@
              :style="{
                  left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
                  boxSizing: 'border-box',
-                 transform: 'rotate(' + (w.rotation || 0) + 'deg)',
+                 position: w.isOverlay ? 'fixed' : 'absolute',
+                 zIndex: w.isOverlay ? 400 : 'auto',
+                 transform: w.isOverlay ? 'none' : 'rotate(' + (w.rotation || 0) + 'deg)',
                  background: 'var(--widget-bg)',
                  color: 'var(--text-color)',
                  fontFamily: 'var(--font-main)'
@@ -542,7 +546,7 @@
                  @touchstart.stop.prevent="startResize($event, index)">
             </div>
 
-           <div class="custom-rotate-handle"
+           <div v-if="!w.isOverlay" class="custom-rotate-handle"
                  @mousedown.stop.prevent="startRotate($event, index)"
                  @touchstart.stop.prevent="startRotate($event, index)"
                  style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; cursor: grab; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.8); z-index: 50;">
@@ -567,6 +571,7 @@
 <script src="widgets/ampel.js"></script>
 <script src="widgets/stundenziel.js"></script>
 <script src="widgets/dateimanagement.js"></script>
+<script src="widgets/kartenabfrage.js"></script>
 <script src="app.js"></script>
 <script>
     if ('serviceWorker' in navigator) {

@@ -470,6 +470,7 @@ const app = createApp({
         addWidget(type, icon) {
             const isNotiz = type === 'notiz';
             const isGruppen = type === 'gruppen';
+            const isKartenabfrage = type === 'kartenabfrage';
 
             let startListe = '';
             if (type === 'zufall' || type === 'gruppen') {
@@ -480,6 +481,25 @@ const app = createApp({
                         .map(s => s.name);
                     startListe = anwesendeSchueler.join('\n');
                 }
+            }
+
+            if (isKartenabfrage) {
+                const w = Math.min(900, window.innerWidth - 80);
+                const h = Math.min(620, window.innerHeight - 120);
+                this.widgets.push({
+                    id: Date.now(),
+                    type: 'kartenabfrage',
+                    icon: '🃏',
+                    isOverlay: true,
+                    x: Math.round((window.innerWidth - w) / 2),
+                    y: Math.round((window.innerHeight - h) / 2),
+                    width: w,
+                    height: h,
+                    karten: [],
+                    frage: ''
+                });
+                this.saveToLocal();
+                return;
             }
 
             this.widgets.push({
@@ -760,5 +780,6 @@ app.component('medien-widget', MedienWidget);
 app.component('ampel-widget', AmpelWidget);
 app.component('stundenziel-widget', StundenzielWidget);
 app.component('dateimanagement-widget', DateimanagementWidget);
+app.component('kartenabfrage-widget', KartenabfrageWidget);
 
 app.mount('#app');
