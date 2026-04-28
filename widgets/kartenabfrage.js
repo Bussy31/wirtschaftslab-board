@@ -21,6 +21,9 @@ const KartenabfrageWidget = {
     computed: {
         karten() { return this.widgetData.karten || []; },
         aktuelleKarte() { return this.karten[this.aktuelleKarteIdx] || null; },
+        alleVerborgen() {
+            return this.karten.length > 0 && this.karten.every(k => k.sichtbar === false);
+        },
         studentUrl() {
             if (!this.sessionId) return '';
             const path = window.location.pathname.replace('board.html', 'student.html');
@@ -217,7 +220,7 @@ const KartenabfrageWidget = {
         }
     },
     template: `
-    <div style="display:flex; flex-direction:column; height:100%; gap:10px; overflow:hidden;">
+    <div @mousedown.stop style="display:flex; flex-direction:column; height:100%; gap:10px; overflow:hidden;">
 
         <!-- SESSION-PANEL (inaktiv) -->
         <div v-if="!sessionActive"
@@ -296,15 +299,10 @@ const KartenabfrageWidget = {
                 title="Reihenfolge zufällig mischen">
                 🔀
             </button>
-            <button @click="alleEinblenden"
+            <button @click="alleVerborgen ? alleEinblenden() : alleAusblenden()"
                 style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Alle Karten einblenden">
-                👁️
-            </button>
-            <button @click="alleAusblenden"
-                style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Alle Karten verbergen (zeigt ???)">
-                🙈
+                :title="alleVerborgen ? 'Alle einblenden' : 'Alle verbergen'">
+                {{ alleVerborgen ? '👁️' : '🙈' }}
             </button>
             <button @click="exportTxt"
                 style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
