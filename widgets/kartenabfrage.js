@@ -386,7 +386,12 @@ const KartenabfrageWidget = {
             <div v-if="ansicht==='grid'"
                  style="height:100%; overflow-y:auto;"
                  class="custom-scrollbar">
-                <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; padding:4px;">
+                <div v-if="karten.length===0"
+                     style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
+                    Noch keine Karten.
+                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
+                </div>
+                <div v-if="karten.length>0" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; padding:4px;">
                     <div v-for="karte in karten" :key="karte.id"
                          :style="{
                              background: karte.farbe,
@@ -418,18 +423,17 @@ const KartenabfrageWidget = {
                             </button>
                         </div>
                     </div>
-                    <div v-if="karten.length===0"
-                         style="grid-column:1/-1; text-align:center; opacity:0.4; padding:40px 20px; font-size:0.9rem;">
-                        Noch keine Karten.<br>
-                        <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
-                    </div>
                 </div>
             </div>
 
             <!-- Einzelkarte -->
             <div v-if="ansicht==='einzeln'"
                  style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:15px; padding:10px;">
-                <div v-if="karten.length===0" style="opacity:0.4; font-size:0.9rem;">Noch keine Karten.</div>
+                <div v-if="karten.length===0"
+                     style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
+                    Noch keine Karten.
+                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
+                </div>
                 <template v-else>
                     <div :style="{
                         background: aktuelleKarte.farbe,
