@@ -280,19 +280,19 @@ const KartenabfrageWidget = {
                 :style="{background: ansicht==='freihand' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
                 style="border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
                 title="Frei anordnen (Drag & Drop)">
-                🎛 Frei
+                Frei
             </button>
             <button @click="ansicht='grid'"
                 :style="{background: ansicht==='grid' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
                 style="border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
                 title="Rasteransicht">
-                ⊞ Grid
+                Grid
             </button>
             <button @click="ansicht='einzeln'"
                 :style="{background: ansicht==='einzeln' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
                 style="border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
                 title="Einzelkarte anzeigen">
-                ▭ Einzeln
+                Einzeln
             </button>
             <button @click="mischen"
                 style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"

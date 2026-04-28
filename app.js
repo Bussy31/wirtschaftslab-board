@@ -8,6 +8,7 @@ const app = createApp({
             offsetX: 0,
             offsetY: 0,
             isFullscreen: false,
+            toolbarH: 64,
             showWidgetMenu: false,
             resizingIndex: null,
             startWidth: 0,
@@ -96,6 +97,13 @@ const app = createApp({
         }
 
         this.loadBoard();
+
+        this.$nextTick(() => {
+            this.toolbarH = document.querySelector('.toolbar')?.offsetHeight || 64;
+        });
+        window.addEventListener('resize', () => {
+            this.toolbarH = document.querySelector('.toolbar')?.offsetHeight || 64;
+        });
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown')) {
