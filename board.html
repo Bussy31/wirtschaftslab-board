@@ -459,7 +459,10 @@
              :class="['widget', { 'ghost-mode': w.isTransparent }]"
              v-show="!w.isMinimized"
              :style="{
-                 left: w.x + 'px', top: w.y + 'px', width: w.width + 'px', height: w.height + 'px',
+                 left: (w.isOverlay && w.isMaximized) ? '0' : w.x + 'px',
+                 top: (w.isOverlay && w.isMaximized) ? '0' : w.y + 'px',
+                 width: (w.isOverlay && w.isMaximized) ? '100vw' : w.width + 'px',
+                 height: (w.isOverlay && w.isMaximized) ? '100vh' : w.height + 'px',
                  boxSizing: 'border-box',
                  position: w.isOverlay ? 'fixed' : 'absolute',
                  zIndex: w.isOverlay ? 400 : 'auto',
@@ -532,6 +535,12 @@
                         {{ w.isTransparent ? '👁️' : '👻' }}
                     </button>
 
+                    <button v-if="w.isOverlay"
+                            @click.stop="w.isMaximized = !w.isMaximized; saveToLocal()"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; color: white; cursor: pointer; height: 24px;"
+                            :title="w.isMaximized ? 'Wiederherstellen' : 'Maximieren'">
+                        {{ w.isMaximized ? '⤡' : '⤢' }}
+                    </button>
                     <span style="cursor: pointer; margin-right: 2px; font-size: 1.1rem; line-height: 1; display: inline-block; transform: translateY(5px);" @click.stop="minimizeWidget(index)" title="Minimieren">➖</span>
                     <span class="close-btn" @click.stop="removeWidget(index)">✖</span>
                 </div>

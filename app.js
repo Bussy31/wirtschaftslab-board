@@ -718,7 +718,9 @@ const app = createApp({
                             }
                         }
 
-                        this.loadBoard(); // Lädt jetzt sofort die "aktiveKlasse" aus dem Backup!
+                        this.loadBoard();
+                        localStorage.setItem('aktiveKlasse', this.aktiveKlasse);
+                        this.saveToLocal();
                         alert("Backup erfolgreich importiert!");
                     } else {
                         alert("Ungültiges Backup-Format.");
