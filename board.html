@@ -180,6 +180,7 @@
                 <button @click="toggleDrawingMode(); showWidgetMenu = false" class="widget-btn">✍️ Zeichnen</button>
                 <hr style="border-color:rgba(255,255,255,0.1); margin:4px 0;">
                 <button @click="addWidget('kartenabfrage', '🃏'); showWidgetMenu = false">🃏 Kartenabfrage</button>
+                <button @click="addWidget('reflexionszielscheibe', '🎯'); showWidgetMenu = false">🎯 Reflexionszielscheibe</button>
             </div>
         </div>
 
@@ -582,6 +583,7 @@
 <script src="widgets/dateimanagement.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script src="widgets/kartenabfrage.js"></script>
+<script src="widgets/reflexionszielscheibe.js"></script>
 <script src="app.js"></script>
 <script>
     if ('serviceWorker' in navigator) {

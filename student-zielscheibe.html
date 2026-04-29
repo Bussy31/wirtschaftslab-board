@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reflexionszielscheibe</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0f172a;
+            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .logo { font-size: 2rem; margin-bottom: 6px; text-align: center; }
+        h1 { font-size: 1.25rem; text-align: center; margin-bottom: 4px; }
+        .session-badge {
+            display: block;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.78rem;
+            opacity: 0.4;
+            margin-bottom: 20px;
+            letter-spacing: 0.05em;
+        }
+        .center-view {
+            text-align: center;
+            padding: 24px 10px;
+        }
+        .center-view .icon { font-size: 3rem; margin-bottom: 14px; }
+        .center-view h2 { margin-bottom: 8px; }
+        .center-view p { opacity: 0.55; font-size: 0.9rem; line-height: 1.5; }
+        .frage-block {
+            margin-bottom: 20px;
+        }
+        .frage-label {
+            font-size: 0.92rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .frage-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+        .skala {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .skala-btn {
+            flex: 1;
+            min-width: 32px;
+            height: 38px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06);
+            color: #f1f5f9;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .skala-btn:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+        .skala-btn.aktiv {
+            border-color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.25);
+        }
+        .skala-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            opacity: 0.4;
+            margin-top: 4px;
+            padding: 0 2px;
+        }
+        .divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 16px 0; }
+        .submit-btn {
+            width: 100%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.35);
+        }
+        .submit-btn:hover:not(:disabled) {
+            background: #2563eb;
+            box-shadow: 0 6px 20px rgba(59,130,246,0.5);
+        }
+        .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+        .submit-btn:disabled { background: rgba(255,255,255,0.12); cursor: default; box-shadow: none; color: rgba(255,255,255,0.4); }
+        .anon-hint {
+            text-align: center;
+            font-size: 0.72rem;
+            opacity: 0.3;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="root">
+
+    <div id="view-loading" class="center-view">
+        <div class="icon">⏳</div>
+        <h2>Verbinde...</h2>
+    </div>
+
+    <div id="view-error" class="center-view" style="display:none;">
+        <div class="icon">❌</div>
+        <h2>Session nicht gefunden</h2>
+        <p>Diese Session ist nicht mehr aktiv oder der Link ist ungültig.<br>Bitte scanne den QR-Code erneut.</p>
+    </div>
+
+    <div id="view-ended" class="center-view" style="display:none;">
+        <div class="icon">✅</div>
+        <h2>Session beendet</h2>
+        <p>Die Lehrkraft hat die Session geschlossen.<br>Vielen Dank für deine Rückmeldung.</p>
+    </div>
+
+    <div id="view-done" class="center-view" style="display:none;">
+        <div class="icon">🎯</div>
+        <h2>Rückmeldung abgeschickt!</h2>
+        <p>Deine Bewertung wurde anonym übermittelt.</p>
+    </div>
+
+    <div id="view-main" style="display:none;">
+        <div class="logo">🎯</div>
+        <h1>Reflexionszielscheibe</h1>
+        <span class="session-badge" id="session-badge"></span>
+        <div id="fragen-container"></div>
+        <hr class="divider">
+        <button class="submit-btn" id="submit-btn" onclick="submit()" disabled>
+            ✓ Abschicken
+        </button>
+        <p class="anon-hint">🔒 Anonym – kein Name, keine Rückverfolgung</p>
+    </div>
+
+</div>
+
+<script>
+    const FARBEN = ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316'];
+
+    const params  = new URLSearchParams(window.location.search);
+    const session = (params.get('session') || '').toUpperCase();
+
+    let ws = null;
+    let connected = false;
+    let config = null;      // { fragen: [...], ringe: 5 }
+    let selections = [];    // selected ring per question (null = not yet selected)
+    let submitted = false;
+
+    function show(id) {
+        ['view-loading','view-error','view-ended','view-done','view-main'].forEach(v => {
+            document.getElementById(v).style.display = v === id ? 'block' : 'none';
+        });
+    }
+
+    function applyConfig(cfg) {
+        config = cfg;
+        selections = new Array(cfg.fragen.length).fill(null);
+        renderForm();
+        checkReady();
+    }
+
+    function renderForm() {
+        const container = document.getElementById('fragen-container');
+        container.innerHTML = '';
+        config.fragen.forEach((frage, qi) => {
+            const farbe = FARBEN[qi % FARBEN.length];
+            const block = document.createElement('div');
+            block.className = 'frage-block';
+
+            const label = document.createElement('div');
+            label.className = 'frage-label';
+            const dot = document.createElement('span');
+            dot.className = 'frage-dot';
+            dot.style.background = farbe;
+            label.appendChild(dot);
+            label.appendChild(document.createTextNode(frage));
+            block.appendChild(label);
+
+            const skala = document.createElement('div');
+            skala.className = 'skala';
+            for (let r = 1; r <= config.ringe; r++) {
+                const btn = document.createElement('button');
+                btn.className = 'skala-btn';
+                btn.textContent = r;
+                btn.dataset.qi = qi;
+                btn.dataset.r = r;
+                if (selections[qi] === r) {
+                    btn.classList.add('aktiv');
+                    btn.style.background = farbe;
+                    btn.style.borderColor = farbe;
+                }
+                btn.onclick = () => selectRating(qi, r, farbe);
+                skala.appendChild(btn);
+            }
+            block.appendChild(skala);
+
+            const labels = document.createElement('div');
+            labels.className = 'skala-labels';
+            labels.innerHTML = '<span>schwach</span><span>sehr gut</span>';
+            block.appendChild(labels);
+
+            container.appendChild(block);
+        });
+    }
+
+    function selectRating(qi, r, farbe) {
+        if (submitted) return;
+        selections[qi] = r;
+        // Update buttons for this question
+        document.querySelectorAll(`.skala-btn[data-qi="${qi}"]`).forEach(btn => {
+            const isActive = parseInt(btn.dataset.r) === r;
+            btn.classList.toggle('aktiv', isActive);
+            btn.style.background = isActive ? farbe : '';
+            btn.style.borderColor = isActive ? farbe : '';
+        });
+        checkReady();
+    }
+
+    function checkReady() {
+        const ready = config && selections.every(s => s !== null);
+        document.getElementById('submit-btn').disabled = !ready || submitted;
+    }
+
+    function submit() {
+        if (submitted || !ws || ws.readyState !== 1) return;
+        if (selections.some(s => s === null)) return;
+        submitted = true;
+        ws.send(JSON.stringify({ type: 'bewertung', ratings: selections }));
+        document.getElementById('submit-btn').disabled = true;
+    }
+
+    if (!session) { show('view-error'); }
+    else { connect(); }
+
+    function connect() {
+        const wsUrl = 'wss://' + window.location.hostname + '/ws';
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({ type: 'join', role: 'student', sessionId: session }));
+        };
+
+        ws.onmessage = (e) => {
+            const msg = JSON.parse(e.data);
+
+            if (msg.type === 'joined') {
+                connected = true;
+                document.getElementById('session-badge').textContent = 'Session ' + session;
+                if (msg.config) {
+                    applyConfig(msg.config);
+                    show('view-main');
+                } else {
+                    // Waiting for teacher to push config
+                    show('view-main');
+                }
+            }
+            if (msg.type === 'config') {
+                applyConfig(msg.config);
+                if (submitted) submitted = false; // reset if teacher changed questions
+                show('view-main');
+            }
+            if (msg.type === 'error') { show('view-error'); }
+            if (msg.type === 'session_ended') { show('view-ended'); }
+            if (msg.type === 'bewertung_received') { show('view-done'); }
+        };
+
+        ws.onclose = () => {
+            if (!connected) show('view-error');
+            else if (!submitted) show('view-ended');
+        };
+        ws.onerror = () => { if (!connected) show('view-error'); };
+    }
+</script>
+</body>
+</html>

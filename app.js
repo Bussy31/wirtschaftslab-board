@@ -479,6 +479,7 @@ const app = createApp({
             const isNotiz = type === 'notiz';
             const isGruppen = type === 'gruppen';
             const isKartenabfrage = type === 'kartenabfrage';
+            const isZielscheibe = type === 'reflexionszielscheibe';
 
             let startListe = '';
             if (type === 'zufall' || type === 'gruppen') {
@@ -505,6 +506,26 @@ const app = createApp({
                     height: h,
                     karten: [],
                     frage: ''
+                });
+                this.saveToLocal();
+                return;
+            }
+
+            if (isZielscheibe) {
+                const w = Math.min(920, window.innerWidth - 80);
+                const h = Math.min(600, window.innerHeight - 120);
+                this.widgets.push({
+                    id: Date.now(),
+                    type: 'reflexionszielscheibe',
+                    icon: '🎯',
+                    isOverlay: true,
+                    x: Math.round((window.innerWidth - w) / 2),
+                    y: Math.round((window.innerHeight - h) / 2),
+                    width: w,
+                    height: h,
+                    fragen: ['Wie gut hat dir die Stunde gefallen?', 'Wie verständlich war der Inhalt?', 'Wie gut warst du dabei?'],
+                    ringe: 5,
+                    bewertungen: []
                 });
                 this.saveToLocal();
                 return;
@@ -791,5 +812,6 @@ app.component('ampel-widget', AmpelWidget);
 app.component('stundenziel-widget', StundenzielWidget);
 app.component('dateimanagement-widget', DateimanagementWidget);
 app.component('kartenabfrage-widget', KartenabfrageWidget);
+app.component('reflexionszielscheibe-widget', ReflexionszielscheibeWidget);
 
 app.mount('#app');
