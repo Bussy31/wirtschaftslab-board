@@ -375,7 +375,7 @@ const KartenabfrageWidget = {
                              :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
                             {{ karte.autor }}
                         </div>
-                        <div :style="{color:textfarbe(karte.farbe), fontSize:'0.88rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3}">
+                        <div :style="{color:textfarbe(karte.farbe), fontSize:'1rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3, display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', fontWeight:'500'}">
                             {{ karte.sichtbar !== false ? karte.text : '???' }}
                         </div>
                         <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
