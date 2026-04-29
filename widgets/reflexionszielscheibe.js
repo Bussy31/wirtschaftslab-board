@@ -313,16 +313,17 @@ const ReflexionszielscheibeWidget = {
             </div>
 
             <!-- STEUERUNG -->
-            <div style="flex:2; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-width:180px; max-width:260px;" class="custom-scrollbar">
+            <div style="flex:2; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-width:200px;" class="custom-scrollbar">
 
                 <div style="font-size:0.72rem; opacity:0.45; text-transform:uppercase; letter-spacing:0.05em;">Fragen</div>
 
                 <div v-for="(f, i) in fragen" :key="i" style="display:flex; gap:5px; align-items:center;">
                     <span :style="{background: frageColors[i % frageColors.length], width:'10px', height:'10px', borderRadius:'50%', flex:'0 0 10px'}"></span>
-                    <input :value="f"
+                    <textarea :value="f"
                            @input="frageAktualisieren(i, $event.target.value)"
                            @blur="frageBlur"
-                           style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:5px 7px; color:var(--text-color); font-size:0.8rem; font-family:inherit; outline:none; min-width:0;">
+                           rows="2"
+                           style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:5px 7px; color:var(--text-color); font-size:0.8rem; font-family:inherit; outline:none; min-width:0; resize:none; line-height:1.35;"></textarea>
                     <span v-if="averages[i] !== null"
                           style="font-size:0.75rem; font-weight:700; flex-shrink:0; opacity:0.75; min-width:30px; text-align:right;">Ø {{ averages[i] }}</span>
                     <button @click="frageLoeschen(i)"
