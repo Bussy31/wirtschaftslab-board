@@ -15,7 +15,8 @@ const KartenabfrageWidget = {
             ansicht: 'freihand',
             aktuelleKarteIdx: 0,
             farben: ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#ffffff','#1e293b'],
-            dragState: { active: false, id: null }
+            dragState: { active: false, id: null },
+            verstecktModus: false
         }
     },
     computed: {
@@ -81,6 +82,7 @@ const KartenabfrageWidget = {
                     const pos = this._neuPosition();
                     msg.card.x = pos.x;
                     msg.card.y = pos.y;
+                    msg.card.sichtbar = !this.verstecktModus;
                     this.widgetData.karten.push(msg.card);
                     this.$emit('save');
                 }
@@ -115,7 +117,7 @@ const KartenabfrageWidget = {
                 text: this.neueKarteText.trim(),
                 farbe: this.neueKarteFarbe,
                 autor: this.neueKarteAutor.trim(),
-                sichtbar: true,
+                sichtbar: !this.verstecktModus,
                 x: pos.x,
                 y: pos.y
             });
@@ -133,6 +135,11 @@ const KartenabfrageWidget = {
         karteToggle(karte) { karte.sichtbar = !karte.sichtbar; this.$emit('save'); },
         alleEinblenden() { (this.widgetData.karten || []).forEach(k => k.sichtbar = true); this.$emit('save'); },
         alleAusblenden() { (this.widgetData.karten || []).forEach(k => k.sichtbar = false); this.$emit('save'); },
+        toggleVerstecktModus() {
+            this.verstecktModus = !this.verstecktModus;
+            if (this.verstecktModus) this.alleAusblenden();
+            else this.alleEinblenden();
+        },
         mischen() {
             if (!this.widgetData.karten || this.widgetData.karten.length < 2) return;
             for (let i = this.widgetData.karten.length - 1; i > 0; i--) {
@@ -242,8 +249,9 @@ const KartenabfrageWidget = {
                 <span style="font-size:0.85rem; opacity:0.7;">👥 {{ studentCount }} Schüler</span>
                 <div style="margin-left:auto; display:flex; gap:6px;">
                     <button @click="showQr = !showQr"
-                            style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.8rem; font-family:inherit;">
-                        {{ showQr ? '✕ QR' : '📱 QR' }}
+                            style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.8rem; font-family:inherit;"
+                            :title="showQr ? 'QR Code verstecken' : 'QR Code anzeigen'">
+                        {{ showQr ? '🫣' : '📱 QR' }}
                     </button>
                     <button @click="stopSession"
                             style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.8rem; font-family:inherit;">
@@ -272,59 +280,6 @@ const KartenabfrageWidget = {
                 placeholder="Frage oder Thema eingeben..."
                 style="width:100%; background:transparent; border:none; outline:none; color:var(--text-color); font-size:1.05rem; font-weight:bold; font-family:inherit;"
             >
-        </div>
-
-        <!-- TOOLBAR -->
-        <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center; flex-shrink:0;">
-            <button @click="ansicht='freihand'"
-                :style="{background: ansicht==='freihand' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
-                style="border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Frei anordnen (Drag & Drop)">
-                Frei
-            </button>
-            <button @click="ansicht='grid'"
-                :style="{background: ansicht==='grid' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
-                style="border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Rasteransicht">
-                Grid
-            </button>
-            <button @click="ansicht='einzeln'"
-                :style="{background: ansicht==='einzeln' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
-                style="border:none; color:var(--text-color); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Einzelkarte anzeigen">
-                Einzeln
-            </button>
-            <button @click="mischen"
-                style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Reihenfolge zufällig mischen">
-                🔀
-            </button>
-            <button @click="alleVerborgen ? alleEinblenden() : alleAusblenden()"
-                style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                :title="alleVerborgen ? 'Alle einblenden' : 'Alle verbergen'">
-                {{ alleVerborgen ? '👁️' : '🙈' }}
-            </button>
-            <button @click="exportTxt"
-                style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Als Textdatei exportieren">
-                📄 TXT
-            </button>
-            <button @click="exportCsv"
-                style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Als CSV exportieren (Excel)">
-                📊 CSV
-            </button>
-            <button @click="exportBild"
-                style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Als Bild exportieren (PNG)">
-                📷 Bild
-            </button>
-            <button @click="alleLoeschen"
-                style="border:none; color:#ef4444; background:rgba(239,68,68,0.08); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:inherit;"
-                title="Alle Karten löschen">
-                🗑️
-            </button>
-            <span style="margin-left:auto; opacity:0.45; font-size:0.8rem;">{{ karten.length }} Karten</span>
         </div>
 
         <!-- KARTEN-BEREICH -->
@@ -483,9 +438,9 @@ const KartenabfrageWidget = {
 
         <!-- NEUE KARTE (manuell) -->
         <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:10px; display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
-            <div style="display:flex; gap:5px; align-items:center;">
+            <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
                 <span style="font-size:0.75rem; opacity:0.5; flex-shrink:0;">Manuell:</span>
-                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                <div style="display:flex; gap:4px; flex-wrap:wrap; flex-shrink:0;">
                     <button v-for="f in farben" :key="f"
                             @click="neueKarteFarbe=f"
                             :style="{
@@ -497,6 +452,45 @@ const KartenabfrageWidget = {
                                 outlineOffset: '1px'
                             }">
                     </button>
+                </div>
+                <!-- Toolbar rechts -->
+                <div style="margin-left:auto; display:flex; gap:3px; align-items:center; flex-wrap:wrap; flex-shrink:0;">
+                    <button @click="ansicht='freihand'"
+                        :style="{background: ansicht==='freihand' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
+                        style="border:none; color:var(--text-color); padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Frei anordnen (Drag & Drop)">Frei</button>
+                    <button @click="ansicht='grid'"
+                        :style="{background: ansicht==='grid' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
+                        style="border:none; color:var(--text-color); padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Rasteransicht">Grid</button>
+                    <button @click="ansicht='einzeln'"
+                        :style="{background: ansicht==='einzeln' ? 'var(--button-color)' : 'rgba(255,255,255,0.08)'}"
+                        style="border:none; color:var(--text-color); padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Einzelkarte anzeigen">Einzeln</button>
+                    <span style="width:1px; height:14px; background:rgba(255,255,255,0.15); display:inline-block; flex-shrink:0;"></span>
+                    <button @click="mischen"
+                        style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:4px 7px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Reihenfolge zufällig mischen">🔀</button>
+                    <button @click="toggleVerstecktModus"
+                        :style="{background: verstecktModus ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.08)'}"
+                        style="border:none; color:var(--text-color); padding:4px 7px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        :title="verstecktModus ? 'Modus: Karten verborgen – klicken zum Einblenden' : 'Alle verbergen (neue Karten sofort unsichtbar)'">
+                        {{ verstecktModus ? '👁️' : '🙈' }}
+                    </button>
+                    <span style="width:1px; height:14px; background:rgba(255,255,255,0.15); display:inline-block; flex-shrink:0;"></span>
+                    <button @click="exportTxt"
+                        style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:4px 7px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Als Textdatei exportieren">📄</button>
+                    <button @click="exportCsv"
+                        style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:4px 7px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Als CSV exportieren (Excel)">📊</button>
+                    <button @click="exportBild"
+                        style="border:none; color:var(--text-color); background:rgba(255,255,255,0.08); padding:4px 7px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Als Bild exportieren (PNG)">📷</button>
+                    <button @click="alleLoeschen"
+                        style="border:none; color:#ef4444; background:rgba(239,68,68,0.08); padding:4px 7px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;"
+                        title="Alle Karten löschen">🗑️</button>
+                    <span style="opacity:0.4; font-size:0.75rem; padding-left:2px;">{{ karten.length }}</span>
                 </div>
             </div>
             <div style="display:flex; gap:6px;">
