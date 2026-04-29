@@ -398,8 +398,9 @@ const KartenabfrageWidget = {
                 </div>
                 <template v-else>
                     <div :style="{
+                        position: 'relative',
                         background: aktuelleKarte.farbe,
-                        borderRadius: '16px',
+                        borderRadius: '2px',
                         padding: '30px 35px',
                         width: '80%',
                         maxWidth: '420px',
@@ -410,9 +411,10 @@ const KartenabfrageWidget = {
                         justifyContent: 'center',
                         gap: '10px',
                         opacity: aktuelleKarte.sichtbar !== false ? 1 : 0.4,
-                        boxShadow: '0 8px 30px rgba(0,0,0,0.35)',
+                        boxShadow: '3px 5px 20px rgba(0,0,0,0.4)',
                         transition: 'all 0.25s ease'
                     }">
+                        <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:54px; height:16px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.15); pointer-events:none; z-index:2;"></div>
                         <div v-if="aktuelleKarte.autor"
                              :style="{fontSize:'0.82rem', fontWeight:'700', color:textfarbe(aktuelleKarte.farbe), opacity:0.65}">
                             {{ aktuelleKarte.autor }}
