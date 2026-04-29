@@ -244,51 +244,56 @@ const ReflexionszielscheibeWidget = {
 
             <!-- ZIELSCHEIBE -->
             <div ref="zielscheibeBereich"
-                 style="flex:3; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.12); border-radius:10px; overflow:hidden; padding:10px; position:relative; min-width:0;">
-                <div v-if="bewertungen.length===0 && !verborgenModus"
-                     style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; opacity:0.3; pointer-events:none; z-index:1;">
-                    <div style="font-size:0.85rem;">Noch keine Rückmeldungen.</div>
-                </div>
+                 style="flex:3; display:flex; flex-direction:column; background:rgba(0,0,0,0.12); border-radius:10px; overflow:hidden; padding:10px; min-width:0; gap:6px;">
 
-                <svg viewBox="0 0 400 400" style="max-width:100%; max-height:100%; overflow:visible;">
-                    <!-- Ringe (von außen nach innen) -->
-                    <circle v-for="rg in svgRinge" :key="rg.i"
-                            cx="200" cy="200" :r="rg.r"
-                            :fill="rg.fill"
-                            stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+                <!-- SVG-Wrapper: nimmt alle verfügbare Höhe, SVG skaliert darin -->
+                <div style="flex:1; min-height:0; width:100%; display:flex; align-items:center; justify-content:center; position:relative;">
 
-                    <!-- Fadenkreuz -->
-                    <line x1="200" y1="28" x2="200" y2="372" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-                    <line x1="28" y1="200" x2="372" y2="200" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+                    <div v-if="bewertungen.length===0 && !verborgenModus"
+                         style="position:absolute; text-align:center; opacity:0.3; pointer-events:none; z-index:1; top:50%; left:50%; transform:translate(-50%,-50%);">
+                        <div style="font-size:0.85rem;">Noch keine Rückmeldungen.</div>
+                    </div>
 
-                    <!-- Ringbeschriftungen (leicht oben-rechts) -->
-                    <text v-for="lbl in ringLabels" :key="'l'+lbl.v"
-                          :x="lbl.x" :y="lbl.y"
-                          fill="rgba(255,255,255,0.28)" font-size="10" text-anchor="middle" dominant-baseline="middle"
-                          style="pointer-events:none; user-select:none;">{{ lbl.v }}</text>
+                    <svg viewBox="0 0 400 400" style="height:100%; width:auto; max-width:100%; overflow:visible;">
+                        <!-- Ringe (von außen nach innen) -->
+                        <circle v-for="rg in svgRinge" :key="rg.i"
+                                cx="200" cy="200" :r="rg.r"
+                                :fill="rg.fill"
+                                stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
 
-                    <!-- Mittelpunkt -->
-                    <circle cx="200" cy="200" r="4" fill="rgba(255,255,255,0.25)"/>
+                        <!-- Fadenkreuz -->
+                        <line x1="200" y1="28" x2="200" y2="372" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+                        <line x1="28" y1="200" x2="372" y2="200" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
 
-                    <!-- Pins -->
-                    <circle v-for="pin in svgPins" :key="pin.id"
-                            :cx="pin.x" :cy="pin.y" r="7"
-                            :fill="pin.color"
-                            opacity="0.82"
-                            stroke="rgba(0,0,0,0.45)" stroke-width="1.5"/>
-                </svg>
+                        <!-- Ringbeschriftungen -->
+                        <text v-for="lbl in ringLabels" :key="'l'+lbl.v"
+                              :x="lbl.x" :y="lbl.y"
+                              fill="rgba(255,255,255,0.28)" font-size="10" text-anchor="middle" dominant-baseline="middle"
+                              style="pointer-events:none; user-select:none;">{{ lbl.v }}</text>
 
-                <!-- Verborgen-Overlay -->
-                <div v-if="verborgenModus"
-                     style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(15,23,42,0.75); border-radius:10px; gap:6px;">
-                    <span style="font-size:1.5rem;">🙈</span>
-                    <span style="opacity:0.5; font-size:0.85rem;">Ergebnisse verborgen</span>
-                    <span v-if="bewertungen.length>0" style="opacity:0.4; font-size:0.75rem;">{{ bewertungen.length }} Rückmeldung{{ bewertungen.length !== 1 ? 'en' : '' }} eingegangen</span>
+                        <!-- Mittelpunkt -->
+                        <circle cx="200" cy="200" r="4" fill="rgba(255,255,255,0.25)"/>
+
+                        <!-- Pins -->
+                        <circle v-for="pin in svgPins" :key="pin.id"
+                                :cx="pin.x" :cy="pin.y" r="7"
+                                :fill="pin.color"
+                                opacity="0.82"
+                                stroke="rgba(0,0,0,0.45)" stroke-width="1.5"/>
+                    </svg>
+
+                    <!-- Verborgen-Overlay -->
+                    <div v-if="verborgenModus"
+                         style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(15,23,42,0.75); border-radius:8px; gap:6px;">
+                        <span style="font-size:1.5rem;">🙈</span>
+                        <span style="opacity:0.5; font-size:0.85rem;">Ergebnisse verborgen</span>
+                        <span v-if="bewertungen.length>0" style="opacity:0.4; font-size:0.75rem;">{{ bewertungen.length }} Rückmeldung{{ bewertungen.length !== 1 ? 'en' : '' }} eingegangen</span>
+                    </div>
                 </div>
 
                 <!-- Legende unten -->
                 <div v-if="fragen.length > 0"
-                     style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding-top:8px; flex-shrink:0;">
+                     style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; flex-shrink:0;">
                     <div v-for="(f, i) in fragen" :key="i"
                          style="display:flex; align-items:center; gap:5px; font-size:0.72rem; opacity:0.7;">
                         <span :style="{background: frageColors[i % frageColors.length], width:'10px', height:'10px', borderRadius:'50%', display:'inline-block', flexShrink:0}"></span>
