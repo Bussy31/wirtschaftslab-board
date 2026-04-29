@@ -313,17 +313,17 @@ const ReflexionszielscheibeWidget = {
             </div>
 
             <!-- STEUERUNG -->
-            <div style="flex:2; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-width:200px;" class="custom-scrollbar">
+            <div style="flex:1.5; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-width:160px;" class="custom-scrollbar">
 
                 <div style="font-size:0.72rem; opacity:0.45; text-transform:uppercase; letter-spacing:0.05em;">Fragen</div>
 
                 <div v-for="(f, i) in fragen" :key="i" style="display:flex; gap:5px; align-items:center;">
                     <span :style="{background: frageColors[i % frageColors.length], width:'10px', height:'10px', borderRadius:'50%', flex:'0 0 10px'}"></span>
                     <textarea :value="f"
-                           @input="frageAktualisieren(i, $event.target.value)"
+                           @input="e => { frageAktualisieren(i, e.target.value); e.target.style.height='auto'; e.target.style.height=e.target.scrollHeight+'px'; }"
                            @blur="frageBlur"
-                           rows="2"
-                           style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:5px 7px; color:var(--text-color); font-size:0.8rem; font-family:inherit; outline:none; min-width:0; resize:none; line-height:1.35;"></textarea>
+                           rows="1"
+                           style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:5px 7px; color:var(--text-color); font-size:0.8rem; font-family:inherit; outline:none; min-width:0; resize:none; line-height:1.35; overflow:hidden;"></textarea>
                     <span v-if="averages[i] !== null"
                           style="font-size:0.75rem; font-weight:700; flex-shrink:0; opacity:0.75; min-width:30px; text-align:right;">Ø {{ averages[i] }}</span>
                     <button @click="frageLoeschen(i)"
@@ -336,11 +336,11 @@ const ReflexionszielscheibeWidget = {
                 </button>
 
                 <div style="font-size:0.72rem; opacity:0.45; text-transform:uppercase; letter-spacing:0.05em; margin-top:6px;">Skala (Ringe)</div>
-                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                <div style="display:flex; gap:3px;">
                     <button v-for="n in [2,3,4,5,6,7,8,9,10]" :key="n"
                             @click="setRinge(n)"
                             :style="{background: ringe===n ? 'var(--button-color)' : 'rgba(255,255,255,0.07)'}"
-                            style="border:none; color:var(--text-color); padding:4px 7px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;">
+                            style="flex:1; border:none; color:var(--text-color); padding:4px 2px; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit;">
                         {{ n }}
                     </button>
                 </div>
