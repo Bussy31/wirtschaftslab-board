@@ -340,7 +340,7 @@ const ReflexionszielscheibeWidget = {
                     <button v-for="n in [2,3,4,5,6,7,8,9,10]" :key="n"
                             @click="setRinge(n)"
                             :style="{background: ringe===n ? 'var(--button-color)' : 'rgba(255,255,255,0.07)'}"
-                            style="flex:1; border:none; color:var(--text-color); padding:4px 0; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit; text-align:center;">
+                            style="flex:1; border:none; color:var(--text-color); padding:4px 0; border-radius:5px; cursor:pointer; font-size:0.78rem; font-family:inherit; display:flex; align-items:center; justify-content:center;">
                         {{ n }}
                     </button>
                 </div>
