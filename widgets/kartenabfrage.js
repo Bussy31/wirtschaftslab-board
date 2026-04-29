@@ -224,6 +224,19 @@ const KartenabfrageWidget = {
             if (!hex || hex.length < 7) return '#ffffff';
             const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
             return (r*299 + g*587 + b*114) / 1000 > 128 ? '#1e293b' : '#ffffff';
+        },
+        postItRotation(id) {
+            let h = 0;
+            const s = String(id);
+            for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) & 0xFFFF;
+            return ((h % 7) - 3) + 'deg';
+        },
+        darkenFarbe(hex) {
+            if (!hex || hex.length < 7) return hex;
+            const r = Math.max(0, parseInt(hex.slice(1,3),16) - 35);
+            const g = Math.max(0, parseInt(hex.slice(3,5),16) - 35);
+            const b = Math.max(0, parseInt(hex.slice(5,7),16) - 35);
+            return `rgb(${r},${g},${b})`;
         }
     },
     template: `
@@ -302,18 +315,21 @@ const KartenabfrageWidget = {
                          background: karte.farbe,
                          width: '160px',
                          minHeight: '90px',
-                         borderRadius: '10px',
-                         padding: '12px',
+                         borderRadius: '3px 12px 12px 12px',
+                         padding: '0 10px 10px 10px',
                          cursor: dragState.id === karte.id ? 'grabbing' : 'grab',
                          userSelect: 'none',
-                         opacity: karte.sichtbar !== false ? 1 : 0.3,
-                         boxShadow: dragState.id === karte.id ? '0 8px 25px rgba(0,0,0,0.5)' : '0 3px 12px rgba(0,0,0,0.3)',
+                         opacity: karte.sichtbar !== false ? 1 : 0.25,
+                         boxShadow: dragState.id === karte.id ? '4px 8px 20px rgba(0,0,0,0.55)' : '3px 5px 14px rgba(0,0,0,0.38)',
                          zIndex: dragState.id === karte.id ? 10 : 1,
                          display: 'flex',
                          flexDirection: 'column',
                          gap: '6px',
+                         transform: 'rotate(' + postItRotation(karte.id) + ')',
                          transition: dragState.active ? 'none' : 'box-shadow 0.2s'
                      }">
+                    <!-- Post-it Klebestreifen oben -->
+                    <div :style="{background: darkenFarbe(karte.farbe), height:'9px', margin:'0 -10px 8px -10px', borderRadius:'3px 12px 0 0', flexShrink:0}"></div>
                     <div v-if="karte.autor"
                          :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
                         {{ karte.autor }}
@@ -323,11 +339,6 @@ const KartenabfrageWidget = {
                         {{ karte.sichtbar !== false ? karte.text : '???' }}
                     </div>
                     <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0;">
-                        <button @click.stop="karteToggle(karte)"
-                                @mousedown.stop
-                                :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
-                            {{ karte.sichtbar !== false ? '👁️' : '🙈' }}
-                        </button>
                         <button @click.stop="karteLoeschen(karte.id)"
                                 @mousedown.stop
                                 :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
@@ -346,19 +357,22 @@ const KartenabfrageWidget = {
                     Noch keine Karten.
                     <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
                 </div>
-                <div v-if="karten.length>0" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; padding:4px;">
+                <div v-if="karten.length>0" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; padding:6px 4px;">
                     <div v-for="karte in karten" :key="karte.id"
                          :style="{
                              background: karte.farbe,
-                             opacity: karte.sichtbar !== false ? 1 : 0.3,
-                             borderRadius: '10px',
-                             padding: '12px',
+                             opacity: karte.sichtbar !== false ? 1 : 0.25,
+                             borderRadius: '3px 12px 12px 12px',
+                             padding: '0 10px 10px 10px',
                              minHeight: '90px',
                              display: 'flex',
                              flexDirection: 'column',
                              gap: '6px',
+                             boxShadow: '3px 5px 14px rgba(0,0,0,0.35)',
+                             transform: 'rotate(' + postItRotation(karte.id) + ')',
                              transition: 'opacity 0.2s'
                          }">
+                        <div :style="{background: darkenFarbe(karte.farbe), height:'9px', margin:'0 -10px 8px -10px', borderRadius:'3px 12px 0 0', flexShrink:0}"></div>
                         <div v-if="karte.autor"
                              :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
                             {{ karte.autor }}
@@ -368,10 +382,6 @@ const KartenabfrageWidget = {
                             {{ karte.sichtbar !== false ? karte.text : '???' }}
                         </div>
                         <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0;">
-                            <button @click="karteToggle(karte)"
-                                    :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
-                                {{ karte.sichtbar !== false ? '👁️' : '🙈' }}
-                            </button>
                             <button @click="karteLoeschen(karte.id)"
                                     :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
                                 ✕
@@ -427,10 +437,6 @@ const KartenabfrageWidget = {
                                 :style="{opacity: aktuelleKarteIdx===karten.length-1 ? 0.25 : 1}"
                                 style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:8px 18px; border-radius:8px; cursor:pointer; font-size:1rem; font-family:inherit;">▶</button>
                     </div>
-                    <button @click="karteToggle(aktuelleKarte)"
-                            style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.85rem; font-family:inherit;">
-                        {{ aktuelleKarte.sichtbar !== false ? '🙈 Verbergen' : '👁️ Einblenden' }}
-                    </button>
                 </template>
             </div>
 
