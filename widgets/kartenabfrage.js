@@ -333,7 +333,7 @@ const KartenabfrageWidget = {
                          :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
                         {{ karte.autor }}
                     </div>
-                    <div :style="{color:textfarbe(karte.farbe), fontSize:'0.85rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3}">
+                    <div :style="{color:textfarbe(karte.farbe), fontSize:'1rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3, display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', fontWeight:'500'}">
                         {{ karte.sichtbar !== false ? karte.text : '???' }}
                     </div>
                     <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
@@ -417,7 +417,7 @@ const KartenabfrageWidget = {
                              :style="{fontSize:'0.82rem', fontWeight:'700', color:textfarbe(aktuelleKarte.farbe), opacity:0.65}">
                             {{ aktuelleKarte.autor }}
                         </div>
-                        <div :style="{color:textfarbe(aktuelleKarte.farbe), fontSize:'1.15rem', textAlign:'center', lineHeight:'1.55', fontWeight:'500'}">
+                        <div :style="{color:textfarbe(aktuelleKarte.farbe), fontSize:'1.45rem', textAlign:'center', lineHeight:'1.45', fontWeight:'500'}">
                             {{ aktuelleKarte.sichtbar !== false ? aktuelleKarte.text : '???' }}
                         </div>
                     </div>
