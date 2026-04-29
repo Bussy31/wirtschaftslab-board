@@ -370,7 +370,7 @@ const KartenabfrageWidget = {
                              boxShadow: '3px 5px 14px rgba(0,0,0,0.35)',
                                  transition: 'opacity 0.2s'
                          }">
-                        <div style="position:absolute; left:-4px; right:-4px; top:50%; transform:translateY(-50%); height:18px; background:rgba(255,255,255,0.18); border-top:1px solid rgba(255,255,255,0.12); border-bottom:1px solid rgba(255,255,255,0.12); pointer-events:none; z-index:2;"></div>
+                        <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:44px; height:16px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.15); pointer-events:none; z-index:2;"></div>
                         <div v-if="karte.autor"
                              :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
                             {{ karte.autor }}
