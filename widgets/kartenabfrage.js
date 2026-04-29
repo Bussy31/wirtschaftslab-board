@@ -315,8 +315,8 @@ const KartenabfrageWidget = {
                          background: karte.farbe,
                          width: '160px',
                          minHeight: '90px',
-                         borderRadius: '3px 12px 12px 12px',
-                         padding: '0 10px 10px 10px',
+                         borderRadius: '2px',
+                         padding: '10px',
                          cursor: dragState.id === karte.id ? 'grabbing' : 'grab',
                          userSelect: 'none',
                          opacity: karte.sichtbar !== false ? 1 : 0.25,
@@ -325,20 +325,18 @@ const KartenabfrageWidget = {
                          display: 'flex',
                          flexDirection: 'column',
                          gap: '6px',
-                         transform: 'rotate(' + postItRotation(karte.id) + ')',
                          transition: dragState.active ? 'none' : 'box-shadow 0.2s'
                      }">
-                    <!-- Post-it Klebestreifen oben -->
-                    <div :style="{background: darkenFarbe(karte.farbe), height:'9px', margin:'0 -10px 8px -10px', borderRadius:'3px 12px 0 0', flexShrink:0}"></div>
+                    <!-- Tesa-Streifen -->
+                    <div style="position:absolute; left:-4px; right:-4px; top:50%; transform:translateY(-50%); height:18px; background:rgba(255,255,255,0.18); border-top:1px solid rgba(255,255,255,0.12); border-bottom:1px solid rgba(255,255,255,0.12); pointer-events:none; z-index:2;"></div>
                     <div v-if="karte.autor"
-                         :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
+                         :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
                         {{ karte.autor }}
                     </div>
-                    <div style="flex:1;"
-                         :style="{color:textfarbe(karte.farbe), fontSize:'0.85rem', lineHeight:'1.4', wordBreak:'break-word'}">
+                    <div :style="{color:textfarbe(karte.farbe), fontSize:'0.85rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3}">
                         {{ karte.sichtbar !== false ? karte.text : '???' }}
                     </div>
-                    <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0;">
+                    <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
                         <button @click.stop="karteLoeschen(karte.id)"
                                 @mousedown.stop
                                 :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
@@ -360,28 +358,27 @@ const KartenabfrageWidget = {
                 <div v-if="karten.length>0" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; padding:6px 4px;">
                     <div v-for="karte in karten" :key="karte.id"
                          :style="{
+                             position: 'relative',
                              background: karte.farbe,
                              opacity: karte.sichtbar !== false ? 1 : 0.25,
-                             borderRadius: '3px 12px 12px 12px',
-                             padding: '0 10px 10px 10px',
+                             borderRadius: '2px',
+                             padding: '10px',
                              minHeight: '90px',
                              display: 'flex',
                              flexDirection: 'column',
                              gap: '6px',
                              boxShadow: '3px 5px 14px rgba(0,0,0,0.35)',
-                             transform: 'rotate(' + postItRotation(karte.id) + ')',
-                             transition: 'opacity 0.2s'
+                                 transition: 'opacity 0.2s'
                          }">
-                        <div :style="{background: darkenFarbe(karte.farbe), height:'9px', margin:'0 -10px 8px -10px', borderRadius:'3px 12px 0 0', flexShrink:0}"></div>
+                        <div style="position:absolute; left:-4px; right:-4px; top:50%; transform:translateY(-50%); height:18px; background:rgba(255,255,255,0.18); border-top:1px solid rgba(255,255,255,0.12); border-bottom:1px solid rgba(255,255,255,0.12); pointer-events:none; z-index:2;"></div>
                         <div v-if="karte.autor"
-                             :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
+                             :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
                             {{ karte.autor }}
                         </div>
-                        <div style="flex:1;"
-                             :style="{color:textfarbe(karte.farbe), fontSize:'0.88rem', lineHeight:'1.4', wordBreak:'break-word'}">
+                        <div :style="{color:textfarbe(karte.farbe), fontSize:'0.88rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3}">
                             {{ karte.sichtbar !== false ? karte.text : '???' }}
                         </div>
-                        <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0;">
+                        <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
                             <button @click="karteLoeschen(karte.id)"
                                     :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
                                 ✕
