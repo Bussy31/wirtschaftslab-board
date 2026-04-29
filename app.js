@@ -517,7 +517,7 @@ const app = createApp({
                 this.widgets.push({
                     id: Date.now(),
                     type: 'reflexionszielscheibe',
-                    icon: '🎯',
+                    icon: '⭕',
                     isOverlay: true,
                     x: Math.round((window.innerWidth - w) / 2),
                     y: Math.round((window.innerHeight - h) / 2),

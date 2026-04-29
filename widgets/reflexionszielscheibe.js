@@ -42,16 +42,35 @@ const ReflexionszielscheibeWidget = {
         },
         svgPins() {
             if (this.verborgenModus) return [];
-            const pins = [];
             const R = 175, cx = 200, cy = 200;
             const N = this.ringe;
+            const nQ = Math.max(1, this.fragen.length);
+
+            // Count pins per (qi, ring) bucket for even angular distribution
+            const buckets = {};
+            this.bewertungen.forEach(b => {
+                if (!b.ratings) return;
+                b.ratings.forEach((r, qi) => {
+                    const key = qi + '-' + r;
+                    buckets[key] = (buckets[key] || 0) + 1;
+                });
+            });
+
+            const bucketIdx = {};
+            const pins = [];
             this.bewertungen.forEach(b => {
                 if (!b.ratings) return;
                 b.ratings.forEach((rating, qi) => {
                     if (rating < 1 || rating > N) return;
+                    const key = qi + '-' + rating;
+                    const total = buckets[key];
+                    const idx = bucketIdx[key] || 0;
+                    bucketIdx[key] = idx + 1;
+
                     const radius = R * (rating - 0.5) / N;
-                    const h = this._hash(b.id + '-' + qi);
-                    const angle = (h % 360) * Math.PI / 180;
+                    // Spread evenly around ring; offset per question so different questions don't stack
+                    const qOffset = (qi / nQ) * (2 * Math.PI / Math.max(total, 1));
+                    const angle = (idx / total) * 2 * Math.PI + qOffset;
                     pins.push({
                         id: b.id + '-' + qi,
                         x: cx + radius * Math.cos(angle),
@@ -291,16 +310,6 @@ const ReflexionszielscheibeWidget = {
                     </div>
                 </div>
 
-                <!-- Legende unten -->
-                <div v-if="fragen.length > 0"
-                     style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; flex-shrink:0;">
-                    <div v-for="(f, i) in fragen" :key="i"
-                         style="display:flex; align-items:center; gap:5px; font-size:0.72rem; opacity:0.7;">
-                        <span :style="{background: frageColors[i % frageColors.length], width:'10px', height:'10px', borderRadius:'50%', display:'inline-block', flexShrink:0}"></span>
-                        <span style="max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :title="f">{{ f }}</span>
-                        <span v-if="averages[i] !== null" style="opacity:0.7; font-weight:600;">Ø {{ averages[i] }}</span>
-                    </div>
-                </div>
             </div>
 
             <!-- STEUERUNG -->
@@ -314,6 +323,8 @@ const ReflexionszielscheibeWidget = {
                            @input="frageAktualisieren(i, $event.target.value)"
                            @blur="frageBlur"
                            style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:5px 7px; color:var(--text-color); font-size:0.8rem; font-family:inherit; outline:none; min-width:0;">
+                    <span v-if="averages[i] !== null"
+                          style="font-size:0.75rem; font-weight:700; flex-shrink:0; opacity:0.75; min-width:30px; text-align:right;">Ø {{ averages[i] }}</span>
                     <button @click="frageLoeschen(i)"
                             style="background:rgba(239,68,68,0.1); border:none; color:#f87171; border-radius:4px; cursor:pointer; padding:3px 6px; font-size:0.72rem; flex-shrink:0;">✕</button>
                 </div>
