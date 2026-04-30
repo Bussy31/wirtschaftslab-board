@@ -545,6 +545,10 @@ const app = createApp({
             this.saveToLocal();
         },
         removeWidget(index) {
+            const w = this.widgets[index];
+            if (w && w.type === 'kanban' && w._sessionActive) {
+                if (!confirm('Das Kanban-Board hat eine aktive Session. Wenn du es schließt, werden alle Schüler getrennt und der Stand gelöscht.\n\nFortfahren?')) return;
+            }
             this.widgets.splice(index, 1);
             this.saveToLocal();
         },
@@ -813,5 +817,6 @@ app.component('stundenziel-widget', StundenzielWidget);
 app.component('dateimanagement-widget', DateimanagementWidget);
 app.component('kartenabfrage-widget', KartenabfrageWidget);
 app.component('reflexionszielscheibe-widget', ReflexionszielscheibeWidget);
+app.component('kanban-widget', KanbanWidget);
 
 app.mount('#app');

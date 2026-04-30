@@ -28,7 +28,7 @@ const KartenabfrageWidget = {
         },
         studentUrl() {
             if (!this.sessionId) return '';
-            const path = window.location.pathname.replace('board.html', 'student.html');
+            const path = window.location.pathname.replace('board.html', 'student-kartenabfrage.html');
             return `${window.location.origin}${path}?session=${this.sessionId}`;
         },
         qrSrc() {
