@@ -341,6 +341,19 @@ const ReflexionszielscheibeWidget = {
                     </div>
                 </div>
 
+                <!-- Legende (immer sichtbar, wird mit exportiert) -->
+                <div v-if="fragen.length > 0"
+                     style="display:flex; flex-wrap:wrap; gap:4px 12px; padding:6px 4px 2px; border-top:1px solid rgba(255,255,255,0.07); flex-shrink:0;">
+                    <div v-for="(f, i) in fragen" :key="i"
+                         style="display:flex; align-items:center; gap:5px; min-width:0;">
+                        <span :style="{background: frageColors[i % frageColors.length]}"
+                              style="width:9px; height:9px; border-radius:50%; flex-shrink:0; display:inline-block;"></span>
+                        <span style="font-size:0.72rem; opacity:0.75; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">{{ f }}</span>
+                        <span v-if="averages[i] !== null"
+                              style="font-size:0.7rem; opacity:0.5; flex-shrink:0;">Ø {{ averages[i] }}</span>
+                    </div>
+                </div>
+
             </div>
 
             <!-- STEUERUNG -->
