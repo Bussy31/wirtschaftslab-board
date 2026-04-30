@@ -55,7 +55,7 @@ const KanbanWidget = {
             if (!posPerSpalte[k.spalte]) posPerSpalte[k.spalte] = 0;
             const idx = posPerSpalte[k.spalte]++;
             if (k.x == null) k.x = 10 + (idx % 2) * 150;
-            if (k.y == null) k.y = 10 + Math.floor(idx / 2) * 150;
+            if (k.y == null) k.y = 20 + Math.floor(idx / 2) * 150;
             if (!k.w) k.w = 130;
             if (!k.h) k.h = 130;
         });
@@ -108,7 +108,7 @@ const KanbanWidget = {
                             nc.w = existing.w || 130; nc.h = existing.h || 130;
                         } else {
                             nc.x = 10 + (i % 2) * 150;
-                            nc.y = 10 + Math.floor(i / 2) * 150;
+                            nc.y = 20 + Math.floor(i / 2) * 150;
                             nc.w = 130; nc.h = 130;
                         }
                     });
@@ -153,7 +153,7 @@ const KanbanWidget = {
                 farbe: this.neueKarteFarbe,
                 spalte,
                 x: 10 + (existing.length % 2) * (w + 15) + Math.round(Math.random() * 8),
-                y: 10 + Math.floor(existing.length / 2) * (h + 15) + Math.round(Math.random() * 8),
+                y: 20 + Math.floor(existing.length / 2) * (h + 15) + Math.round(Math.random() * 8),
                 w, h
             };
             this.widgetData.karten.push(card);
@@ -281,7 +281,7 @@ const KanbanWidget = {
 
         <!-- SESSION-PANEL (inaktiv) -->
         <div v-if="!sessionActive"
-             style="background:rgba(59,130,246,0.08); border:1px dashed rgba(59,130,246,0.35); border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+             style="background:color-mix(in srgb, var(--button-color) 8%, transparent); border:1px dashed var(--button-color); border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
             <span style="font-size:0.85rem; opacity:0.7;">Schüler können noch nicht am Kanban-Board arbeiten.</span>
             <button @click="startSession"
                     :disabled="wsStatus==='connecting'"
@@ -373,7 +373,7 @@ const KanbanWidget = {
                         <div draggable="true"
                              @dragstart.stop="dragStart(karte.id)"
                              @dragend.stop="dragEnd"
-                             style="position:absolute; left:50%; top:0; transform:translateX(-50%);
+                             style="position:absolute; left:50%; top:-8px; transform:translateX(-50%);
                                     width:44px; height:14px;
                                     background:rgba(255,255,255,0.25);
                                     border-left:1px solid rgba(255,255,255,0.18);
@@ -385,7 +385,7 @@ const KanbanWidget = {
                         <!-- Karten-Inhalt (Drag zum freien Verschieben) -->
                         <div @mousedown.prevent="cardMousedown(karte, $event)"
                              style="flex:1; display:flex; flex-direction:column; gap:3px;
-                                    padding:18px 8px 20px; cursor:grab;">
+                                    padding:6px 8px 20px; cursor:grab;">
                             <div v-if="karte.autor"
                                  :style="{fontSize:'0.68rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
                                 {{ karte.autor }}

@@ -250,7 +250,7 @@ const ReflexionszielscheibeWidget = {
 
         <!-- SESSION-PANEL (inaktiv) -->
         <div v-if="!sessionActive"
-             style="background:rgba(59,130,246,0.08); border:1px dashed rgba(59,130,246,0.35); border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+             style="background:color-mix(in srgb, var(--button-color) 8%, transparent); border:1px dashed var(--button-color); border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
             <span style="font-size:0.85rem; opacity:0.7;">Schüler können noch keine Rückmeldung geben.</span>
             <button @click="startSession"
                     :disabled="wsStatus==='connecting' || fragen.length===0"
