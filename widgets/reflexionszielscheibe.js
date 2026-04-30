@@ -8,6 +8,7 @@ const ReflexionszielscheibeWidget = {
             sessionActive: false,
             studentCount: 0,
             showQr: false,
+            qrModalOffen: false,
             wsStatus: 'idle',
             verborgenModus: false,
             sortiertModus: false,
@@ -279,7 +280,7 @@ const ReflexionszielscheibeWidget = {
             </div>
             <div v-if="showQr"
                  style="display:flex; gap:16px; align-items:flex-start; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08);">
-                <img :src="qrSrc" style="width:110px; height:110px; border-radius:8px; background:white; flex-shrink:0;" alt="QR Code">
+                <img :src="qrSrc" @click="qrModalOffen = true" style="width:110px; height:110px; border-radius:8px; background:white; flex-shrink:0; cursor:zoom-in;" alt="QR Code" title="Klicken zum Vergrößern">
                 <div style="display:flex; flex-direction:column; gap:5px; min-width:0;">
                     <div style="font-size:0.78rem; opacity:0.55;">Schüler scannen diesen Code:</div>
                     <div style="font-size:0.72rem; word-break:break-all; opacity:0.6; background:rgba(0,0,0,0.2); padding:5px 8px; border-radius:6px;">{{ studentUrl }}</div>
@@ -422,6 +423,15 @@ const ReflexionszielscheibeWidget = {
             </div>
 
         </div>
+    </div>
+
+    <!-- QR-Modal -->
+    <div v-if="qrModalOffen"
+         @click="qrModalOffen = false"
+         style="position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.75); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; cursor:zoom-out;">
+        <img :src="qrSrc.replace('160x160','400x400')" @click.stop style="width:280px; height:280px; border-radius:16px; background:white; box-shadow:0 20px 60px rgba(0,0,0,0.6);" alt="QR Code groß">
+        <div style="font-size:0.8rem; opacity:0.5; color:white;">Klicken zum Schließen</div>
+        <div style="font-size:0.72rem; word-break:break-all; opacity:0.55; color:white; max-width:320px; text-align:center;">{{ studentUrl }}</div>
     </div>
     `
 };
