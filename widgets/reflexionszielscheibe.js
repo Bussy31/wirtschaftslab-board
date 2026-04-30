@@ -10,6 +10,7 @@ const ReflexionszielscheibeWidget = {
             showQr: false,
             wsStatus: 'idle',
             verborgenModus: false,
+            sortiertModus: false,
             frageColors: ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316'],
         }
     },
@@ -46,7 +47,39 @@ const ReflexionszielscheibeWidget = {
             const N = this.ringe;
             const nQ = Math.max(1, this.fragen.length);
 
-            // Count pins per (qi, ring) bucket for even angular distribution
+            if (this.sortiertModus) {
+                // Group each question into its own angular sector
+                const byQuestion = {};
+                this.bewertungen.forEach(b => {
+                    if (!b.ratings) return;
+                    b.ratings.forEach((rating, qi) => {
+                        if (rating < 1 || rating > N) return;
+                        if (!byQuestion[qi]) byQuestion[qi] = [];
+                        byQuestion[qi].push({ rating, bid: b.id });
+                    });
+                });
+                const pins = [];
+                for (let qi = 0; qi < nQ; qi++) {
+                    const items = byQuestion[qi] || [];
+                    if (!items.length) continue;
+                    const sectorStart = (qi / nQ) * 2 * Math.PI - Math.PI / 2;
+                    const sectorWidth = (2 * Math.PI) / nQ;
+                    const color = this.frageColors[qi % this.frageColors.length];
+                    items.forEach((item, idx) => {
+                        const radius = R * (item.rating - 0.5) / N;
+                        const angle = sectorStart + ((idx + 0.5) / items.length) * sectorWidth;
+                        pins.push({
+                            id: item.bid + '-' + qi,
+                            x: cx + radius * Math.cos(angle),
+                            y: cy + radius * Math.sin(angle),
+                            color
+                        });
+                    });
+                }
+                return pins;
+            }
+
+            // Unsorted: spread evenly around full circle per bucket
             const buckets = {};
             this.bewertungen.forEach(b => {
                 if (!b.ratings) return;
@@ -55,7 +88,6 @@ const ReflexionszielscheibeWidget = {
                     buckets[key] = (buckets[key] || 0) + 1;
                 });
             });
-
             const bucketIdx = {};
             const pins = [];
             this.bewertungen.forEach(b => {
@@ -66,9 +98,7 @@ const ReflexionszielscheibeWidget = {
                     const total = buckets[key];
                     const idx = bucketIdx[key] || 0;
                     bucketIdx[key] = idx + 1;
-
                     const radius = R * (rating - 0.5) / N;
-                    // Spread evenly around ring; offset per question so different questions don't stack
                     const qOffset = (qi / nQ) * (2 * Math.PI / Math.max(total, 1));
                     const angle = (idx / total) * 2 * Math.PI + qOffset;
                     pins.push({
@@ -295,10 +325,11 @@ const ReflexionszielscheibeWidget = {
 
                         <!-- Pins -->
                         <circle v-for="pin in svgPins" :key="pin.id"
-                                :cx="pin.x" :cy="pin.y" r="7"
+                                cx="0" cy="0" r="7"
                                 :fill="pin.color"
                                 opacity="0.82"
-                                stroke="rgba(0,0,0,0.45)" stroke-width="1.5"/>
+                                stroke="rgba(0,0,0,0.45)" stroke-width="1.5"
+                                :style="{ transform: 'translate(' + pin.x + 'px,' + pin.y + 'px)', transition: 'transform 0.65s cubic-bezier(0.4,0,0.2,1)' }"/>
                     </svg>
 
                     <!-- Verborgen-Overlay -->
@@ -357,6 +388,13 @@ const ReflexionszielscheibeWidget = {
                         style="border:none; color:var(--text-color); padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.8rem; font-family:inherit; text-align:left;"
                         :title="verborgenModus ? 'Ergebnisse anzeigen' : 'Ergebnisse verbergen'">
                     {{ verborgenModus ? '👁️ Anzeigen' : '🙈 Verbergen' }}
+                </button>
+
+                <button @click="sortiertModus = !sortiertModus"
+                        :style="{background: sortiertModus ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.07)', borderColor: sortiertModus ? 'rgba(59,130,246,0.5)' : 'transparent'}"
+                        style="border:1px solid transparent; color:var(--text-color); padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.8rem; font-family:inherit; text-align:left;"
+                        :title="sortiertModus ? 'Gemischt anzeigen' : 'Nach Fragen sortieren'">
+                    {{ sortiertModus ? '🔀 Gemischt' : '🗂️ Sortieren' }}
                 </button>
 
                 <button @click="exportBild"
