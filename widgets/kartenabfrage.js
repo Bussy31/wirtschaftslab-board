@@ -10,11 +10,11 @@ const KartenabfrageWidget = {
             showQr: false,
             wsStatus: 'idle',
             neueKarteText: '',
-            neueKarteFarbe: '#3b82f6',
+            neueKarteFarbe: '#fbbf24',
             neueKarteAutor: '',
             ansicht: 'freihand',
             aktuelleKarteIdx: 0,
-            farben: ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#ffffff','#1e293b'],
+            farben: ['#fbbf24','#f87171','#86efac','#93c5fd','#c4b5fd','#f9a8d4','#5eead4','#fdba74','#ffffff','#475569'],
             dragState: { active: false, id: null },
             verstecktModus: false,
             qrModalOffen: false

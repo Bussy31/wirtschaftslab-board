@@ -16,7 +16,8 @@ const KanbanWidget = {
             neueKarteSpalte: null,
             dragCardId: null,
             dragOverSpalte: null,
-            dragOverCardId: null,
+            freeDragState: { active: false },
+            spaltenRefs: {},
             farben: ['#fbbf24','#f87171','#86efac','#93c5fd','#c4b5fd','#f9a8d4','#5eead4','#fdba74','#ffffff','#475569'],
         }
     },
@@ -48,8 +49,24 @@ const KanbanWidget = {
     mounted() {
         if (!this.widgetData.spalten) this.widgetData.spalten = ['Aufgabe', 'In Bearbeitung', 'Erledigt'];
         if (!this.widgetData.karten) this.widgetData.karten = [];
+        // Initialize positions for existing cards without them
+        const posPerSpalte = {};
+        (this.widgetData.karten || []).forEach(k => {
+            if (!posPerSpalte[k.spalte]) posPerSpalte[k.spalte] = 0;
+            const idx = posPerSpalte[k.spalte]++;
+            if (k.x == null) k.x = 10 + (idx % 2) * 150;
+            if (k.y == null) k.y = 10 + Math.floor(idx / 2) * 150;
+            if (!k.w) k.w = 130;
+            if (!k.h) k.h = 130;
+        });
+        this._onMousemove = this.onMousemove.bind(this);
+        this._onMouseup = this.onMouseup.bind(this);
+        document.addEventListener('mousemove', this._onMousemove);
+        document.addEventListener('mouseup', this._onMouseup);
     },
     beforeUnmount() {
+        document.removeEventListener('mousemove', this._onMousemove);
+        document.removeEventListener('mouseup', this._onMouseup);
         this.stopSession();
     },
     methods: {
@@ -82,7 +99,20 @@ const KanbanWidget = {
                     this.studentCount = msg.count;
                 }
                 if (msg.type === 'kanban_update') {
-                    this.widgetData.karten = msg.board.cards;
+                    const newCards = msg.board.cards;
+                    // Preserve local x/y/w/h; initialize for new cards
+                    newCards.forEach((nc, i) => {
+                        const existing = (this.widgetData.karten || []).find(k => k.id === nc.id);
+                        if (existing && existing.x != null) {
+                            nc.x = existing.x; nc.y = existing.y;
+                            nc.w = existing.w || 130; nc.h = existing.h || 130;
+                        } else {
+                            nc.x = 10 + (i % 2) * 150;
+                            nc.y = 10 + Math.floor(i / 2) * 150;
+                            nc.w = 130; nc.h = 130;
+                        }
+                    });
+                    this.widgetData.karten = newCards;
                     this.$emit('save');
                 }
             };
@@ -112,14 +142,20 @@ const KanbanWidget = {
         },
         karteHinzufuegen() {
             if (!this.neueKarteText.trim()) return;
+            if (!this.widgetData.karten) this.widgetData.karten = [];
+            const spalte = this.aktiveSpalte;
+            const existing = this.widgetData.karten.filter(k => k.spalte === spalte);
+            const w = 130, h = 130;
             const card = {
                 id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
                 text: this.neueKarteText.trim(),
                 autor: this.neueKarteAutor.trim(),
                 farbe: this.neueKarteFarbe,
-                spalte: this.aktiveSpalte
+                spalte,
+                x: 10 + (existing.length % 2) * (w + 15) + Math.round(Math.random() * 8),
+                y: 10 + Math.floor(existing.length / 2) * (h + 15) + Math.round(Math.random() * 8),
+                w, h
             };
-            if (!this.widgetData.karten) this.widgetData.karten = [];
             this.widgetData.karten.push(card);
             this.$emit('save');
             this.wsSend({ type: 'kanban_card_add', text: card.text, autor: card.autor, farbe: card.farbe, spalte: card.spalte });
@@ -131,52 +167,99 @@ const KanbanWidget = {
             this.$emit('save');
             this.wsSend({ type: 'kanban_card_delete', cardId: id });
         },
-        dragStart(id) {
-            this.dragCardId = id;
-        },
-        dragEnd() {
-            this.dragCardId = null;
-            this.dragOverSpalte = null;
-            this.dragOverCardId = null;
-        },
-        dropOnCard(targetId) {
-            if (!this.dragCardId || this.dragCardId === targetId) {
-                this.dragCardId = null;
-                this.dragOverCardId = null;
-                return;
-            }
-            const cards = this.widgetData.karten;
-            const dragged = cards.find(k => k.id === this.dragCardId);
-            const target = cards.find(k => k.id === targetId);
-            if (!dragged || !target) return;
-
-            const targetSpalte = target.spalte;
-            const fromIdx = cards.indexOf(dragged);
-            cards.splice(fromIdx, 1);
-            const toIdx = cards.indexOf(target);
-            dragged.spalte = targetSpalte;
-            cards.splice(toIdx, 0, dragged);
-
-            this.$emit('save');
-            this.wsSend({ type: 'kanban_card_move', cardId: dragged.id, spalte: targetSpalte });
-            this.dragCardId = null;
-            this.dragOverCardId = null;
-            this.dragOverSpalte = null;
-        },
-        dropOnSpalte(spalte) {
+        // HTML5 drag for cross-column via tape strip
+        dragStart(id) { this.dragCardId = id; },
+        dragEnd() { this.dragCardId = null; this.dragOverSpalte = null; },
+        dropOnSpalte(spalte, e) {
             if (!this.dragCardId) return;
             const card = this.widgetData.karten.find(k => k.id === this.dragCardId);
             if (card && card.spalte !== spalte) {
-                const fromIdx = this.widgetData.karten.indexOf(card);
-                this.widgetData.karten.splice(fromIdx, 1);
+                const el = this.spaltenRefs[spalte];
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    const w = card.w || 130, h = card.h || 130;
+                    card.x = Math.max(0, Math.min(el.clientWidth - w, e.clientX - rect.left - w / 2));
+                    card.y = Math.max(0, Math.min(el.clientHeight - h, e.clientY - rect.top - h / 2));
+                }
                 card.spalte = spalte;
-                this.widgetData.karten.push(card);
                 this.$emit('save');
                 this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte });
             }
             this.dragCardId = null;
             this.dragOverSpalte = null;
-            this.dragOverCardId = null;
+        },
+        // Free mouse drag within/across columns
+        cardMousedown(card, e) {
+            this.freeDragState = {
+                active: true,
+                cardId: card.id,
+                type: 'move',
+                startMouseX: e.clientX,
+                startMouseY: e.clientY,
+                startCardX: card.x || 0,
+                startCardY: card.y || 0,
+            };
+        },
+        resizeMousedown(card, e) {
+            this.freeDragState = {
+                active: true,
+                cardId: card.id,
+                type: 'resize',
+                startMouseX: e.clientX,
+                startMouseY: e.clientY,
+                startW: card.w || 130,
+                startH: card.h || 130,
+            };
+        },
+        onMousemove(e) {
+            if (!this.freeDragState.active) return;
+            const state = this.freeDragState;
+            const card = this.widgetData.karten.find(k => k.id === state.cardId);
+            if (!card) return;
+            const dx = e.clientX - state.startMouseX;
+            const dy = e.clientY - state.startMouseY;
+            if (state.type === 'move') {
+                card.x = state.startCardX + dx;
+                card.y = state.startCardY + dy;
+            } else if (state.type === 'resize') {
+                card.w = Math.max(80, state.startW + dx);
+                card.h = Math.max(80, state.startH + dy);
+            }
+        },
+        onMouseup(e) {
+            if (!this.freeDragState.active) return;
+            const state = this.freeDragState;
+            if (state.type === 'move') {
+                const card = this.widgetData.karten.find(k => k.id === state.cardId);
+                if (card) {
+                    // Check if card landed in a different column
+                    let targetSpalte = null;
+                    for (const [spalte, el] of Object.entries(this.spaltenRefs)) {
+                        if (!el) continue;
+                        const rect = el.getBoundingClientRect();
+                        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                            e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                            targetSpalte = spalte;
+                            break;
+                        }
+                    }
+                    if (targetSpalte && targetSpalte !== card.spalte) {
+                        const el = this.spaltenRefs[targetSpalte];
+                        if (el) {
+                            const rect = el.getBoundingClientRect();
+                            const w = card.w || 130, h = card.h || 130;
+                            card.x = Math.max(0, e.clientX - rect.left - w / 2);
+                            card.y = Math.max(0, e.clientY - rect.top - h / 2);
+                        }
+                        card.spalte = targetSpalte;
+                        this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: targetSpalte });
+                    }
+                    this.$emit('save');
+                }
+            } else if (state.type === 'resize') {
+                this.$emit('save');
+            }
+            this.freeDragState = { active: false };
         },
         alleLoeschen() {
             if (confirm('Alle Karten löschen?')) {
@@ -239,11 +322,12 @@ const KanbanWidget = {
         </div>
 
         <!-- KANBAN BOARD -->
-        <div style="flex:1; display:flex; gap:10px; min-height:0; overflow:hidden;">
+        <div style="flex:1; display:flex; gap:10px; min-height:0; overflow:visible;">
             <div v-for="spalte in spalten" :key="spalte"
                  @dragover.prevent="dragOverSpalte = spalte"
                  @dragleave="dragOverSpalte = null"
-                 @drop.prevent="dropOnSpalte(spalte)"
+                 @drop.prevent="dropOnSpalte(spalte, $event)"
+                 :ref="el => { if (el) spaltenRefs[spalte] = el; else delete spaltenRefs[spalte] }"
                  :style="{
                      flex: 1,
                      display: 'flex',
@@ -251,62 +335,107 @@ const KanbanWidget = {
                      background: dragOverSpalte === spalte ? 'rgba(59,130,246,0.07)' : 'rgba(0,0,0,0.10)',
                      borderRadius: '12px',
                      border: dragOverSpalte === spalte ? '1px solid rgba(59,130,246,0.35)' : '1px solid rgba(255,255,255,0.06)',
-                     overflow: 'hidden',
+                     overflow: 'visible',
                      transition: 'background 0.15s, border-color 0.15s',
-                     minWidth: 0
+                     minWidth: 0,
+                     position: 'relative'
                  }">
 
                 <!-- Spalten-Header -->
-                <div style="padding:10px 12px 8px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(255,255,255,0.04); position:relative;">
+                <div style="padding:10px 12px 8px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(255,255,255,0.04); border-radius:12px 12px 0 0; position:relative; z-index:2;">
                     <span style="font-size:0.88rem; font-weight:800; opacity:0.9; letter-spacing:0.03em; text-align:center;">{{ spalte }}</span>
                     <span style="position:absolute; right:10px; font-size:0.72rem; opacity:0.4; background:rgba(255,255,255,0.1); padding:1px 8px; border-radius:10px;">{{ (kartenPerSpalte[spalte] || []).length }}</span>
                 </div>
 
-                <!-- Karten -->
-                <div style="flex:1; overflow-y:auto; padding:10px 8px; display:flex; flex-direction:column; gap:10px;" class="custom-scrollbar">
+                <!-- Karten-Canvas (frei positionierbar) -->
+                <div style="flex:1; position:relative; overflow:visible; min-height:80px;">
+
                     <div v-for="karte in (kartenPerSpalte[spalte] || [])" :key="karte.id"
-                         draggable="true"
-                         @dragstart="dragStart(karte.id)"
-                         @dragend="dragEnd"
-                         @dragover.prevent="dragOverCardId = karte.id"
-                         @drop.prevent.stop="dropOnCard(karte.id)"
                          :style="{
-                             position: 'relative',
+                             position: 'absolute',
+                             left: (karte.x || 0) + 'px',
+                             top: (karte.y || 0) + 'px',
+                             width: (karte.w || 130) + 'px',
+                             height: (karte.h || 130) + 'px',
                              background: karte.farbe,
                              borderRadius: '3px',
-                             padding: '16px 10px 8px',
-                             cursor: dragCardId === karte.id ? 'grabbing' : 'grab',
-                             opacity: dragCardId === karte.id ? 0.35 : 1,
-                             boxShadow: dragCardId === karte.id ? '4px 8px 20px rgba(0,0,0,0.55)' : '2px 5px 12px rgba(0,0,0,0.38)',
-                             outline: dragOverCardId === karte.id && dragCardId !== karte.id ? '2px solid rgba(255,255,255,0.8)' : 'none',
-                             outlineOffset: '2px',
-                             transition: 'opacity 0.15s, box-shadow 0.15s',
-                             flexShrink: 0,
+                             boxShadow: freeDragState.cardId === karte.id
+                                 ? '6px 10px 24px rgba(0,0,0,0.55)'
+                                 : '2px 5px 12px rgba(0,0,0,0.38)',
+                             zIndex: freeDragState.cardId === karte.id ? 50 : 1,
+                             transition: freeDragState.active ? 'none' : 'box-shadow 0.2s',
                              display: 'flex',
                              flexDirection: 'column',
-                             gap: '4px',
                              userSelect: 'none'
                          }">
-                        <!-- Tesa-Streifen -->
-                        <div style="position:absolute; left:50%; top:0; transform:translateX(-50%); width:44px; height:14px; background:rgba(255,255,255,0.25); border-left:1px solid rgba(255,255,255,0.18); border-right:1px solid rgba(255,255,255,0.18); border-bottom:1px solid rgba(255,255,255,0.12); pointer-events:none; z-index:2;"></div>
-                        <div v-if="karte.autor"
-                             :style="{fontSize:'0.7rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
-                            {{ karte.autor }}
+
+                        <!-- Tesa-Streifen (HTML5-Drag-Handle für Spaltenwechsel) -->
+                        <div draggable="true"
+                             @dragstart.stop="dragStart(karte.id)"
+                             @dragend.stop="dragEnd"
+                             style="position:absolute; left:50%; top:0; transform:translateX(-50%);
+                                    width:44px; height:14px;
+                                    background:rgba(255,255,255,0.25);
+                                    border-left:1px solid rgba(255,255,255,0.18);
+                                    border-right:1px solid rgba(255,255,255,0.18);
+                                    border-bottom:1px solid rgba(255,255,255,0.12);
+                                    cursor:grab; z-index:5;">
                         </div>
-                        <div :style="{color:textfarbe(karte.farbe), fontSize:'0.9rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3, fontWeight:'500', textAlign:'center', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'30px'}">
-                            {{ karte.text }}
+
+                        <!-- Karten-Inhalt (Drag zum freien Verschieben) -->
+                        <div @mousedown.prevent="cardMousedown(karte, $event)"
+                             style="flex:1; display:flex; flex-direction:column; gap:3px;
+                                    padding:18px 8px 20px; cursor:grab;">
+                            <div v-if="karte.autor"
+                                 :style="{fontSize:'0.68rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
+                                {{ karte.autor }}
+                            </div>
+                            <div :style="{
+                                color: textfarbe(karte.farbe),
+                                fontSize: '0.88rem',
+                                lineHeight: '1.35',
+                                wordBreak: 'break-word',
+                                fontWeight: '500',
+                                flex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                textAlign: 'center'
+                            }">
+                                {{ karte.text }}
+                            </div>
                         </div>
-                        <div style="display:flex; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
-                            <button @click.stop="karteLoeschen(karte.id)"
-                                    @mousedown.stop
-                                    :style="{background:'rgba(0,0,0,0.15)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 6px', fontSize:'0.65rem', color:textfarbe(karte.farbe)}">
-                                ✕
-                            </button>
-                        </div>
+
+                        <!-- Löschen-Button (oben rechts) -->
+                        <button @click.stop="karteLoeschen(karte.id)"
+                                @mousedown.stop
+                                :style="{
+                                    position: 'absolute', top: '2px', right: '3px',
+                                    background: 'rgba(0,0,0,0.15)', border: 'none',
+                                    borderRadius: '4px', cursor: 'pointer',
+                                    padding: '1px 4px', fontSize: '0.6rem',
+                                    color: textfarbe(karte.farbe), zIndex: 6, lineHeight: 1
+                                }">✕</button>
+
+                        <!-- Resize-Griff (unten rechts) -->
+                        <div @mousedown.prevent.stop="resizeMousedown(karte, $event)"
+                             :style="{
+                                 position: 'absolute', bottom: '2px', right: '2px',
+                                 width: '13px', height: '13px',
+                                 cursor: 'se-resize', zIndex: 6,
+                                 opacity: 0.4,
+                                 color: textfarbe(karte.farbe),
+                                 fontSize: '11px', lineHeight: '13px',
+                                 textAlign: 'center', userSelect: 'none'
+                             }">⌟</div>
+
                     </div>
 
+                    <!-- Leer-Hinweis -->
                     <div v-if="!(kartenPerSpalte[spalte] || []).length"
-                         style="text-align:center; opacity:0.2; font-size:0.75rem; padding:20px 4px;">
+                         style="position:absolute; inset:0; display:flex; align-items:center;
+                                justify-content:center; text-align:center;
+                                opacity:0.2; font-size:0.75rem; padding:20px;">
                         Leer
                     </div>
                 </div>
