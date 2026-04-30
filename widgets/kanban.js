@@ -12,15 +12,16 @@ const KanbanWidget = {
             wsStatus: 'idle',
             neueKarteText: '',
             neueKarteAutor: '',
-            neueKarteFarbe: '#3b82f6',
+            neueKarteFarbe: '#fbbf24',
             neueKarteSpalte: null,
             dragCardId: null,
             dragOverSpalte: null,
-            farben: ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316'],
+            dragOverCardId: null,
+            farben: ['#fbbf24','#f87171','#86efac','#93c5fd','#c4b5fd','#f9a8d4','#5eead4','#fdba74','#ffffff','#475569'],
         }
     },
     computed: {
-        spalten() { return this.widgetData.spalten || ['To Do', 'In Arbeit', 'Fertig']; },
+        spalten() { return this.widgetData.spalten || ['Aufgabe', 'In Bearbeitung', 'Erledigt']; },
         karten() { return this.widgetData.karten || []; },
         studentUrl() {
             if (!this.sessionId) return '';
@@ -45,7 +46,7 @@ const KanbanWidget = {
         }
     },
     mounted() {
-        if (!this.widgetData.spalten) this.widgetData.spalten = ['To Do', 'In Arbeit', 'Fertig'];
+        if (!this.widgetData.spalten) this.widgetData.spalten = ['Aufgabe', 'In Bearbeitung', 'Erledigt'];
         if (!this.widgetData.karten) this.widgetData.karten = [];
     },
     beforeUnmount() {
@@ -136,17 +137,46 @@ const KanbanWidget = {
         dragEnd() {
             this.dragCardId = null;
             this.dragOverSpalte = null;
+            this.dragOverCardId = null;
+        },
+        dropOnCard(targetId) {
+            if (!this.dragCardId || this.dragCardId === targetId) {
+                this.dragCardId = null;
+                this.dragOverCardId = null;
+                return;
+            }
+            const cards = this.widgetData.karten;
+            const dragged = cards.find(k => k.id === this.dragCardId);
+            const target = cards.find(k => k.id === targetId);
+            if (!dragged || !target) return;
+
+            const targetSpalte = target.spalte;
+            const fromIdx = cards.indexOf(dragged);
+            cards.splice(fromIdx, 1);
+            const toIdx = cards.indexOf(target);
+            dragged.spalte = targetSpalte;
+            cards.splice(toIdx, 0, dragged);
+
+            this.$emit('save');
+            this.wsSend({ type: 'kanban_card_move', cardId: dragged.id, spalte: targetSpalte });
+            this.dragCardId = null;
+            this.dragOverCardId = null;
+            this.dragOverSpalte = null;
         },
         dropOnSpalte(spalte) {
             if (!this.dragCardId) return;
             const card = this.widgetData.karten.find(k => k.id === this.dragCardId);
             if (card && card.spalte !== spalte) {
+                const fromIdx = this.widgetData.karten.indexOf(card);
+                this.widgetData.karten.splice(fromIdx, 1);
                 card.spalte = spalte;
+                this.widgetData.karten.push(card);
                 this.$emit('save');
                 this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte });
             }
             this.dragCardId = null;
             this.dragOverSpalte = null;
+            this.dragOverCardId = null;
         },
         alleLoeschen() {
             if (confirm('Alle Karten löschen?')) {
@@ -158,7 +188,7 @@ const KanbanWidget = {
             }
         },
         textfarbe(hex) {
-            if (!hex || hex.length < 7) return '#ffffff';
+            if (!hex || hex.length < 7) return '#1e293b';
             const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
             return (r*299 + g*587 + b*114) / 1000 > 128 ? '#1e293b' : '#ffffff';
         },
@@ -209,7 +239,7 @@ const KanbanWidget = {
         </div>
 
         <!-- KANBAN BOARD -->
-        <div style="flex:1; display:flex; gap:8px; min-height:0; overflow:hidden;">
+        <div style="flex:1; display:flex; gap:10px; min-height:0; overflow:hidden;">
             <div v-for="spalte in spalten" :key="spalte"
                  @dragover.prevent="dragOverSpalte = spalte"
                  @dragleave="dragOverSpalte = null"
@@ -218,50 +248,65 @@ const KanbanWidget = {
                      flex: 1,
                      display: 'flex',
                      flexDirection: 'column',
-                     background: dragOverSpalte === spalte ? 'rgba(59,130,246,0.12)' : 'rgba(0,0,0,0.12)',
-                     borderRadius: '10px',
-                     border: dragOverSpalte === spalte ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(255,255,255,0.06)',
+                     background: dragOverSpalte === spalte ? 'rgba(59,130,246,0.07)' : 'rgba(0,0,0,0.10)',
+                     borderRadius: '12px',
+                     border: dragOverSpalte === spalte ? '1px solid rgba(59,130,246,0.35)' : '1px solid rgba(255,255,255,0.06)',
                      overflow: 'hidden',
                      transition: 'background 0.15s, border-color 0.15s',
                      minWidth: 0
                  }">
+
                 <!-- Spalten-Header -->
-                <div style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-                    <span style="font-size:0.8rem; font-weight:700; opacity:0.85;">{{ spalte }}</span>
-                    <span style="font-size:0.72rem; opacity:0.4; background:rgba(255,255,255,0.08); padding:1px 7px; border-radius:10px;">{{ (kartenPerSpalte[spalte] || []).length }}</span>
+                <div style="padding:10px 12px 8px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(255,255,255,0.04); position:relative;">
+                    <span style="font-size:0.88rem; font-weight:800; opacity:0.9; letter-spacing:0.03em; text-align:center;">{{ spalte }}</span>
+                    <span style="position:absolute; right:10px; font-size:0.72rem; opacity:0.4; background:rgba(255,255,255,0.1); padding:1px 8px; border-radius:10px;">{{ (kartenPerSpalte[spalte] || []).length }}</span>
                 </div>
-                <!-- Karten-Liste -->
-                <div style="flex:1; overflow-y:auto; padding:6px; display:flex; flex-direction:column; gap:5px;" class="custom-scrollbar">
+
+                <!-- Karten -->
+                <div style="flex:1; overflow-y:auto; padding:10px 8px; display:flex; flex-direction:column; gap:10px;" class="custom-scrollbar">
                     <div v-for="karte in (kartenPerSpalte[spalte] || [])" :key="karte.id"
                          draggable="true"
                          @dragstart="dragStart(karte.id)"
                          @dragend="dragEnd"
+                         @dragover.prevent="dragOverCardId = karte.id"
+                         @drop.prevent.stop="dropOnCard(karte.id)"
                          :style="{
+                             position: 'relative',
                              background: karte.farbe,
-                             borderRadius: '6px',
-                             padding: '8px 9px',
-                             cursor: 'grab',
-                             opacity: dragCardId === karte.id ? 0.5 : 1,
-                             transition: 'opacity 0.15s',
-                             flexShrink: 0
+                             borderRadius: '3px',
+                             padding: '16px 10px 8px',
+                             cursor: dragCardId === karte.id ? 'grabbing' : 'grab',
+                             opacity: dragCardId === karte.id ? 0.35 : 1,
+                             boxShadow: dragCardId === karte.id ? '4px 8px 20px rgba(0,0,0,0.55)' : '2px 5px 12px rgba(0,0,0,0.38)',
+                             outline: dragOverCardId === karte.id && dragCardId !== karte.id ? '2px solid rgba(255,255,255,0.8)' : 'none',
+                             outlineOffset: '2px',
+                             transition: 'opacity 0.15s, box-shadow 0.15s',
+                             flexShrink: 0,
+                             display: 'flex',
+                             flexDirection: 'column',
+                             gap: '4px',
+                             userSelect: 'none'
                          }">
+                        <!-- Tesa-Streifen -->
+                        <div style="position:absolute; left:50%; top:0; transform:translateX(-50%); width:44px; height:14px; background:rgba(255,255,255,0.25); border-left:1px solid rgba(255,255,255,0.18); border-right:1px solid rgba(255,255,255,0.18); border-bottom:1px solid rgba(255,255,255,0.12); pointer-events:none; z-index:2;"></div>
                         <div v-if="karte.autor"
-                             :style="{fontSize:'0.68rem', fontWeight:'700', color: textfarbe(karte.farbe), opacity:0.6, marginBottom:'3px'}">
+                             :style="{fontSize:'0.7rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
                             {{ karte.autor }}
                         </div>
-                        <div :style="{color: textfarbe(karte.farbe), fontSize:'0.82rem', lineHeight:'1.35', wordBreak:'break-word', marginBottom:'5px'}">
+                        <div :style="{color:textfarbe(karte.farbe), fontSize:'0.9rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3, fontWeight:'500', textAlign:'center', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'30px'}">
                             {{ karte.text }}
                         </div>
-                        <div style="display:flex; justify-content:flex-end;">
+                        <div style="display:flex; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
                             <button @click.stop="karteLoeschen(karte.id)"
                                     @mousedown.stop
-                                    :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'1px 5px', fontSize:'0.65rem', color: textfarbe(karte.farbe)}">
+                                    :style="{background:'rgba(0,0,0,0.15)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 6px', fontSize:'0.65rem', color:textfarbe(karte.farbe)}">
                                 ✕
                             </button>
                         </div>
                     </div>
+
                     <div v-if="!(kartenPerSpalte[spalte] || []).length"
-                         style="text-align:center; opacity:0.2; font-size:0.75rem; padding:16px 4px;">
+                         style="text-align:center; opacity:0.2; font-size:0.75rem; padding:20px 4px;">
                         Leer
                     </div>
                 </div>
@@ -278,18 +323,18 @@ const KanbanWidget = {
                         style="border:none; color:var(--text-color); padding:3px 9px; border-radius:5px; cursor:pointer; font-size:0.75rem; font-family:inherit; flex-shrink:0;">
                     {{ s }}
                 </button>
-                <div style="margin-left:auto; display:flex; gap:3px;">
+                <div style="margin-left:auto; display:flex; gap:3px; flex-wrap:wrap;">
                     <button v-for="f in farben" :key="f"
                             @click="neueKarteFarbe = f"
-                            :style="{background:f, width:'17px', height:'17px', borderRadius:'50%', border: neueKarteFarbe===f ? '2px solid white' : '2px solid transparent', cursor:'pointer', padding:0, flexShrink:0}">
+                            :style="{background:f, width:'17px', height:'17px', borderRadius:'50%', border: neueKarteFarbe===f ? '2px solid white' : '2px solid transparent', cursor:'pointer', padding:0, flexShrink:0, outline: neueKarteFarbe===f ? '1px solid rgba(255,255,255,0.4)' : 'none', outlineOffset:'1px'}">
                     </button>
                 </div>
             </div>
             <div style="display:flex; gap:5px;">
                 <input v-model="neueKarteAutor"
-                       placeholder="Name"
+                       placeholder="Name (optional)"
                        @keyup.enter="karteHinzufuegen"
-                       style="width:90px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:6px 8px; color:var(--text-color); font-size:0.82rem; font-family:inherit; outline:none; flex-shrink:0;">
+                       style="width:110px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:6px 8px; color:var(--text-color); font-size:0.82rem; font-family:inherit; outline:none; flex-shrink:0;">
                 <input v-model="neueKarteText"
                        placeholder="Kartentext eingeben..."
                        @keyup.enter="karteHinzufuegen"

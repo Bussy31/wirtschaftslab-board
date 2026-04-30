@@ -480,6 +480,7 @@ const app = createApp({
             const isGruppen = type === 'gruppen';
             const isKartenabfrage = type === 'kartenabfrage';
             const isZielscheibe = type === 'reflexionszielscheibe';
+            const isKanban = type === 'kanban';
 
             let startListe = '';
             if (type === 'zufall' || type === 'gruppen') {
@@ -526,6 +527,25 @@ const app = createApp({
                     fragen: ['Wie gut hat dir die Stunde gefallen?', 'Wie verständlich war der Inhalt?', 'Wie gut warst du dabei?'],
                     ringe: 5,
                     bewertungen: []
+                });
+                this.saveToLocal();
+                return;
+            }
+
+            if (isKanban) {
+                const w = Math.min(1050, window.innerWidth - 80);
+                const h = Math.min(660, window.innerHeight - 120);
+                this.widgets.push({
+                    id: Date.now(),
+                    type: 'kanban',
+                    icon: '📋',
+                    isOverlay: true,
+                    x: Math.round((window.innerWidth - w) / 2),
+                    y: Math.round((window.innerHeight - h) / 2),
+                    width: w,
+                    height: h,
+                    spalten: ['Aufgabe', 'In Bearbeitung', 'Erledigt'],
+                    karten: []
                 });
                 this.saveToLocal();
                 return;
