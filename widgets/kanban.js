@@ -19,6 +19,7 @@ const KanbanWidget = {
             freeDragState: { active: false },
             freeDragOverSpalte: null,
             spaltenRefs: {},
+            expandedCanvasHeights: {},
             farben: ['#fbbf24','#f87171','#86efac','#93c5fd','#c4b5fd','#f9a8d4','#5eead4','#fdba74','#ffffff','#475569'],
         }
     },
@@ -266,17 +267,16 @@ const KanbanWidget = {
                     }
                 }
                 this.freeDragOverSpalte = hover;
-                // Auto-Scroll
+                // Auto-Scroll (expandedCanvasHeights reaktiv → überlebt Vue Re-renders)
                 if (hover && this.spaltenRefs[hover]) {
                     const outer = this.spaltenRefs[hover];
                     const rect = outer.getBoundingClientRect();
                     const THRESH = 70, SPEED = 10;
                     if (e.clientY > rect.bottom - THRESH) {
                         outer.scrollTop += SPEED;
-                        const canvas = outer.querySelector('.karten-inner');
-                        if (canvas) {
-                            const curH = parseFloat(canvas.style.minHeight) || 500;
-                            canvas.style.minHeight = Math.max(curH, outer.scrollTop + outer.clientHeight + 200) + 'px';
+                        const needed = outer.scrollTop + outer.clientHeight + 200;
+                        if (needed > (this.expandedCanvasHeights[hover] || 0)) {
+                            this.expandedCanvasHeights = { ...this.expandedCanvasHeights, [hover]: needed };
                         }
                     } else if (e.clientY < rect.top + THRESH) {
                         outer.scrollTop = Math.max(0, outer.scrollTop - SPEED);
@@ -331,6 +331,7 @@ const KanbanWidget = {
             }
             this.freeDragState = { active: false };
             this.freeDragOverSpalte = null;
+            this.expandedCanvasHeights = {};
         },
         alleLoeschen() {
             if (confirm('Alle Karten löschen?')) {
@@ -371,7 +372,7 @@ const KanbanWidget = {
             const karten = this.kartenPerSpalte[spalte] || [];
             const maxX = karten.reduce((m, k) => Math.max(m, (k.x || 0) + (k.w || 130) + 20), 300);
             const maxY = karten.reduce((m, k) => Math.max(m, (k.y || 0) + (k.h || 130) + 20), 500);
-            return { width: maxX + 'px', height: maxY + 'px' };
+            return { width: maxX + 'px', height: Math.max(maxY, this.expandedCanvasHeights[spalte] || 0) + 'px' };
         },
         textfarbe(hex) {
             if (!hex || hex.length < 7) return '#1e293b';
@@ -421,6 +422,44 @@ const KanbanWidget = {
                     <div style="font-size:0.72rem; word-break:break-all; opacity:0.6; background:rgba(0,0,0,0.2); padding:5px 8px; border-radius:6px;">{{ studentUrl }}</div>
                     <div style="font-size:0.75rem; opacity:0.45; margin-top:2px;">Schüler können Karten verschieben und hinzufügen.</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- KARTE HINZUFÜGEN -->
+        <div style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px; flex-shrink:0;">
+            <div style="display:flex; gap:5px; margin-bottom:6px; align-items:center; flex-wrap:wrap;">
+                <span style="font-size:0.72rem; opacity:0.45; flex-shrink:0;">Spalte:</span>
+                <button v-for="s in spalten" :key="s"
+                        @click="neueKarteSpalte = s"
+                        :style="{background: aktiveSpalte===s ? 'var(--button-color)' : 'rgba(255,255,255,0.07)', fontWeight: aktiveSpalte===s ? '700' : '400'}"
+                        style="border:none; color:var(--text-color); padding:3px 9px; border-radius:5px; cursor:pointer; font-size:0.75rem; font-family:inherit; flex-shrink:0;">
+                    {{ s }}
+                </button>
+                <div style="margin-left:auto; display:flex; gap:3px; flex-wrap:wrap;">
+                    <button v-for="f in farben" :key="f"
+                            @click="neueKarteFarbe = f"
+                            :style="{background:f, width:'17px', height:'17px', borderRadius:'50%', border: neueKarteFarbe===f ? '2px solid white' : '2px solid transparent', cursor:'pointer', padding:0, flexShrink:0, outline: neueKarteFarbe===f ? '1px solid rgba(255,255,255,0.4)' : 'none', outlineOffset:'1px'}">
+                    </button>
+                </div>
+            </div>
+            <div style="display:flex; gap:5px;">
+                <input v-model="neueKarteAutor"
+                       placeholder="Name (optional)"
+                       @keyup.enter="karteHinzufuegen"
+                       style="width:110px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:6px 8px; color:var(--text-color); font-size:0.82rem; font-family:inherit; outline:none; flex-shrink:0;">
+                <input v-model="neueKarteText"
+                       placeholder="Kartentext eingeben..."
+                       @keyup.enter="karteHinzufuegen"
+                       style="flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:6px 8px; color:var(--text-color); font-size:0.82rem; font-family:inherit; outline:none; min-width:0;">
+                <button @click="karteHinzufuegen"
+                        style="background:var(--button-color); border:none; color:var(--text-color); padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.9rem; font-family:inherit; flex-shrink:0;">
+                    +
+                </button>
+                <button @click="alleLoeschen"
+                        style="border:none; color:#ef4444; background:rgba(239,68,68,0.08); padding:6px 8px; border-radius:6px; cursor:pointer; font-size:0.78rem; font-family:inherit; flex-shrink:0;"
+                        title="Alle Karten löschen">
+                    🗑️
+                </button>
             </div>
         </div>
 
@@ -537,44 +576,6 @@ const KanbanWidget = {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- KARTE HINZUFÜGEN -->
-        <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:10px; flex-shrink:0;">
-            <div style="display:flex; gap:5px; margin-bottom:6px; align-items:center; flex-wrap:wrap;">
-                <span style="font-size:0.72rem; opacity:0.45; flex-shrink:0;">Spalte:</span>
-                <button v-for="s in spalten" :key="s"
-                        @click="neueKarteSpalte = s"
-                        :style="{background: aktiveSpalte===s ? 'var(--button-color)' : 'rgba(255,255,255,0.07)', fontWeight: aktiveSpalte===s ? '700' : '400'}"
-                        style="border:none; color:var(--text-color); padding:3px 9px; border-radius:5px; cursor:pointer; font-size:0.75rem; font-family:inherit; flex-shrink:0;">
-                    {{ s }}
-                </button>
-                <div style="margin-left:auto; display:flex; gap:3px; flex-wrap:wrap;">
-                    <button v-for="f in farben" :key="f"
-                            @click="neueKarteFarbe = f"
-                            :style="{background:f, width:'17px', height:'17px', borderRadius:'50%', border: neueKarteFarbe===f ? '2px solid white' : '2px solid transparent', cursor:'pointer', padding:0, flexShrink:0, outline: neueKarteFarbe===f ? '1px solid rgba(255,255,255,0.4)' : 'none', outlineOffset:'1px'}">
-                    </button>
-                </div>
-            </div>
-            <div style="display:flex; gap:5px;">
-                <input v-model="neueKarteAutor"
-                       placeholder="Name (optional)"
-                       @keyup.enter="karteHinzufuegen"
-                       style="width:110px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:6px 8px; color:var(--text-color); font-size:0.82rem; font-family:inherit; outline:none; flex-shrink:0;">
-                <input v-model="neueKarteText"
-                       placeholder="Kartentext eingeben..."
-                       @keyup.enter="karteHinzufuegen"
-                       style="flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:6px 8px; color:var(--text-color); font-size:0.82rem; font-family:inherit; outline:none; min-width:0;">
-                <button @click="karteHinzufuegen"
-                        style="background:var(--button-color); border:none; color:var(--text-color); padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.9rem; font-family:inherit; flex-shrink:0;">
-                    +
-                </button>
-                <button @click="alleLoeschen"
-                        style="border:none; color:#ef4444; background:rgba(239,68,68,0.08); padding:6px 8px; border-radius:6px; cursor:pointer; font-size:0.78rem; font-family:inherit; flex-shrink:0;"
-                        title="Alle Karten löschen">
-                    🗑️
-                </button>
             </div>
         </div>
 
