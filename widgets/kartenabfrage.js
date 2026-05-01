@@ -312,16 +312,6 @@ const KartenabfrageWidget = {
             </div>
         </div>
 
-        <!-- FRAGE / TITEL -->
-        <div style="background:rgba(255,255,255,0.05); border-radius:8px; padding:8px 12px; border:1px solid rgba(255,255,255,0.08); flex-shrink:0;">
-            <input
-                :value="widgetData.frage || ''"
-                @input="setFrage"
-                placeholder="Frage oder Thema eingeben..."
-                style="width:100%; background:transparent; border:none; outline:none; color:var(--text-color); font-size:1.05rem; font-weight:bold; font-family:inherit;"
-            >
-        </div>
-
         <!-- NEUE KARTE (manuell) -->
         <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:10px; display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
             <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
@@ -395,8 +385,21 @@ const KartenabfrageWidget = {
             </div>
         </div>
 
-        <!-- KARTEN-BEREICH -->
-        <div ref="kartenBereich" style="flex:1; overflow:hidden; min-height:0; position:relative;">
+        <!-- KARTEN-BEREICH (Screenshot-Bereich) -->
+        <div ref="kartenBereich" style="flex:1; overflow:hidden; min-height:0; display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.06); border-radius:8px; padding:8px;">
+
+            <!-- FRAGE / TITEL (im Screenshot sichtbar) -->
+            <div style="background:rgba(255,255,255,0.07); border-radius:6px; padding:7px 12px; border:1px solid rgba(255,255,255,0.1); flex-shrink:0;">
+                <input
+                    :value="widgetData.frage || ''"
+                    @input="setFrage"
+                    placeholder="Frage oder Thema eingeben..."
+                    style="width:100%; background:transparent; border:none; outline:none; color:var(--text-color); font-size:1.05rem; font-weight:bold; font-family:inherit;"
+                >
+            </div>
+
+            <!-- Karten-Ansichten -->
+            <div style="flex:1; overflow:hidden; min-height:0; position:relative;">
 
             <!-- Freihand (Drag & Drop) -->
             <div v-if="ansicht==='freihand'"
@@ -538,7 +541,8 @@ const KartenabfrageWidget = {
                 </template>
             </div>
 
-        </div>
+            </div><!-- end Karten-Ansichten -->
+        </div><!-- end KARTEN-BEREICH -->
 
     </div>
 
