@@ -17,11 +17,20 @@ const KartenabfrageWidget = {
             farben: ['#fbbf24','#f87171','#86efac','#93c5fd','#c4b5fd','#f9a8d4','#5eead4','#fdba74','#ffffff','#475569'],
             dragState: { active: false, id: null },
             verstecktModus: false,
-            qrModalOffen: false
+            qrModalOffen: false,
+            freihandCanvasW: 800,
+            freihandCanvasH: 600
         }
     },
     computed: {
         karten() { return this.widgetData.karten || []; },
+        freihandCanvasStyle() {
+            return {
+                position: 'relative',
+                minWidth: 'max(100%, ' + this.freihandCanvasW + 'px)',
+                minHeight: 'max(100%, ' + this.freihandCanvasH + 'px)'
+            };
+        },
         aktuelleKarte() { return this.karten[this.aktuelleKarteIdx] || null; },
         alleVerborgen() {
             return this.karten.length > 0 && this.karten.every(k => k.sichtbar === false);
@@ -47,6 +56,9 @@ const KartenabfrageWidget = {
             if (!k.w) k.w = 160;
             if (!k.h) k.h = 110;
         });
+        const karten = this.widgetData.karten || [];
+        this.freihandCanvasW = Math.max(800, karten.reduce((m, k) => Math.max(m, (k.x || 0) + (k.w || 160) + 40), 800));
+        this.freihandCanvasH = Math.max(600, karten.reduce((m, k) => Math.max(m, (k.y || 0) + (k.h || 110) + 40), 600));
     },
     beforeUnmount() { this.stopSession(); },
     methods: {
@@ -161,15 +173,30 @@ const KartenabfrageWidget = {
         freihandDragStart(karte, e) {
             e.preventDefault();
             const id = karte.id;
-            const startX = e.clientX, startY = e.clientY;
-            const startLeft = karte.x || 0, startTop = karte.y || 0;
+            const outer = this.$refs.freihandOuter;
+            if (!outer) return;
+            const startClientX = e.clientX, startClientY = e.clientY;
+            const startCardX = karte.x || 0, startCardY = karte.y || 0;
+            const startScrollLeft = outer.scrollLeft, startScrollTop = outer.scrollTop;
             this.dragState = { active: true, id };
+            const THRESH = 60, SPEED = 12;
             const move = (ev) => {
                 const k = this.widgetData.karten.find(c => c.id === id);
-                if (k) {
-                    k.x = startLeft + (ev.clientX - startX);
-                    k.y = startTop + (ev.clientY - startY);
-                }
+                if (!k) return;
+                const dScroll = { x: outer.scrollLeft - startScrollLeft, y: outer.scrollTop - startScrollTop };
+                k.x = Math.max(0, startCardX + (ev.clientX - startClientX) + dScroll.x);
+                k.y = Math.max(0, startCardY + (ev.clientY - startClientY) + dScroll.y);
+                // Auto-Scroll an Containerkanten
+                const rect = outer.getBoundingClientRect();
+                if (ev.clientX > rect.right - THRESH) outer.scrollLeft += SPEED;
+                else if (ev.clientX < rect.left + THRESH) outer.scrollLeft = Math.max(0, outer.scrollLeft - SPEED);
+                if (ev.clientY > rect.bottom - THRESH) outer.scrollTop += SPEED;
+                else if (ev.clientY < rect.top + THRESH) outer.scrollTop = Math.max(0, outer.scrollTop - SPEED);
+                // Auto-Expand bei 80%-Schwelle
+                const cardRight  = k.x + (k.w || 160) + 20;
+                const cardBottom = k.y + (k.h || 110) + 20;
+                if (cardRight  > this.freihandCanvasW * 0.8) this.freihandCanvasW = Math.max(this.freihandCanvasW, cardRight  + 200);
+                if (cardBottom > this.freihandCanvasH * 0.8) this.freihandCanvasH = Math.max(this.freihandCanvasH, cardBottom + 200);
             };
             const up = () => {
                 this.dragState = { active: false, id: null };
@@ -191,6 +218,10 @@ const KartenabfrageWidget = {
                 if (k) {
                     k.w = Math.max(100, startW + (ev.clientX - startX));
                     k.h = Math.max(70, startH + (ev.clientY - startY));
+                    const cardRight  = (k.x || 0) + k.w + 20;
+                    const cardBottom = (k.y || 0) + k.h + 20;
+                    if (cardRight  > this.freihandCanvasW * 0.8) this.freihandCanvasW = Math.max(this.freihandCanvasW, cardRight  + 200);
+                    if (cardBottom > this.freihandCanvasH * 0.8) this.freihandCanvasH = Math.max(this.freihandCanvasH, cardBottom + 200);
                 }
             };
             const up = () => {
@@ -403,9 +434,13 @@ const KartenabfrageWidget = {
 
             <!-- Freihand (Drag & Drop) -->
             <div v-if="ansicht==='freihand'"
-                 style="position:relative; width:100%; height:100%; overflow:hidden; background:rgba(0,0,0,0.08); border-radius:8px;">
+                 ref="freihandOuter"
+                 style="width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.08); border-radius:8px;"
+                 class="custom-scrollbar">
+                <!-- Scrollbarer Canvas -->
+                <div :style="freihandCanvasStyle">
                 <div v-if="karten.length===0"
-                     style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
+                     style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px; pointer-events:none;">
                     Noch keine Karten.
                     <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
                 </div>
@@ -448,7 +483,8 @@ const KartenabfrageWidget = {
                     <div @mousedown.prevent.stop="freihandResizeStart(karte, $event)"
                          :style="{position:'absolute', bottom:'2px', right:'2px', width:'13px', height:'13px', cursor:'se-resize', zIndex:6, opacity:0.4, color:textfarbe(karte.farbe), fontSize:'11px', lineHeight:'13px', textAlign:'center', userSelect:'none'}">⌟</div>
                 </div>
-            </div>
+                </div><!-- end canvas -->
+            </div><!-- end freihandOuter -->
 
             <!-- Grid -->
             <div v-if="ansicht==='grid'"
