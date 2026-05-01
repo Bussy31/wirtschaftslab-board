@@ -113,14 +113,14 @@ const KanbanWidget = {
                     const newCards = msg.board.cards;
                     newCards.forEach((nc) => {
                         const existing = (this.widgetData.karten || []).find(k => k.id === nc.id);
-                        if (existing && existing.x != null && existing.spalte === nc.spalte) {
-                            // Gleiche Spalte: Lehrer-Position beibehalten
-                            nc.x = existing.x; nc.y = existing.y;
-                            nc.w = existing.w || 130; nc.h = existing.h || 130;
-                        } else if (Number.isFinite(nc.x)) {
-                            // Neue Spalte oder neue Karte: Server-Position (vom Schüler) verwenden
+                        if (Number.isFinite(nc.x) && Number.isFinite(nc.y)) {
+                            // Server hat Position (vom Schüler oder Lehrer) → direkt verwenden
                             nc.w = existing ? (existing.w || 130) : 130;
                             nc.h = existing ? (existing.h || 130) : 130;
+                        } else if (existing && existing.x != null) {
+                            // Server hat keine Position → lokale behalten
+                            nc.x = existing.x; nc.y = existing.y;
+                            nc.w = existing.w || 130; nc.h = existing.h || 130;
                         } else {
                             // Fallback: Gitter-Layout pro Spalte
                             const inSpalte = newCards.filter(c => c.spalte === nc.spalte);
@@ -273,17 +273,20 @@ const KanbanWidget = {
                             break;
                         }
                     }
-                    if (targetSpalte && targetSpalte !== card.spalte) {
-                        const outerEl = this.spaltenRefs[targetSpalte];
-                        if (outerEl) {
-                            const innerEl = outerEl.querySelector('.karten-inner');
-                            const rect = (innerEl || outerEl).getBoundingClientRect();
-                            const w = card.w || 130, h = card.h || 130;
-                            card.x = Math.max(0, e.clientX - rect.left - w / 2);
-                            card.y = Math.max(20, e.clientY - rect.top - h / 2);
+                    if (targetSpalte) {
+                        if (targetSpalte !== card.spalte) {
+                            const outerEl = this.spaltenRefs[targetSpalte];
+                            if (outerEl) {
+                                const innerEl = outerEl.querySelector('.karten-inner');
+                                const rect = (innerEl || outerEl).getBoundingClientRect();
+                                const w = card.w || 130, h = card.h || 130;
+                                card.x = Math.max(0, e.clientX - rect.left - w / 2);
+                                card.y = Math.max(20, e.clientY - rect.top - h / 2);
+                            }
+                            card.spalte = targetSpalte;
                         }
-                        card.spalte = targetSpalte;
-                        this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: targetSpalte, x: card.x, y: card.y });
+                        // Immer senden — auch bei Same-Column (Position-Sync)
+                        this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: card.spalte, x: card.x, y: card.y });
                     }
                     this.$emit('save');
                 }

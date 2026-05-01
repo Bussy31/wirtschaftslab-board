@@ -537,6 +537,26 @@
         drag.cardEl.style.top  = (drag.startClientY + (clientY - drag.startY)) + 'px';
         const hit = findSpalteAtPoint(clientX, clientY);
         updateHighlights(hit ? hit.spalte : null);
+
+        // Auto-Scroll: Spalte nach unten/oben scrollen wenn Zeiger nahe am Rand
+        if (hit) {
+            const outer = hit.el.querySelector('.karten-outer');
+            if (outer) {
+                const rect = outer.getBoundingClientRect();
+                const THRESH = 70, SPEED = 10;
+                if (clientY > rect.bottom - THRESH) {
+                    outer.scrollTop += SPEED;
+                    // Canvas dynamisch erweitern damit Scrollbar mitwächst
+                    const canvas = outer.querySelector('.karten-canvas');
+                    if (canvas) {
+                        const curH = parseFloat(canvas.style.minHeight) || 500;
+                        canvas.style.minHeight = Math.max(curH, outer.scrollTop + outer.clientHeight + 200) + 'px';
+                    }
+                } else if (clientY < rect.top + THRESH) {
+                    outer.scrollTop = Math.max(0, outer.scrollTop - SPEED);
+                }
+            }
+        }
     }
 
     function dragEnd(clientX, clientY) {
@@ -557,10 +577,11 @@
                         y: Math.max(20, finalCardY - cr.top)
                     };
                 }
+                // Immer senden — auch bei Same-Column (Position-Sync)
+                wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: hit.spalte,
+                         x: positions[card.id]?.x, y: positions[card.id]?.y });
                 if (hit.spalte !== card.spalte) {
                     card.spalte = hit.spalte;
-                    wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: hit.spalte,
-                             x: positions[card.id]?.x, y: positions[card.id]?.y });
                     toast('Karte verschoben');
                 }
             } else {
