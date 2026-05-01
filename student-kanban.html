@@ -261,6 +261,7 @@
     let ws = null, connected = false;
     let board = { columns: ['Aufgabe', 'In Bearbeitung', 'Erledigt'], cards: [] };
     let positions = {};
+    let canvasHeights = {};   // Erweiterte Canvas-Höhen pro Spalte
     let selectedFarbe = '#fbbf24';
     let html5DragId = null;
     let dragSourceSpalte = null;
@@ -351,8 +352,8 @@
         const maxY = karten.reduce((m, k) => {
             const p = positions[k.id];
             return p ? Math.max(m, p.y + CARD_H + 20) : m;
-        }, 500);
-        return { width: maxX, height: maxY };
+        }, 50);
+        return { width: maxX, height: Math.max(maxY, canvasHeights[spalte] || 0) };
     }
 
     function renderBoard() {
@@ -420,7 +421,7 @@
             canvas.className = 'karten-canvas';
             const size = canvasMinSize(spalte);
             canvas.style.minWidth = size.width + 'px';
-            canvas.style.minHeight = size.height + 'px';
+            canvas.style.minHeight = `max(100%, ${size.height}px)`;
 
             if (karten.length === 0) {
                 const leer = document.createElement('div');
@@ -583,6 +584,16 @@
                 if (hit.spalte !== card.spalte) {
                     card.spalte = hit.spalte;
                     toast('Karte verschoben');
+                }
+                // Auto-Expand: Karte in untersten 20% → Canvas um 30% erweitern
+                const outer = hit.el.querySelector('.karten-outer');
+                if (outer && positions[card.id]) {
+                    const viewH = outer.clientHeight;
+                    const curH = Math.max(canvasHeights[hit.spalte] || 0, viewH);
+                    const cardBottom = positions[card.id].y + CARD_H + 20;
+                    if (cardBottom > curH * 0.8) {
+                        canvasHeights[hit.spalte] = cardBottom + Math.max(viewH * 0.3, 100);
+                    }
                 }
             } else {
                 positions[card.id] = { x: drag.startCardX, y: drag.startCardY };

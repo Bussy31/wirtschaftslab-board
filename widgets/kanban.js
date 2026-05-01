@@ -178,6 +178,7 @@ const KanbanWidget = {
             this.widgetData.karten.push(card);
             this.$emit('save');
             this.wsSend({ type: 'kanban_card_add', text: card.text, autor: card.autor, farbe: card.farbe, spalte: card.spalte, x: card.x, y: card.y });
+            this.autoExpandCanvas(card.spalte);
             this.neueKarteText = '';
             this.neueKarteAutor = '';
         },
@@ -317,6 +318,7 @@ const KanbanWidget = {
                         }
                         if (targetSpalte !== card.spalte) card.spalte = targetSpalte;
                         this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: card.spalte, x: card.x, y: card.y });
+                        this.autoExpandCanvas(card.spalte);
                     } else {
                         card.x = state.startCardX;
                         card.y = state.startCardY;
@@ -371,8 +373,23 @@ const KanbanWidget = {
         canvasSize(spalte) {
             const karten = this.kartenPerSpalte[spalte] || [];
             const maxX = karten.reduce((m, k) => Math.max(m, (k.x || 0) + (k.w || 130) + 20), 300);
-            const maxY = karten.reduce((m, k) => Math.max(m, (k.y || 0) + (k.h || 130) + 20), 500);
-            return { width: maxX + 'px', height: Math.max(maxY, this.expandedCanvasHeights[spalte] || 0) + 'px' };
+            const maxY = karten.reduce((m, k) => Math.max(m, (k.y || 0) + (k.h || 130) + 20), 50);
+            const h = Math.max(maxY, this.expandedCanvasHeights[spalte] || 0);
+            return { width: maxX + 'px', height: `max(100%, ${h}px)` };
+        },
+        autoExpandCanvas(spalte) {
+            this.$nextTick(() => {
+                const outer = this.spaltenRefs[spalte];
+                if (!outer) return;
+                const viewH = outer.clientHeight;
+                const karten = this.kartenPerSpalte[spalte] || [];
+                const maxBottom = karten.reduce((m, k) => Math.max(m, (k.y || 0) + (k.h || 130) + 20), 0);
+                const curH = Math.max(this.expandedCanvasHeights[spalte] || 0, viewH);
+                if (maxBottom > curH * 0.8) {
+                    const newH = maxBottom + Math.max(viewH * 0.3, 100);
+                    this.expandedCanvasHeights = { ...this.expandedCanvasHeights, [spalte]: newH };
+                }
+            });
         },
         textfarbe(hex) {
             if (!hex || hex.length < 7) return '#1e293b';
