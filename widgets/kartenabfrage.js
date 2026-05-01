@@ -37,7 +37,6 @@ const KartenabfrageWidget = {
         }
     },
     mounted() {
-        // Assign positions to existing cards that don't have x,y yet
         (this.widgetData.karten || []).forEach((k, i) => {
             if (k.x == null || k.y == null) {
                 const col = i % 4;
@@ -45,6 +44,8 @@ const KartenabfrageWidget = {
                 k.x = 20 + col * 175;
                 k.y = 20 + row * 125;
             }
+            if (!k.w) k.w = 160;
+            if (!k.h) k.h = 110;
         });
     },
     beforeUnmount() { this.stopSession(); },
@@ -83,6 +84,8 @@ const KartenabfrageWidget = {
                     const pos = this._neuPosition();
                     msg.card.x = pos.x;
                     msg.card.y = pos.y;
+                    msg.card.w = 160;
+                    msg.card.h = 110;
                     msg.card.sichtbar = !this.verstecktModus;
                     this.widgetData.karten.push(msg.card);
                     this.$emit('save');
@@ -120,7 +123,9 @@ const KartenabfrageWidget = {
                 autor: this.neueKarteAutor.trim(),
                 sichtbar: !this.verstecktModus,
                 x: pos.x,
-                y: pos.y
+                y: pos.y,
+                w: 160,
+                h: 110
             });
             this.neueKarteText = '';
             this.neueKarteAutor = '';
@@ -168,6 +173,27 @@ const KartenabfrageWidget = {
             };
             const up = () => {
                 this.dragState = { active: false, id: null };
+                this.$emit('save');
+                document.removeEventListener('mousemove', move);
+                document.removeEventListener('mouseup', up);
+            };
+            document.addEventListener('mousemove', move);
+            document.addEventListener('mouseup', up);
+        },
+        freihandResizeStart(karte, e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = karte.id;
+            const startX = e.clientX, startY = e.clientY;
+            const startW = karte.w || 160, startH = karte.h || 110;
+            const move = (ev) => {
+                const k = this.widgetData.karten.find(c => c.id === id);
+                if (k) {
+                    k.w = Math.max(100, startW + (ev.clientX - startX));
+                    k.h = Math.max(70, startH + (ev.clientY - startY));
+                }
+            };
+            const up = () => {
                 this.$emit('save');
                 document.removeEventListener('mousemove', move);
                 document.removeEventListener('mouseup', up);
@@ -296,152 +322,6 @@ const KartenabfrageWidget = {
             >
         </div>
 
-        <!-- KARTEN-BEREICH -->
-        <div ref="kartenBereich" style="flex:1; overflow:hidden; min-height:0; position:relative;">
-
-            <!-- Freihand (Drag & Drop) -->
-            <div v-if="ansicht==='freihand'"
-                 style="position:relative; width:100%; height:100%; overflow:hidden; background:rgba(0,0,0,0.08); border-radius:8px;">
-                <div v-if="karten.length===0"
-                     style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
-                    Noch keine Karten.
-                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
-                </div>
-                <div v-for="karte in karten" :key="karte.id"
-                     @mousedown.prevent="freihandDragStart(karte, $event)"
-                     :style="{
-                         position: 'absolute',
-                         left: (karte.x || 0) + 'px',
-                         top: (karte.y || 0) + 'px',
-                         background: karte.farbe,
-                         width: '160px',
-                         minHeight: '90px',
-                         borderRadius: '2px',
-                         padding: '10px',
-                         cursor: dragState.id === karte.id ? 'grabbing' : 'grab',
-                         userSelect: 'none',
-                         opacity: karte.sichtbar !== false ? 1 : 0.25,
-                         boxShadow: dragState.id === karte.id ? '4px 8px 20px rgba(0,0,0,0.55)' : '3px 5px 14px rgba(0,0,0,0.38)',
-                         zIndex: dragState.id === karte.id ? 10 : 1,
-                         display: 'flex',
-                         flexDirection: 'column',
-                         gap: '6px',
-                         transition: dragState.active ? 'none' : 'box-shadow 0.2s'
-                     }">
-                    <!-- Tesa-Streifen -->
-                    <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:44px; height:16px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.15); pointer-events:none; z-index:2;"></div>
-                    <div v-if="karte.autor"
-                         :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
-                        {{ karte.autor }}
-                    </div>
-                    <div :style="{color:textfarbe(karte.farbe), fontSize:'1rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3, display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', fontWeight:'500'}">
-                        {{ karte.sichtbar !== false ? karte.text : '???' }}
-                    </div>
-                    <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
-                        <button @click.stop="karteLoeschen(karte.id)"
-                                @mousedown.stop
-                                :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
-                            ✕
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Grid -->
-            <div v-if="ansicht==='grid'"
-                 style="height:100%; overflow-y:auto;"
-                 class="custom-scrollbar">
-                <div v-if="karten.length===0"
-                     style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
-                    Noch keine Karten.
-                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
-                </div>
-                <div v-if="karten.length>0" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; padding:6px 4px;">
-                    <div v-for="karte in karten" :key="karte.id"
-                         :style="{
-                             position: 'relative',
-                             background: karte.farbe,
-                             opacity: karte.sichtbar !== false ? 1 : 0.25,
-                             borderRadius: '2px',
-                             padding: '10px',
-                             minHeight: '90px',
-                             display: 'flex',
-                             flexDirection: 'column',
-                             gap: '6px',
-                             boxShadow: '3px 5px 14px rgba(0,0,0,0.35)',
-                                 transition: 'opacity 0.2s'
-                         }">
-                        <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:44px; height:16px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.15); pointer-events:none; z-index:2;"></div>
-                        <div v-if="karte.autor"
-                             :style="{fontSize:'0.72rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65, position:'relative', zIndex:3}">
-                            {{ karte.autor }}
-                        </div>
-                        <div :style="{color:textfarbe(karte.farbe), fontSize:'1rem', lineHeight:'1.4', wordBreak:'break-word', flex:1, position:'relative', zIndex:3, display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', fontWeight:'500'}">
-                            {{ karte.sichtbar !== false ? karte.text : '???' }}
-                        </div>
-                        <div style="display:flex; gap:4px; justify-content:flex-end; flex-shrink:0; position:relative; z-index:3;">
-                            <button @click="karteLoeschen(karte.id)"
-                                    :style="{background:'rgba(0,0,0,0.18)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'2px 5px', fontSize:'0.7rem', color:textfarbe(karte.farbe)}">
-                                ✕
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Einzelkarte -->
-            <div v-if="ansicht==='einzeln'"
-                 style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:15px; padding:10px;">
-                <div v-if="karten.length===0"
-                     style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
-                    Noch keine Karten.
-                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
-                </div>
-                <template v-else>
-                    <div :style="{
-                        position: 'relative',
-                        background: aktuelleKarte.farbe,
-                        borderRadius: '2px',
-                        padding: '30px 35px',
-                        width: '80%',
-                        maxWidth: '420px',
-                        minHeight: '160px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '10px',
-                        opacity: aktuelleKarte.sichtbar !== false ? 1 : 0.4,
-                        boxShadow: '3px 5px 20px rgba(0,0,0,0.4)',
-                        transition: 'all 0.25s ease'
-                    }">
-                        <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:54px; height:16px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.15); pointer-events:none; z-index:2;"></div>
-                        <div v-if="aktuelleKarte.autor"
-                             :style="{fontSize:'0.82rem', fontWeight:'700', color:textfarbe(aktuelleKarte.farbe), opacity:0.65}">
-                            {{ aktuelleKarte.autor }}
-                        </div>
-                        <div :style="{color:textfarbe(aktuelleKarte.farbe), fontSize:'1.45rem', textAlign:'center', lineHeight:'1.45', fontWeight:'500'}">
-                            {{ aktuelleKarte.sichtbar !== false ? aktuelleKarte.text : '???' }}
-                        </div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <button @click="vorherige"
-                                :disabled="aktuelleKarteIdx===0"
-                                :style="{opacity: aktuelleKarteIdx===0 ? 0.25 : 1}"
-                                style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:8px 18px; border-radius:8px; cursor:pointer; font-size:1rem; font-family:inherit;">◀</button>
-                        <span style="opacity:0.6; font-size:0.9rem; min-width:60px; text-align:center;">
-                            {{ aktuelleKarteIdx+1 }} / {{ karten.length }}
-                        </span>
-                        <button @click="naechste"
-                                :disabled="aktuelleKarteIdx===karten.length-1"
-                                :style="{opacity: aktuelleKarteIdx===karten.length-1 ? 0.25 : 1}"
-                                style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:8px 18px; border-radius:8px; cursor:pointer; font-size:1rem; font-family:inherit;">▶</button>
-                    </div>
-                </template>
-            </div>
-
-        </div>
-
         <!-- NEUE KARTE (manuell) -->
         <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:10px; display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
             <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
@@ -514,6 +394,152 @@ const KartenabfrageWidget = {
                 </button>
             </div>
         </div>
+
+        <!-- KARTEN-BEREICH -->
+        <div ref="kartenBereich" style="flex:1; overflow:hidden; min-height:0; position:relative;">
+
+            <!-- Freihand (Drag & Drop) -->
+            <div v-if="ansicht==='freihand'"
+                 style="position:relative; width:100%; height:100%; overflow:hidden; background:rgba(0,0,0,0.08); border-radius:8px;">
+                <div v-if="karten.length===0"
+                     style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
+                    Noch keine Karten.
+                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
+                </div>
+                <div v-for="karte in karten" :key="karte.id"
+                     @mousedown.prevent="freihandDragStart(karte, $event)"
+                     :style="{
+                         position: 'absolute',
+                         left: (karte.x || 0) + 'px',
+                         top: (karte.y || 0) + 'px',
+                         background: karte.farbe,
+                         width: (karte.w || 160) + 'px',
+                         height: (karte.h || 110) + 'px',
+                         borderRadius: '3px',
+                         cursor: dragState.id === karte.id ? 'grabbing' : 'grab',
+                         userSelect: 'none',
+                         opacity: karte.sichtbar !== false ? 1 : 0.25,
+                         boxShadow: dragState.id === karte.id ? '4px 8px 20px rgba(0,0,0,0.55)' : '2px 5px 12px rgba(0,0,0,0.38)',
+                         zIndex: dragState.id === karte.id ? 10 : 1,
+                         display: 'flex',
+                         flexDirection: 'column',
+                         transition: dragState.active ? 'none' : 'box-shadow 0.2s'
+                     }">
+                    <!-- Tesa-Streifen -->
+                    <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:44px; height:14px; background:rgba(255,255,255,0.25); border-left:1px solid rgba(255,255,255,0.18); border-right:1px solid rgba(255,255,255,0.18); border-bottom:1px solid rgba(255,255,255,0.12); pointer-events:none; z-index:2;"></div>
+                    <!-- X-Button oben rechts -->
+                    <button @click.stop="karteLoeschen(karte.id)"
+                            @mousedown.stop
+                            :style="{position:'absolute', top:'2px', right:'3px', background:'rgba(0,0,0,0.15)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'1px 4px', fontSize:'0.6rem', color:textfarbe(karte.farbe), zIndex:6, lineHeight:1}">✕</button>
+                    <!-- Inhalt -->
+                    <div style="flex:1; display:flex; flex-direction:column; gap:3px; padding:6px 8px 4px;">
+                        <div v-if="karte.autor"
+                             :style="{fontSize:'0.68rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
+                            {{ karte.autor }}
+                        </div>
+                        <div :style="{color:textfarbe(karte.farbe), fontSize:'0.88rem', lineHeight:'1.35', wordBreak:'break-word', flex:1, display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', fontWeight:'500'}">
+                            {{ karte.sichtbar !== false ? karte.text : '???' }}
+                        </div>
+                    </div>
+                    <!-- Resize-Griff unten rechts -->
+                    <div @mousedown.prevent.stop="freihandResizeStart(karte, $event)"
+                         :style="{position:'absolute', bottom:'2px', right:'2px', width:'13px', height:'13px', cursor:'se-resize', zIndex:6, opacity:0.4, color:textfarbe(karte.farbe), fontSize:'11px', lineHeight:'13px', textAlign:'center', userSelect:'none'}">⌟</div>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div v-if="ansicht==='grid'"
+                 style="height:100%; overflow-y:auto;"
+                 class="custom-scrollbar">
+                <div v-if="karten.length===0"
+                     style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
+                    Noch keine Karten.
+                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
+                </div>
+                <div v-if="karten.length>0" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; padding:6px 4px;">
+                    <div v-for="karte in karten" :key="karte.id"
+                         :style="{
+                             position: 'relative',
+                             background: karte.farbe,
+                             opacity: karte.sichtbar !== false ? 1 : 0.25,
+                             borderRadius: '3px',
+                             minHeight: '90px',
+                             display: 'flex',
+                             flexDirection: 'column',
+                             boxShadow: '2px 5px 12px rgba(0,0,0,0.35)',
+                             transition: 'opacity 0.2s'
+                         }">
+                        <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:44px; height:14px; background:rgba(255,255,255,0.25); border-left:1px solid rgba(255,255,255,0.18); border-right:1px solid rgba(255,255,255,0.18); border-bottom:1px solid rgba(255,255,255,0.12); pointer-events:none; z-index:2;"></div>
+                        <!-- X-Button oben rechts -->
+                        <button @click.stop="karteLoeschen(karte.id)"
+                                @mousedown.stop
+                                :style="{position:'absolute', top:'2px', right:'3px', background:'rgba(0,0,0,0.15)', border:'none', borderRadius:'4px', cursor:'pointer', padding:'1px 4px', fontSize:'0.6rem', color:textfarbe(karte.farbe), zIndex:6, lineHeight:1}">✕</button>
+                        <div style="flex:1; display:flex; flex-direction:column; gap:3px; padding:6px 8px 8px;">
+                            <div v-if="karte.autor"
+                                 :style="{fontSize:'0.68rem', fontWeight:'700', color:textfarbe(karte.farbe), opacity:0.65}">
+                                {{ karte.autor }}
+                            </div>
+                            <div :style="{color:textfarbe(karte.farbe), fontSize:'0.88rem', lineHeight:'1.35', wordBreak:'break-word', flex:1, display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center', fontWeight:'500'}">
+                                {{ karte.sichtbar !== false ? karte.text : '???' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Einzelkarte -->
+            <div v-if="ansicht==='einzeln'"
+                 style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:15px; padding:10px;">
+                <div v-if="karten.length===0"
+                     style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0.4; font-size:0.9rem; text-align:center; padding:20px;">
+                    Noch keine Karten.
+                    <span style="font-size:0.8rem;">Session starten → Schüler reichen ein, oder unten manuell hinzufügen.</span>
+                </div>
+                <template v-else>
+                    <div :style="{
+                        position: 'relative',
+                        background: aktuelleKarte.farbe,
+                        borderRadius: '2px',
+                        padding: '30px 35px',
+                        width: '80%',
+                        maxWidth: '420px',
+                        minHeight: '160px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        opacity: aktuelleKarte.sichtbar !== false ? 1 : 0.4,
+                        boxShadow: '3px 5px 20px rgba(0,0,0,0.4)',
+                        transition: 'all 0.25s ease'
+                    }">
+                        <div style="position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:54px; height:16px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.15); pointer-events:none; z-index:2;"></div>
+                        <div v-if="aktuelleKarte.autor"
+                             :style="{fontSize:'0.82rem', fontWeight:'700', color:textfarbe(aktuelleKarte.farbe), opacity:0.65}">
+                            {{ aktuelleKarte.autor }}
+                        </div>
+                        <div :style="{color:textfarbe(aktuelleKarte.farbe), fontSize:'1.45rem', textAlign:'center', lineHeight:'1.45', fontWeight:'500'}">
+                            {{ aktuelleKarte.sichtbar !== false ? aktuelleKarte.text : '???' }}
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <button @click="vorherige"
+                                :disabled="aktuelleKarteIdx===0"
+                                :style="{opacity: aktuelleKarteIdx===0 ? 0.25 : 1}"
+                                style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:8px 18px; border-radius:8px; cursor:pointer; font-size:1rem; font-family:inherit;">◀</button>
+                        <span style="opacity:0.6; font-size:0.9rem; min-width:60px; text-align:center;">
+                            {{ aktuelleKarteIdx+1 }} / {{ karten.length }}
+                        </span>
+                        <button @click="naechste"
+                                :disabled="aktuelleKarteIdx===karten.length-1"
+                                :style="{opacity: aktuelleKarteIdx===karten.length-1 ? 0.25 : 1}"
+                                style="background:rgba(255,255,255,0.1); border:none; color:var(--text-color); padding:8px 18px; border-radius:8px; cursor:pointer; font-size:1rem; font-family:inherit;">▶</button>
+                    </div>
+                </template>
+            </div>
+
+        </div>
+
     </div>
 
     <!-- QR-Modal -->
