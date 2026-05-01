@@ -111,14 +111,22 @@ const KanbanWidget = {
                 }
                 if (msg.type === 'kanban_update') {
                     const newCards = msg.board.cards;
-                    newCards.forEach((nc, i) => {
+                    newCards.forEach((nc) => {
                         const existing = (this.widgetData.karten || []).find(k => k.id === nc.id);
-                        if (existing && existing.x != null) {
+                        if (existing && existing.x != null && existing.spalte === nc.spalte) {
+                            // Gleiche Spalte: Lehrer-Position beibehalten
                             nc.x = existing.x; nc.y = existing.y;
                             nc.w = existing.w || 130; nc.h = existing.h || 130;
+                        } else if (Number.isFinite(nc.x)) {
+                            // Neue Spalte oder neue Karte: Server-Position (vom Schüler) verwenden
+                            nc.w = existing ? (existing.w || 130) : 130;
+                            nc.h = existing ? (existing.h || 130) : 130;
                         } else {
-                            nc.x = 10 + (i % 2) * 150;
-                            nc.y = 20 + Math.floor(i / 2) * 150;
+                            // Fallback: Gitter-Layout pro Spalte
+                            const inSpalte = newCards.filter(c => c.spalte === nc.spalte);
+                            const idx = inSpalte.findIndex(c => c.id === nc.id);
+                            nc.x = 10 + (idx % 2) * 150;
+                            nc.y = 20 + Math.floor(idx / 2) * 150;
                             nc.w = 130; nc.h = 130;
                         }
                     });
@@ -168,7 +176,7 @@ const KanbanWidget = {
             };
             this.widgetData.karten.push(card);
             this.$emit('save');
-            this.wsSend({ type: 'kanban_card_add', text: card.text, autor: card.autor, farbe: card.farbe, spalte: card.spalte });
+            this.wsSend({ type: 'kanban_card_add', text: card.text, autor: card.autor, farbe: card.farbe, spalte: card.spalte, x: card.x, y: card.y });
             this.neueKarteText = '';
             this.neueKarteAutor = '';
         },
@@ -196,7 +204,7 @@ const KanbanWidget = {
                 }
                 card.spalte = spalte;
                 this.$emit('save');
-                this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte });
+                this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte, x: card.x, y: card.y });
             }
             this.dragCardId = null;
             this.dragOverSpalte = null;
@@ -275,7 +283,7 @@ const KanbanWidget = {
                             card.y = Math.max(20, e.clientY - rect.top - h / 2);
                         }
                         card.spalte = targetSpalte;
-                        this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: targetSpalte });
+                        this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: targetSpalte, x: card.x, y: card.y });
                     }
                     this.$emit('save');
                 }

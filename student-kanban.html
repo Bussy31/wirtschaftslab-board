@@ -559,7 +559,8 @@
                 }
                 if (hit.spalte !== card.spalte) {
                     card.spalte = hit.spalte;
-                    wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: hit.spalte });
+                    wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: hit.spalte,
+                             x: positions[card.id]?.x, y: positions[card.id]?.y });
                     toast('Karte verschoben');
                 }
             } else {
@@ -607,7 +608,11 @@
         const autor = autorEl.value.trim();
         const spalte = spalteEl.value || board.columns[0];
         if (autor) localStorage.setItem('kanban_autor', autor);
-        wsSend({ type: 'kanban_card_add', text, autor, farbe: selectedFarbe, spalte });
+        const inSpalte = board.cards.filter(c => c.spalte === spalte);
+        const idx = inSpalte.length;
+        const cardX = 10 + (idx % 2) * (CARD_W + 15);
+        const cardY = 20 + Math.floor(idx / 2) * (CARD_H + 15);
+        wsSend({ type: 'kanban_card_add', text, autor, farbe: selectedFarbe, spalte, x: cardX, y: cardY });
         textEl.value = '';
         toast('Karte hinzugefügt ✓');
         const btn = document.getElementById('add-btn');
