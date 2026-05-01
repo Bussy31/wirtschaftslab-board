@@ -28,13 +28,7 @@
         }
         .header-logo { font-size: 1.3rem; }
         .header-title { font-size: 0.95rem; font-weight: 700; }
-        .header-badge {
-            font-family: monospace;
-            font-size: 0.7rem;
-            opacity: 0.4;
-            letter-spacing: 0.06em;
-            margin-left: auto;
-        }
+        .header-badge { font-family: monospace; font-size: 0.7rem; opacity: 0.4; letter-spacing: 0.06em; margin-left: auto; }
 
         .add-form {
             background: #1e293b;
@@ -72,43 +66,22 @@
             flex-shrink: 0;
             -webkit-appearance: none;
         }
-        .add-form .farben-row {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .add-form button.add-btn {
-            background: #3b82f6;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            padding: 9px 18px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-            flex-shrink: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .add-form button.add-btn:active { opacity: 0.75; }
-        .add-form button.add-btn:disabled { background: rgba(255,255,255,0.12); cursor: default; }
-
+        .farben-row { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
         .color-swatch {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            padding: 0;
-            flex-shrink: 0;
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid transparent; cursor: pointer; padding: 0; flex-shrink: 0;
             -webkit-tap-highlight-color: transparent;
         }
-        .color-swatch.active {
-            border-color: white;
-            outline: 1px solid rgba(255,255,255,0.4);
-            outline-offset: 1px;
+        .color-swatch.active { border-color: white; outline: 1px solid rgba(255,255,255,0.4); outline-offset: 1px; }
+        .add-btn {
+            background: #3b82f6; border: none; color: white;
+            border-radius: 8px; padding: 9px 18px;
+            font-size: 1rem; font-weight: 700; cursor: pointer;
+            font-family: inherit; flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
+        .add-btn:active { opacity: 0.75; }
+        .add-btn:disabled { background: rgba(255,255,255,0.12); cursor: default; }
 
         .board {
             flex: 1;
@@ -132,44 +105,43 @@
             transition: background 0.15s, border-color 0.15s;
         }
         .spalte.drag-over {
-            background: rgba(59,130,246,0.07);
-            border-color: rgba(59,130,246,0.35);
+            background: rgba(59,130,246,0.13);
+            border-color: rgba(59,130,246,0.45);
+        }
+        .spalte.drag-target {
+            background: rgba(59,130,246,0.05);
+            border-color: rgba(59,130,246,0.2);
         }
 
         .spalte-header {
             padding: 10px 12px 8px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
             background: rgba(255,255,255,0.04);
             border-radius: 12px 12px 0 0;
-            position: relative;
-            z-index: 2;
+            position: relative; z-index: 2;
         }
-        .spalte-name {
-            font-size: 0.88rem;
-            font-weight: 800;
-            opacity: 0.9;
-            letter-spacing: 0.03em;
-            text-align: center;
-        }
+        .spalte-name { font-size: 0.88rem; font-weight: 800; opacity: 0.9; letter-spacing: 0.03em; text-align: center; }
         .spalte-count {
-            position: absolute;
-            right: 10px;
-            font-size: 0.72rem;
-            opacity: 0.4;
-            background: rgba(255,255,255,0.1);
-            padding: 1px 8px;
-            border-radius: 10px;
+            position: absolute; right: 10px;
+            font-size: 0.72rem; opacity: 0.4;
+            background: rgba(255,255,255,0.1); padding: 1px 8px; border-radius: 10px;
         }
 
-        .karten-canvas {
+        .karten-outer {
             flex: 1;
+            overflow: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.15) transparent;
+        }
+        .karten-outer::-webkit-scrollbar { width: 3px; height: 3px; }
+        .karten-outer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+        .karten-canvas {
             position: relative;
-            overflow: visible;
-            min-height: 80px;
+            min-width: 300px;
+            min-height: 500px;
         }
 
         .karte {
@@ -182,111 +154,64 @@
             -webkit-user-select: none;
             touch-action: none;
             z-index: 1;
+            transition: box-shadow 0.2s;
         }
         .karte.dragging {
-            box-shadow: 6px 10px 24px rgba(0,0,0,0.55);
+            box-shadow: 6px 10px 24px rgba(0,0,0,0.55) !important;
             z-index: 50;
+            transition: none;
         }
-
         .karte-tape {
-            position: absolute;
-            left: 50%;
-            top: -8px;
+            position: absolute; left: 50%; top: -8px;
             transform: translateX(-50%);
-            width: 44px;
-            height: 14px;
+            width: 44px; height: 14px;
             background: rgba(255,255,255,0.25);
             border-left: 1px solid rgba(255,255,255,0.18);
             border-right: 1px solid rgba(255,255,255,0.18);
             border-bottom: 1px solid rgba(255,255,255,0.12);
-            cursor: grab;
-            z-index: 5;
+            cursor: grab; z-index: 5;
         }
-
         .karte-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            padding: 6px 8px 20px;
-            cursor: grab;
+            flex: 1; display: flex; flex-direction: column; gap: 3px;
+            padding: 6px 8px 20px; cursor: grab;
         }
-        .karte-body:active { cursor: grabbing; }
-
-        .karte-autor {
-            font-size: 0.68rem;
-            font-weight: 700;
-            opacity: 0.65;
-        }
+        .karte-autor { font-size: 0.68rem; font-weight: 700; opacity: 0.65; }
         .karte-text {
-            font-size: 0.88rem;
-            line-height: 1.35;
-            word-break: break-word;
-            font-weight: 500;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            font-size: 0.88rem; line-height: 1.35; word-break: break-word;
+            font-weight: 500; flex: 1;
+            display: flex; align-items: center; justify-content: center; text-align: center;
         }
-
         .karte-delete {
-            position: absolute;
-            top: 2px;
-            right: 3px;
-            background: rgba(0,0,0,0.15);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 1px 4px;
-            font-size: 0.6rem;
-            z-index: 6;
-            line-height: 1;
+            position: absolute; top: 2px; right: 3px;
+            background: rgba(0,0,0,0.15); border: none;
+            border-radius: 4px; cursor: pointer;
+            padding: 1px 4px; font-size: 0.6rem;
+            z-index: 6; line-height: 1;
             -webkit-tap-highlight-color: transparent;
         }
-
         .spalte-leer {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            opacity: 0.2;
-            font-size: 0.75rem;
-            padding: 20px;
-            pointer-events: none;
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; opacity: 0.2; font-size: 0.75rem;
+            padding: 20px; pointer-events: none;
         }
 
         .center-view {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 30px 20px;
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 30px 20px;
         }
         .center-view .icon { font-size: 3rem; margin-bottom: 14px; }
         .center-view h2 { margin-bottom: 8px; }
         .center-view p { opacity: 0.55; font-size: 0.9rem; line-height: 1.5; }
 
         .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(34,197,94,0.9);
-            color: white;
-            padding: 9px 20px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.25s;
-            pointer-events: none;
-            white-space: nowrap;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(34,197,94,0.9); color: white;
+            padding: 9px 20px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600;
+            z-index: 200; opacity: 0; transition: opacity 0.25s;
+            pointer-events: none; white-space: nowrap;
         }
         .toast.show { opacity: 1; }
     </style>
@@ -297,13 +222,11 @@
     <div class="icon">⏳</div>
     <h2>Verbinde...</h2>
 </div>
-
 <div id="view-error" class="center-view" style="display:none;">
     <div class="icon">❌</div>
     <h2>Session nicht gefunden</h2>
     <p>Diese Session ist nicht mehr aktiv oder der Link ist ungültig.<br>Bitte scanne den QR-Code erneut.</p>
 </div>
-
 <div id="view-ended" class="center-view" style="display:none;">
     <div class="icon">✅</div>
     <h2>Session beendet</h2>
@@ -311,13 +234,11 @@
 </div>
 
 <div id="view-main" style="display:none; flex-direction:column; height:100dvh; overflow:hidden;">
-
     <div class="header">
         <div class="header-logo">📋</div>
         <div class="header-title">Kanban-Board</div>
         <div class="header-badge" id="session-badge"></div>
     </div>
-
     <div class="add-form">
         <input type="text" id="autor" class="autor" placeholder="Name (optional)" maxlength="50" autocomplete="name">
         <input type="text" id="text" class="text" placeholder="Neue Karte..." maxlength="300">
@@ -325,7 +246,6 @@
         <div class="farben-row" id="farben-row"></div>
         <button class="add-btn" id="add-btn" onclick="karteHinzufuegen()">+</button>
     </div>
-
     <div class="board" id="board"></div>
 </div>
 
@@ -338,22 +258,21 @@
     const params = new URLSearchParams(window.location.search);
     const session = (params.get('session') || '').toUpperCase();
 
-    let ws = null;
-    let connected = false;
+    let ws = null, connected = false;
     let board = { columns: ['Aufgabe', 'In Bearbeitung', 'Erledigt'], cards: [] };
-    let positions = {}; // cardId → {x, y}
+    let positions = {};
     let selectedFarbe = '#fbbf24';
     let html5DragId = null;
+    let dragSourceSpalte = null;
 
-    // Drag state (mouse + touch)
     let drag = { active: false, cardId: null, cardEl: null,
-                 startX: 0, startY: 0, startCardX: 0, startCardY: 0 };
+                 startX: 0, startY: 0,
+                 startClientX: 0, startClientY: 0,
+                 startCardX: 0, startCardY: 0 };
 
-    // Name aus localStorage
     const savedName = localStorage.getItem('kanban_autor');
     if (savedName) document.getElementById('autor').value = savedName;
 
-    // Farb-Picker aufbauen
     function buildColorPicker() {
         const row = document.getElementById('farben-row');
         row.innerHTML = '';
@@ -361,9 +280,6 @@
             const btn = document.createElement('button');
             btn.className = 'color-swatch' + (f === selectedFarbe ? ' active' : '');
             btn.style.background = f;
-            btn.style.border = f === selectedFarbe ? '2px solid white' : '2px solid transparent';
-            btn.style.outline = f === selectedFarbe ? '1px solid rgba(255,255,255,0.4)' : 'none';
-            btn.style.outlineOffset = '1px';
             btn.addEventListener('click', e => { e.preventDefault(); selectedFarbe = f; buildColorPicker(); });
             btn.addEventListener('touchend', e => { e.preventDefault(); selectedFarbe = f; buildColorPicker(); });
             row.appendChild(btn);
@@ -374,9 +290,11 @@
     function show(id) {
         ['view-loading','view-error','view-ended','view-main'].forEach(v => {
             const el = document.getElementById(v);
-            el.style.display = v === id ? (v === 'view-main' ? 'flex' : 'flex') : 'none';
-            if (v === id && v === 'view-main') el.style.flexDirection = 'column';
+            el.style.display = 'none';
         });
+        const target = document.getElementById(id);
+        target.style.display = 'flex';
+        if (id === 'view-main') target.style.flexDirection = 'column';
     }
 
     function toast(msg) {
@@ -403,14 +321,38 @@
         return null;
     }
 
+    function updateHighlights(activeSpalte) {
+        document.querySelectorAll('.spalte').forEach(el => {
+            el.classList.remove('drag-over', 'drag-target');
+            if (!drag.active && !html5DragId) return;
+            const s = el.dataset.spalte;
+            if (s === activeSpalte) el.classList.add('drag-over');
+            else if (s !== dragSourceSpalte) el.classList.add('drag-target');
+        });
+    }
+
     function initPosition(cardId, spalte) {
         if (positions[cardId]) return;
-        const inSpalte = board.cards.filter(c => c.spalte === spalte && !positions[c.id]);
+        const inSpalte = board.cards.filter(c => c.spalte === spalte);
         const idx = inSpalte.findIndex(c => c.id === cardId);
+        const i = idx < 0 ? 0 : idx;
         positions[cardId] = {
-            x: 10 + (idx < 0 ? 0 : idx % 2) * (CARD_W + 15),
-            y: 20 + (idx < 0 ? 0 : Math.floor(idx / 2)) * (CARD_H + 15)
+            x: 10 + (i % 2) * (CARD_W + 15),
+            y: 20 + Math.floor(i / 2) * (CARD_H + 15)
         };
+    }
+
+    function canvasMinSize(spalte) {
+        const karten = board.cards.filter(k => k.spalte === spalte);
+        const maxX = karten.reduce((m, k) => {
+            const p = positions[k.id];
+            return p ? Math.max(m, p.x + CARD_W + 20) : m;
+        }, 300);
+        const maxY = karten.reduce((m, k) => {
+            const p = positions[k.id];
+            return p ? Math.max(m, p.y + CARD_H + 20) : m;
+        }, 500);
+        return { width: maxX, height: maxY };
     }
 
     function renderBoard() {
@@ -434,12 +376,14 @@
             col.className = 'spalte';
             col.dataset.spalte = spalte;
 
-            // HTML5 drop (from tape strip)
-            col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
-            col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+            // HTML5 drop (Tesa-Streifen)
+            col.addEventListener('dragover', e => {
+                e.preventDefault();
+                updateHighlights(spalte);
+            });
+            col.addEventListener('dragleave', () => updateHighlights(null));
             col.addEventListener('drop', e => {
                 e.preventDefault();
-                col.classList.remove('drag-over');
                 if (!html5DragId) return;
                 const card = board.cards.find(c => c.id === html5DragId);
                 if (card && card.spalte !== spalte) {
@@ -453,10 +397,12 @@
                     }
                     card.spalte = spalte;
                     wsSend({ type: 'kanban_card_move', cardId: card.id, spalte });
-                    renderBoard();
                     toast('Karte verschoben');
                 }
                 html5DragId = null;
+                dragSourceSpalte = null;
+                document.querySelectorAll('.spalte').forEach(c => c.classList.remove('drag-over', 'drag-target'));
+                renderBoard();
             });
 
             // Header
@@ -465,9 +411,16 @@
             header.innerHTML = `<span class="spalte-name">${spalte}</span><span class="spalte-count">${karten.length}</span>`;
             col.appendChild(header);
 
-            // Canvas
+            // Outer scroll
+            const outer = document.createElement('div');
+            outer.className = 'karten-outer';
+
+            // Inner canvas
             const canvas = document.createElement('div');
             canvas.className = 'karten-canvas';
+            const size = canvasMinSize(spalte);
+            canvas.style.minWidth = size.width + 'px';
+            canvas.style.minHeight = size.height + 'px';
 
             if (karten.length === 0) {
                 const leer = document.createElement('div');
@@ -486,15 +439,24 @@
                 cardEl.dataset.id = karte.id;
                 cardEl.style.cssText = `left:${pos.x}px; top:${pos.y}px; width:${CARD_W}px; height:${CARD_H}px; background:${karte.farbe};`;
 
-                // Tape strip (HTML5 drag handle für Spaltenwechsel)
+                // Tesa-Streifen (HTML5-Drag-Handle)
                 const tape = document.createElement('div');
                 tape.className = 'karte-tape';
                 tape.draggable = true;
-                tape.addEventListener('dragstart', e => { e.stopPropagation(); html5DragId = karte.id; });
-                tape.addEventListener('dragend', () => html5DragId = null);
+                tape.addEventListener('dragstart', e => {
+                    e.stopPropagation();
+                    html5DragId = karte.id;
+                    dragSourceSpalte = karte.spalte;
+                    updateHighlights(null);
+                });
+                tape.addEventListener('dragend', () => {
+                    html5DragId = null;
+                    dragSourceSpalte = null;
+                    document.querySelectorAll('.spalte').forEach(c => c.classList.remove('drag-over', 'drag-target'));
+                });
                 cardEl.appendChild(tape);
 
-                // Body (freies Verschieben)
+                // Body
                 const body = document.createElement('div');
                 body.className = 'karte-body';
 
@@ -513,7 +475,7 @@
                 body.appendChild(t);
                 cardEl.appendChild(body);
 
-                // Delete button
+                // Delete
                 const del = document.createElement('button');
                 del.className = 'karte-delete';
                 del.textContent = '✕';
@@ -526,89 +488,95 @@
                 body.addEventListener('mousedown', e => {
                     if (e.button !== 0) return;
                     e.preventDefault();
-                    dragStart(karte.id, e.clientX, e.clientY, cardEl);
+                    dragStart(karte.id, karte.spalte, e.clientX, e.clientY, cardEl, canvas);
                 });
-
                 // Touch drag
                 body.addEventListener('touchstart', e => {
                     if (e.touches.length !== 1) return;
                     e.preventDefault();
                     const t = e.touches[0];
-                    dragStart(karte.id, t.clientX, t.clientY, cardEl);
+                    dragStart(karte.id, karte.spalte, t.clientX, t.clientY, cardEl, canvas);
                 }, { passive: false });
 
                 canvas.appendChild(cardEl);
             });
 
-            col.appendChild(canvas);
+            outer.appendChild(canvas);
+            col.appendChild(outer);
             boardEl.appendChild(col);
         });
     }
 
-    function dragStart(cardId, clientX, clientY, el) {
+    function dragStart(cardId, spalte, clientX, clientY, el, canvas) {
+        const rect = el.getBoundingClientRect();
+        // Karte aus Scroll-Container rausnehmen → kein Clipping beim Cross-Column-Drag
+        el.style.position = 'fixed';
+        el.style.left = rect.left + 'px';
+        el.style.top = rect.top + 'px';
+        el.style.width = rect.width + 'px';
+        el.style.height = rect.height + 'px';
+        document.body.appendChild(el);
+
         drag.active = true;
         drag.cardId = cardId;
         drag.cardEl = el;
         drag.startX = clientX;
         drag.startY = clientY;
+        drag.startClientX = rect.left;
+        drag.startClientY = rect.top;
         drag.startCardX = positions[cardId] ? positions[cardId].x : 0;
         drag.startCardY = positions[cardId] ? positions[cardId].y : 0;
+        dragSourceSpalte = spalte;
         el.classList.add('dragging');
+        updateHighlights(spalte);
     }
 
     function dragMove(clientX, clientY) {
         if (!drag.active || !drag.cardEl) return;
-        const dx = clientX - drag.startX;
-        const dy = clientY - drag.startY;
-        drag.cardEl.style.left = (drag.startCardX + dx) + 'px';
-        drag.cardEl.style.top = (drag.startCardY + dy) + 'px';
-        // Column highlight
+        drag.cardEl.style.left = (drag.startClientX + (clientX - drag.startX)) + 'px';
+        drag.cardEl.style.top  = (drag.startClientY + (clientY - drag.startY)) + 'px';
         const hit = findSpalteAtPoint(clientX, clientY);
-        document.querySelectorAll('.spalte').forEach(c => c.classList.remove('drag-over'));
-        if (hit) hit.el.classList.add('drag-over');
+        updateHighlights(hit ? hit.spalte : null);
     }
 
     function dragEnd(clientX, clientY) {
         if (!drag.active) return;
-        const dx = clientX - drag.startX;
-        const dy = clientY - drag.startY;
-        const newX = drag.startCardX + dx;
-        const newY = drag.startCardY + dy;
 
         const card = board.cards.find(c => c.id === drag.cardId);
         if (card) {
             const hit = findSpalteAtPoint(clientX, clientY);
-            const targetSpalte = hit ? hit.spalte : null;
+            const finalCardX = drag.startClientX + (clientX - drag.startX);
+            const finalCardY = drag.startClientY + (clientY - drag.startY);
 
-            if (targetSpalte && targetSpalte !== card.spalte) {
-                const canvas = hit.el.querySelector('.karten-canvas');
-                if (canvas) {
-                    const rect = canvas.getBoundingClientRect();
+            if (hit) {
+                const canvasEl = hit.el.querySelector('.karten-canvas');
+                if (canvasEl) {
+                    const cr = canvasEl.getBoundingClientRect();
                     positions[card.id] = {
-                        x: Math.max(0, clientX - rect.left - CARD_W / 2),
-                        y: Math.max(20, clientY - rect.top - CARD_H / 2)
+                        x: Math.max(0, finalCardX - cr.left),
+                        y: Math.max(20, finalCardY - cr.top)
                     };
                 }
-                card.spalte = targetSpalte;
-                wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: targetSpalte });
-                toast('Karte verschoben');
+                if (hit.spalte !== card.spalte) {
+                    card.spalte = hit.spalte;
+                    wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: hit.spalte });
+                    toast('Karte verschoben');
+                }
             } else {
-                positions[card.id] = { x: newX, y: newY };
+                positions[card.id] = { x: drag.startCardX, y: drag.startCardY };
             }
         }
 
-        drag.cardEl.classList.remove('dragging');
-        document.querySelectorAll('.spalte').forEach(c => c.classList.remove('drag-over'));
+        if (drag.cardEl && drag.cardEl.parentNode === document.body) drag.cardEl.remove();
+        document.querySelectorAll('.spalte').forEach(c => c.classList.remove('drag-over', 'drag-target'));
         drag.active = false;
         drag.cardEl = null;
+        dragSourceSpalte = null;
         renderBoard();
     }
 
-    // Global mouse events
     document.addEventListener('mousemove', e => { if (drag.active) dragMove(e.clientX, e.clientY); });
     document.addEventListener('mouseup', e => { if (drag.active) dragEnd(e.clientX, e.clientY); });
-
-    // Global touch events
     document.addEventListener('touchmove', e => {
         if (!drag.active) return;
         e.preventDefault();
@@ -620,9 +588,13 @@
     });
     document.addEventListener('touchcancel', () => {
         if (!drag.active) return;
-        drag.cardEl && drag.cardEl.classList.remove('dragging');
-        document.querySelectorAll('.spalte').forEach(c => c.classList.remove('drag-over'));
-        drag.active = false; drag.cardEl = null;
+        if (drag.cardEl) {
+            if (drag.cardEl.parentNode === document.body) drag.cardEl.remove();
+            else drag.cardEl.classList.remove('dragging');
+        }
+        document.querySelectorAll('.spalte').forEach(c => c.classList.remove('drag-over', 'drag-target'));
+        drag.active = false; drag.cardEl = null; dragSourceSpalte = null;
+        if (drag.cardId) positions[drag.cardId] = { x: drag.startCardX, y: drag.startCardY };
         renderBoard();
     });
 
@@ -632,15 +604,12 @@
         const spalteEl = document.getElementById('spalte-select');
         const text = textEl.value.trim();
         if (!text) { textEl.focus(); return; }
-
         const autor = autorEl.value.trim();
         const spalte = spalteEl.value || board.columns[0];
         if (autor) localStorage.setItem('kanban_autor', autor);
-
         wsSend({ type: 'kanban_card_add', text, autor, farbe: selectedFarbe, spalte });
         textEl.value = '';
         toast('Karte hinzugefügt ✓');
-
         const btn = document.getElementById('add-btn');
         btn.disabled = true;
         setTimeout(() => btn.disabled = false, 800);
@@ -662,20 +631,17 @@
         if (e.key === 'Enter') karteHinzufuegen();
     });
 
-    if (!session) { show('view-error'); }
-    else { connect(); }
+    if (!session) show('view-error');
+    else connect();
 
     function connect() {
         const wsUrl = 'wss://' + window.location.hostname + '/ws';
         ws = new WebSocket(wsUrl);
-
         ws.onopen = () => {
             ws.send(JSON.stringify({ type: 'join', role: 'student', sessionId: session }));
         };
-
         ws.onmessage = (e) => {
             const msg = JSON.parse(e.data);
-
             if (msg.type === 'joined') {
                 connected = true;
                 document.getElementById('session-badge').textContent = 'Session ' + session;
@@ -683,20 +649,15 @@
                 renderBoard();
                 show('view-main');
             }
-
             if (msg.type === 'kanban_update') {
-                const newCards = msg.board.cards;
-                // Clean up positions for deleted cards
-                const ids = new Set(newCards.map(c => c.id));
+                const ids = new Set(msg.board.cards.map(c => c.id));
                 Object.keys(positions).forEach(id => { if (!ids.has(id)) delete positions[id]; });
                 board = msg.board;
                 renderBoard();
             }
-
             if (msg.type === 'error') show('view-error');
             if (msg.type === 'session_ended') show('view-ended');
         };
-
         ws.onclose = () => { if (!connected) show('view-error'); else show('view-ended'); };
         ws.onerror = () => { if (!connected) show('view-error'); };
     }
