@@ -210,6 +210,13 @@ const KanbanWidget = {
             this.dragOverSpalte = null;
         },
         cardMousedown(card, e) {
+            const cardEl = e.currentTarget.parentElement;
+            const rect = cardEl.getBoundingClientRect();
+            // Ghost: Clone als position:fixed ans Body → kein Clipping, Scroll möglich
+            const ghost = cardEl.cloneNode(true);
+            ghost.style.cssText += `;position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;z-index:9999;pointer-events:none;box-shadow:6px 10px 24px rgba(0,0,0,0.55);transition:none;`;
+            document.body.appendChild(ghost);
+            cardEl.style.opacity = '0.2';
             this.freeDragState = {
                 active: true,
                 cardId: card.id,
@@ -218,6 +225,10 @@ const KanbanWidget = {
                 startMouseY: e.clientY,
                 startCardX: card.x || 0,
                 startCardY: card.y || 0,
+                startClientX: rect.left,
+                startClientY: rect.top,
+                ghost,
+                originalEl: cardEl,
             };
         },
         resizeMousedown(card, e) {
@@ -239,8 +250,11 @@ const KanbanWidget = {
             const dx = e.clientX - state.startMouseX;
             const dy = e.clientY - state.startMouseY;
             if (state.type === 'move') {
-                card.x = state.startCardX + dx;
-                card.y = state.startCardY + dy;
+                // Ghost bewegen statt card.x/y (Vue-DOM bleibt unberührt während Drag)
+                if (state.ghost) {
+                    state.ghost.style.left = (state.startClientX + dx) + 'px';
+                    state.ghost.style.top  = (state.startClientY + dy) + 'px';
+                }
                 let hover = null;
                 for (const [spalte, el] of Object.entries(this.spaltenRefs)) {
                     if (!el) continue;
@@ -252,6 +266,22 @@ const KanbanWidget = {
                     }
                 }
                 this.freeDragOverSpalte = hover;
+                // Auto-Scroll
+                if (hover && this.spaltenRefs[hover]) {
+                    const outer = this.spaltenRefs[hover];
+                    const rect = outer.getBoundingClientRect();
+                    const THRESH = 70, SPEED = 10;
+                    if (e.clientY > rect.bottom - THRESH) {
+                        outer.scrollTop += SPEED;
+                        const canvas = outer.querySelector('.karten-inner');
+                        if (canvas) {
+                            const curH = parseFloat(canvas.style.minHeight) || 500;
+                            canvas.style.minHeight = Math.max(curH, outer.scrollTop + outer.clientHeight + 200) + 'px';
+                        }
+                    } else if (e.clientY < rect.top + THRESH) {
+                        outer.scrollTop = Math.max(0, outer.scrollTop - SPEED);
+                    }
+                }
             } else if (state.type === 'resize') {
                 card.w = Math.max(80, state.startW + dx);
                 card.h = Math.max(80, state.startH + dy);
@@ -263,6 +293,10 @@ const KanbanWidget = {
             if (state.type === 'move') {
                 const card = this.widgetData.karten.find(k => k.id === state.cardId);
                 if (card) {
+                    const dx = e.clientX - state.startMouseX;
+                    const dy = e.clientY - state.startMouseY;
+                    const ghostLeft = state.startClientX + dx;
+                    const ghostTop  = state.startClientY + dy;
                     let targetSpalte = null;
                     for (const [spalte, el] of Object.entries(this.spaltenRefs)) {
                         if (!el) continue;
@@ -274,22 +308,24 @@ const KanbanWidget = {
                         }
                     }
                     if (targetSpalte) {
-                        if (targetSpalte !== card.spalte) {
-                            const outerEl = this.spaltenRefs[targetSpalte];
-                            if (outerEl) {
-                                const innerEl = outerEl.querySelector('.karten-inner');
-                                const rect = (innerEl || outerEl).getBoundingClientRect();
-                                const w = card.w || 130, h = card.h || 130;
-                                card.x = Math.max(0, e.clientX - rect.left - w / 2);
-                                card.y = Math.max(20, e.clientY - rect.top - h / 2);
-                            }
-                            card.spalte = targetSpalte;
+                        const outerEl = this.spaltenRefs[targetSpalte];
+                        const innerEl = outerEl?.querySelector('.karten-inner');
+                        const rect = (innerEl || outerEl)?.getBoundingClientRect();
+                        if (rect) {
+                            card.x = Math.max(0, ghostLeft - rect.left);
+                            card.y = Math.max(20, ghostTop  - rect.top);
                         }
-                        // Immer senden — auch bei Same-Column (Position-Sync)
+                        if (targetSpalte !== card.spalte) card.spalte = targetSpalte;
                         this.wsSend({ type: 'kanban_card_move', cardId: card.id, spalte: card.spalte, x: card.x, y: card.y });
+                    } else {
+                        card.x = state.startCardX;
+                        card.y = state.startCardY;
                     }
                     this.$emit('save');
                 }
+                // Ghost entfernen, Original wieder einblenden
+                if (state.ghost) state.ghost.remove();
+                if (state.originalEl) state.originalEl.style.opacity = '';
             } else if (state.type === 'resize') {
                 this.$emit('save');
             }
@@ -403,9 +439,9 @@ const KanbanWidget = {
                     <span style="position:absolute; right:10px; font-size:0.72rem; opacity:0.4; background:rgba(255,255,255,0.1); padding:1px 8px; border-radius:10px;">{{ (kartenPerSpalte[spalte] || []).length }}</span>
                 </div>
 
-                <!-- Outer: scrollbarer Bereich (overflow:visible beim Drag → kein Clipping) -->
+                <!-- Outer: scrollbarer Bereich -->
                 <div :ref="el => { if (el) spaltenRefs[spalte] = el; else delete spaltenRefs[spalte] }"
-                     :style="{ flex:1, overflow: freeDragState.active ? 'visible' : 'auto', scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.15) transparent' }"
+                     style="flex:1; overflow:auto; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.15) transparent;"
                      class="custom-scrollbar">
 
                     <!-- Inner: Canvas (wächst mit den Karten) -->
