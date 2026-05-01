@@ -200,12 +200,18 @@ const KartenabfrageWidget = {
             };
             const up = () => {
                 this.dragState = { active: false, id: null };
+                this.recalcCanvas();
                 this.$emit('save');
                 document.removeEventListener('mousemove', move);
                 document.removeEventListener('mouseup', up);
             };
             document.addEventListener('mousemove', move);
             document.addEventListener('mouseup', up);
+        },
+        recalcCanvas() {
+            const karten = this.widgetData.karten || [];
+            this.freihandCanvasW = karten.reduce((m, k) => Math.max(m, (k.x || 0) + (k.w || 160) + 40), 100);
+            this.freihandCanvasH = karten.reduce((m, k) => Math.max(m, (k.y || 0) + (k.h || 110) + 40), 100);
         },
         freihandResizeStart(karte, e) {
             e.preventDefault();
@@ -225,6 +231,7 @@ const KartenabfrageWidget = {
                 }
             };
             const up = () => {
+                this.recalcCanvas();
                 this.$emit('save');
                 document.removeEventListener('mousemove', move);
                 document.removeEventListener('mouseup', up);
