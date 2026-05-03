@@ -137,16 +137,9 @@ const ReflexionszielscheibeWidget = {
         if (!this.widgetData.fragen)    this.widgetData.fragen = ['Wie gut hat dir die Stunde gefallen?', 'Wie verständlich war der Inhalt?', 'Wie gut warst du dabei?'];
         if (!this.widgetData.ringe)     this.widgetData.ringe = 5;
         if (!this.widgetData.bewertungen) this.widgetData.bewertungen = [];
-        this.$nextTick(() => this._resizeAllTextareas());
     },
     beforeUnmount() { this.stopSession(); },
     methods: {
-        _resizeAllTextareas() {
-            this.$el.querySelectorAll('textarea').forEach(ta => {
-                ta.style.height = 'auto';
-                ta.style.height = ta.scrollHeight + 'px';
-            });
-        },
         _hash(str) {
             let h = 5381;
             for (let i = 0; i < str.length; i++) h = ((h << 5) + h) ^ str.charCodeAt(i);
@@ -379,10 +372,10 @@ const ReflexionszielscheibeWidget = {
                 <div v-for="(f, i) in fragen" :key="i" style="display:flex; gap:5px; align-items:center;">
                     <span :style="{background: frageColors[i % frageColors.length], width:'10px', height:'10px', borderRadius:'50%', flex:'0 0 10px'}"></span>
                     <textarea :value="f"
-                           @input="e => { frageAktualisieren(i, e.target.value); e.target.style.height='auto'; e.target.style.height=e.target.scrollHeight+'px'; }"
+                           @input="e => frageAktualisieren(i, e.target.value)"
                            @blur="frageBlur"
-                           rows="1"
-                           style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:5px 7px; color:var(--text-color); font-size:0.8rem; font-family:inherit; outline:none; min-width:0; resize:none; line-height:1.35; overflow:hidden;"></textarea>
+                           rows="3"
+                           style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:5px 7px; color:var(--text-color); font-size:0.8rem; font-family:inherit; outline:none; min-width:0; resize:none; line-height:1.35; overflow-y:auto;"></textarea>
                     <span v-if="averages[i] !== null"
                           style="font-size:0.75rem; font-weight:700; flex-shrink:0; opacity:0.75; min-width:30px; text-align:right;">Ø {{ averages[i] }}</span>
                     <button @click="frageLoeschen(i)"
