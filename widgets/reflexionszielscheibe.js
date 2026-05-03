@@ -295,7 +295,7 @@ const ReflexionszielscheibeWidget = {
 
             <!-- EXPORT-BEREICH: Legende links + Zielscheibe (wird als PNG exportiert) -->
             <div ref="zielscheibeBereich"
-                 style="flex:1; display:flex; gap:0; background:rgba(0,0,0,0.12); border-radius:10px; overflow:hidden; padding:10px; min-width:0;">
+                 style="flex:3; display:flex; gap:0; background:rgba(0,0,0,0.12); border-radius:10px; overflow:hidden; padding:10px; min-width:0;">
 
                 <!-- LEGENDE LINKS -->
                 <div v-if="fragen.length > 0"
@@ -318,7 +318,7 @@ const ReflexionszielscheibeWidget = {
                         <div style="font-size:0.85rem;">Noch keine Rückmeldungen.</div>
                     </div>
 
-                    <svg viewBox="0 0 400 400" style="height:100%; width:auto; max-width:100%; overflow:visible;">
+                    <svg viewBox="0 0 400 400" style="max-width:100%; max-height:100%; width:auto; height:auto; overflow:visible; display:block;">
                         <!-- Ringe (von außen nach innen) -->
                         <circle v-for="rg in svgRinge" :key="rg.i"
                                 cx="200" cy="200" :r="rg.r"
@@ -365,7 +365,7 @@ const ReflexionszielscheibeWidget = {
 
             <!-- STEUERUNG -->
             <div v-show="!steuerungEingeklappt"
-                 style="flex:0 0 155px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-width:0;" class="custom-scrollbar">
+                 style="flex:1.5; min-width:160px; display:flex; flex-direction:column; gap:8px; overflow-y:auto;" class="custom-scrollbar">
 
                 <div style="font-size:0.72rem; opacity:0.45; text-transform:uppercase; letter-spacing:0.05em;">Fragen</div>
 
