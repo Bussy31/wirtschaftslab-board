@@ -137,9 +137,16 @@ const ReflexionszielscheibeWidget = {
         if (!this.widgetData.fragen)    this.widgetData.fragen = ['Wie gut hat dir die Stunde gefallen?', 'Wie verständlich war der Inhalt?', 'Wie gut warst du dabei?'];
         if (!this.widgetData.ringe)     this.widgetData.ringe = 5;
         if (!this.widgetData.bewertungen) this.widgetData.bewertungen = [];
+        this.$nextTick(() => this._resizeAllTextareas());
     },
     beforeUnmount() { this.stopSession(); },
     methods: {
+        _resizeAllTextareas() {
+            this.$el.querySelectorAll('textarea').forEach(ta => {
+                ta.style.height = 'auto';
+                ta.style.height = ta.scrollHeight + 'px';
+            });
+        },
         _hash(str) {
             let h = 5381;
             for (let i = 0; i < str.length; i++) h = ((h << 5) + h) ^ str.charCodeAt(i);
