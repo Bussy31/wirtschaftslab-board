@@ -12,6 +12,7 @@ const ReflexionszielscheibeWidget = {
             wsStatus: 'idle',
             verborgenModus: false,
             sortiertModus: false,
+            steuerungEingeklappt: false,
             frageColors: ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316'],
         }
     },
@@ -290,14 +291,27 @@ const ReflexionszielscheibeWidget = {
         </div>
 
         <!-- HAUPTBEREICH -->
-        <div style="flex:1; display:flex; gap:12px; min-height:0; overflow:hidden;">
+        <div style="flex:1; display:flex; gap:8px; min-height:0; overflow:hidden;">
 
-            <!-- ZIELSCHEIBE -->
+            <!-- EXPORT-BEREICH: Legende links + Zielscheibe (wird als PNG exportiert) -->
             <div ref="zielscheibeBereich"
-                 style="flex:3; display:flex; flex-direction:column; background:rgba(0,0,0,0.12); border-radius:10px; overflow:hidden; padding:10px; min-width:0; gap:6px;">
+                 style="flex:1; display:flex; gap:0; background:rgba(0,0,0,0.12); border-radius:10px; overflow:hidden; padding:10px; min-width:0;">
 
-                <!-- SVG-Wrapper: nimmt alle verfügbare Höhe, SVG skaliert darin -->
-                <div style="flex:1; min-height:0; width:100%; display:flex; align-items:center; justify-content:center; position:relative;">
+                <!-- LEGENDE LINKS -->
+                <div v-if="fragen.length > 0"
+                     style="width:130px; flex-shrink:0; display:flex; flex-direction:column; gap:6px; padding-right:10px; border-right:1px solid rgba(255,255,255,0.07); overflow-y:auto;">
+                    <div v-for="(f, i) in fragen" :key="i" style="display:flex; align-items:flex-start; gap:5px;">
+                        <span :style="{background: frageColors[i % frageColors.length]}"
+                              style="width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:3px; display:inline-block;"></span>
+                        <div style="min-width:0;">
+                            <div style="font-size:0.7rem; opacity:0.75; line-height:1.35; word-break:break-word;">{{ f }}</div>
+                            <div v-if="averages[i] !== null" style="font-size:0.67rem; opacity:0.45;">Ø {{ averages[i] }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SVG-Zielscheibe -->
+                <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; position:relative; padding-left:8px;">
 
                     <div v-if="bewertungen.length===0 && !verborgenModus"
                          style="position:absolute; text-align:center; opacity:0.3; pointer-events:none; z-index:1; top:50%; left:50%; transform:translate(-50%,-50%);">
@@ -342,23 +356,16 @@ const ReflexionszielscheibeWidget = {
                     </div>
                 </div>
 
-                <!-- Legende (immer sichtbar, wird mit exportiert) -->
-                <div v-if="fragen.length > 0"
-                     style="display:flex; flex-wrap:wrap; gap:4px 12px; padding:6px 4px 2px; border-top:1px solid rgba(255,255,255,0.07); flex-shrink:0;">
-                    <div v-for="(f, i) in fragen" :key="i"
-                         style="display:flex; align-items:center; gap:5px; min-width:0;">
-                        <span :style="{background: frageColors[i % frageColors.length]}"
-                              style="width:9px; height:9px; border-radius:50%; flex-shrink:0; display:inline-block;"></span>
-                        <span style="font-size:0.72rem; opacity:0.75; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">{{ f }}</span>
-                        <span v-if="averages[i] !== null"
-                              style="font-size:0.7rem; opacity:0.5; flex-shrink:0;">Ø {{ averages[i] }}</span>
-                    </div>
-                </div>
-
             </div>
 
+            <!-- STEUERUNG TOGGLE -->
+            <button @click="steuerungEingeklappt = !steuerungEingeklappt"
+                    style="flex-shrink:0; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--text-color); border-radius:6px; cursor:pointer; width:18px; padding:0; align-self:stretch; font-size:0.65rem; opacity:0.5; transition:opacity 0.15s;"
+                    :title="steuerungEingeklappt ? 'Einstellungen aufklappen' : 'Einstellungen einklappen'">{{ steuerungEingeklappt ? '›' : '‹' }}</button>
+
             <!-- STEUERUNG -->
-            <div style="flex:1.5; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-width:160px;" class="custom-scrollbar">
+            <div v-show="!steuerungEingeklappt"
+                 style="flex:0 0 155px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; min-width:0;" class="custom-scrollbar">
 
                 <div style="font-size:0.72rem; opacity:0.45; text-transform:uppercase; letter-spacing:0.05em;">Fragen</div>
 

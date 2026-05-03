@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/HerrBussmann/.claude/**)",
+      "Bash(~/.claude/skills/gstack/bin/gstack-review-log '{\"skill\":\"codex-plan-review\",\"timestamp\":\"2026-05-01T12:00:00Z\",\"status\":\"issues_found\",\"source\":\"claude\",\"commit\":\"6d5aaf1\"}')",
+      "Bash(~/.claude/skills/gstack/bin/gstack-review-log '{\"skill\":\"plan-ceo-review\",\"timestamp\":\"2026-05-01T12:30:00Z\",\"status\":\"issues_open\",\"unresolved\":1,\"critical_gaps\":3,\"mode\":\"SCOPE_EXPANSION\",\"scope_proposed\":7,\"scope_accepted\":7,\"scope_deferred\":8,\"commit\":\"6d5aaf1\"}')",
+      "Bash(~/.claude/skills/gstack/bin/gstack-review-read)",
+      "Skill(plan-eng-review)",
+      "Skill(plan-eng-review:*)",
+      "Read(//Users/HerrBussmann/CodingProjects/**)",
+      "Bash(rm -f wirtschaftslab-board/package.json)",
+      "Bash(rm -f wirtschaftslab-board/vite.config.ts)",
+      "Bash(rm -f wirtschaftslab-board/tsconfig.json)",
+      "Bash(rm -f wirtschaftslab-board/tsconfig.app.json)",
+      "Bash(rm -f wirtschaftslab-board/tsconfig.node.json)",
+      "Bash(cp /Users/HerrBussmann/CodingProjects/wirtschaftslab-board/icon-192.png /Users/HerrBussmann/CodingProjects/wirtschaftslab-board-react/public/)",
+      "Bash(cp /Users/HerrBussmann/CodingProjects/wirtschaftslab-board/icon-512.png /Users/HerrBussmann/CodingProjects/wirtschaftslab-board-react/public/)",
+      "Bash(cp /Users/HerrBussmann/CodingProjects/wirtschaftslab-board/TODOS.md /Users/HerrBussmann/CodingProjects/wirtschaftslab-board-react/TODOS.md)",
+      "Bash(cp /Users/HerrBussmann/CodingProjects/wirtschaftslab-board/CLAUDE.md /Users/HerrBussmann/CodingProjects/wirtschaftslab-board-react/CLAUDE.md)",
+      "Bash(npm install *)",
+      "Bash(npm audit *)",
+      "Bash(npx tsc *)",
+      "Bash(~/.claude/skills/gstack/bin/gstack-review-log '{\"skill\":\"plan-eng-review\",\"timestamp\":\"2026-05-02T12:57:00Z\",\"status\":\"clean\",\"unresolved\":0,\"critical_gaps\":1,\"issues_found\":5,\"mode\":\"FULL_REVIEW\",\"commit\":\"6d5aaf1\"}')",
+      "Bash(\"~/.claude/skills/gstack/bin/gstack-brain-sync\" --discover-new)",
+      "Bash(\"~/.claude/skills/gstack/bin/gstack-brain-sync\" --once)"
+    ],
+    "additionalDirectories": [
+      "/Users/HerrBussmann/CodingProjects/wirtschaftslab-board-react"
+    ]
+  }
+}
