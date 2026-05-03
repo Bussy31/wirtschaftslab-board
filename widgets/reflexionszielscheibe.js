@@ -311,14 +311,14 @@ const ReflexionszielscheibeWidget = {
                 </div>
 
                 <!-- SVG-Zielscheibe -->
-                <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; position:relative; padding-left:8px;">
+                <div style="flex:1; min-height:0; min-width:0; position:relative; overflow:hidden; padding-left:8px;">
 
                     <div v-if="bewertungen.length===0 && !verborgenModus"
                          style="position:absolute; text-align:center; opacity:0.3; pointer-events:none; z-index:1; top:50%; left:50%; transform:translate(-50%,-50%);">
                         <div style="font-size:0.85rem;">Noch keine Rückmeldungen.</div>
                     </div>
 
-                    <svg viewBox="0 0 400 400" style="max-width:100%; max-height:100%; width:auto; height:auto; overflow:visible; display:block;">
+                    <svg viewBox="0 0 400 400" style="position:absolute; inset:0; width:100%; height:100%; overflow:visible;">
                         <!-- Ringe (von außen nach innen) -->
                         <circle v-for="rg in svgRinge" :key="rg.i"
                                 cx="200" cy="200" :r="rg.r"
