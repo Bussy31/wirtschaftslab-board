@@ -14,16 +14,25 @@ const QrWidget = {
                 <img v-if="url" :src="'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data=' + encodeURIComponent(url)" style="width: 100%; height: 100%; object-fit: contain;">
                 <span v-else style="color: #64748b; font-size: 0.9rem; text-align: center;">QR-Code erscheint hier</span>
             </div>
+
+            <input
+                type="text"
+                v-model="label"
+                @input="saveState"
+                placeholder="Bezeichnung (z.B. Kahoot-Quiz)..."
+                style="width: 100%; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 8px; text-align: center; font-size: 0.9rem; box-sizing: border-box;">
         </div>
     `,
     data() {
         return {
-            url: this.widgetData.url || ''
+            url: this.widgetData.url || '',
+            label: this.widgetData.label || ''
         }
     },
     methods: {
         saveState() {
             this.widgetData.url = this.url;
+            this.widgetData.label = this.label;
             this.$emit('save');
         }
     }
